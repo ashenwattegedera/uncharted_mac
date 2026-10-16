@@ -135,3 +135,5 @@ marking either platform verified.
 The next Linux build also exposed a pre-existing Windows-only affinity helper
 compiled but unused on Linux. Its definition is now guarded by `_WIN32`, matching
 its only call site and retaining warnings as errors.
+GCC additionally identified the missing `<unistd.h>` declaration for `_exit` in
+the fiber runtime; that header is now included explicitly.
