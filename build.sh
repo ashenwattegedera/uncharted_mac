@@ -2,6 +2,19 @@
 set -euo pipefail
 cd -- "$(dirname -- "$0")"
 mkdir -p out
+if [[ ${1:-} == --cpu-only ]]; then
+    if [[ $# -gt 2 || ( $# -eq 2 && $2 != --test ) ]]; then
+        echo 'Usage: bash build.sh --cpu-only [--test]' >&2; exit 2
+    fi
+    cmake -S . -B out/cpu -G Ninja -DCMAKE_BUILD_TYPE=Debug
+    cmake --build out/cpu
+    if [[ ${2:-} == --test ]]; then ctest --test-dir out/cpu --output-on-failure; fi
+    exit 0
+fi
+if [[ $(uname -s) == Darwin ]]; then
+    echo 'The macOS game runtime is not implemented yet. Use bash build.sh --cpu-only --test for the M0 harness.' >&2
+    exit 1
+fi
 # Windows: MSYS2 CLANG64 (packages in packaging/windows/README.md). The GPU library is static
 # there and CMake links bb-probe.exe as well; no PGO (GCC-only flags), LTO off by default.
 case $(uname -s) in
@@ -15,11 +28,7 @@ MINGW*|MSYS*)
           ! -f gpu/third_party/xbyak/xbyak/xbyak.h ]]; then
         git submodule update --init --recursive
     fi
-    for patch in gpu/patches/fsr-vulkan/*.patch; do
-        if ! git -C gpu/third_party/fsr-vulkan apply --reverse --check "$PWD/$patch" 2>/dev/null; then
-            git -C gpu/third_party/fsr-vulkan apply "$PWD/$patch"
-        fi
-    done
+    bash scripts/apply_gpu_patches.sh
     cmake -S gpu -B out/gpu -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBB_PGO=off \
         -DBB_LTO="${BB_LTO:-OFF}" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ >/dev/null
     echo "GPU library and loader: LTO ${BB_LTO:-OFF}"
@@ -64,11 +73,7 @@ mkdir -p pgo
 if [[ ! -f gpu/third_party/fsr-vulkan/CMakeLists.txt || ! -f gpu/third_party/imgui/imgui.h ]]; then
     git submodule update --init --recursive
 fi
-for patch in gpu/patches/fsr-vulkan/*.patch; do
-    if ! git -C gpu/third_party/fsr-vulkan apply --reverse --check "$PWD/$patch" 2>/dev/null; then
-        git -C gpu/third_party/fsr-vulkan apply "$PWD/$patch"
-    fi
-done
+bash scripts/apply_gpu_patches.sh
 cmake -S gpu -B out/gpu -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBB_PGO="$pgo" \
     -DBB_LTO="${BB_LTO:-ON}" -DBB_PGO_DIR="$PWD/pgo" >/dev/null
 echo "GPU library: PGO $pgo, LTO ${BB_LTO:-ON}"

@@ -15,11 +15,23 @@ typedef bb_jmp_buf sigjmp_buf;
 extern __thread sigjmp_buf *runtime_fault_recover;
 /* Restarts the game (in-game settings menu, render resolution change). */
 void runtime_restart(void);
+#if defined(__x86_64__)
 #define ABI __attribute__((sysv_abi))
+#define BB_MS_ABI __attribute__((ms_abi))
+#elif defined(BB_HOST_CONTRACTS_ONLY)
+/* Host-side contract tests only: this does not implement the guest x86 ABI. */
+#define ABI
+#define BB_MS_ABI
+#else
+#error Non-x86 runtime builds require the host-contract harness until a translator exists.
+#endif
 typedef void (ABI *GuestCallback)(void);
 void runtime_start(uint64_t capabilities);
 uintptr_t runtime_resolve(const char *name, int is_data);
 void runtime_report(void);
+/* Selected at link time: omitted providers remain unresolved, never success stubs. */
+uintptr_t runtime_subsystems_resolve(const char *name);
+void runtime_subsystems_report(void);
 void runtime_finalize(void *dso);
 uintptr_t runtime_mutex_resolve(const char *name);
 void runtime_mutex_report(void);
@@ -100,7 +112,7 @@ typedef struct {
     uint64_t offset;
     const unsigned char *signature;
     size_t signature_size, moved;
-    void (__attribute__((ms_abi)) *callback)(uint64_t rdi, uint64_t rsi, uint64_t image, uint64_t r14);
+    void (BB_MS_ABI *callback)(uint64_t rdi, uint64_t rsi, uint64_t image, uint64_t r14);
     const unsigned char *patch;
 } RuntimeGuestCallback;
 const RuntimeGuestCallback *runtime_guest_callbacks(size_t *count);
