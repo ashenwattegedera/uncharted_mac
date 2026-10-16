@@ -3,6 +3,7 @@ import subprocess
 import sys
 
 CASES = {
+    'execution-unavailable': (25, 'guest execution backend unavailable'),
     'guard-recursion': (21, 'recursive/concurrent static initialization'),
     'stack-failure': (22, 'stack protector detected corruption'),
     'bad-tls': (21, 'unsupported TLS module/offset'),

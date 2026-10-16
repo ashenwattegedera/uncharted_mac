@@ -283,7 +283,8 @@ static void *host_start(void *p) {
     set_host_name(t->name);
     runtime_set_guest_fpu();
     if (t->attr.affinity!=0x7f) apply_affinity(t,1);
-    if (!exit_setjmp(t)) t->result=t->entry(t->argument);
+    if (!exit_setjmp(t)) t->result=(void *)bb_execution_call(BB_CALL_PTR_PTR,
+        (uintptr_t)t->entry,(uintptr_t)t->argument,0,0,NULL);
     runtime_thread_keys_cleanup();
     pthread_mutex_lock(&lock); t->finished=1; ++exited; pthread_mutex_unlock(&lock);
     return t->result;

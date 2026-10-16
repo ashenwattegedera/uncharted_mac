@@ -54,6 +54,11 @@ code runs directly on your PC and the graphics are translated to Vulkan. Unpack 
 MSYS2 CLANG64 on Windows: `bash build.sh` builds `out\bb-probe.exe`, and
 `bash packaging/windows/package.sh` makes `dist\uncharted-windows` and the zip.
 
+**Apple Silicon development:** `bash build.sh --cpu-only --test` builds the
+game-free CPU harness. ARM game execution is not implemented yet. See the
+[Mac port development guide](docs/MAC_PORT_DEVELOPMENT.md) and
+[verification record](docs/M0_VERIFICATION.md) for current coverage and limitations.
+
 ## Credits
 
 Built on [bbport](https://github.com/deadinside28/bloodborne_pc), the native Linux port of

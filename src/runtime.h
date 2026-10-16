@@ -2,6 +2,7 @@
 #define BB_RUNTIME_H
 #include <stdint.h>
 #include <stddef.h>
+#include "execution.h"
 #ifdef _WIN32
 #include "compat_win.h"
 /* No signals on Windows: the exception handler resumes the thread in bb_longjmp

@@ -160,7 +160,8 @@ static void arrived(FiberThread *t) {
 ABI __attribute__((used,noreturn)) void fiber_main(GuestFiber *fiber) {
     FiberThread *t=this_thread();
     arrived(t);
-    fiber->entry(fiber->arg_on_initialize,t->arg_on_run_to);
+    bb_execution_call(BB_CALL_VOID_U64_U64,(uintptr_t)fiber->entry,
+        fiber->arg_on_initialize,t->arg_on_run_to,0,NULL);
     fatal("entry function returned",fiber);
     __builtin_unreachable();
 }

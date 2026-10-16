@@ -4,7 +4,7 @@ Date: 2026-10-16. Baseline: `68c8cf9` (current local `main` and `origin/main` at
 
 **Decision:** build a native arm64 macOS host with an integrated x86-64 execution backend. Retain the PS4 service layer and shadPS4-derived graphics pipeline, initially using MoltenVK for Metal access. Rosetta is not a product dependency or the implementation strategy.
 
-Status: **planning complete; implementation not started; translator not selected**. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
+Status: **M0 local implementation complete; cross-platform acceptance pending; translator not selected**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
 
 ## 1. Scope and initial acceptance target
 
@@ -46,9 +46,9 @@ Workflow for each increment:
 
 No direct implementation commits to `mac-port` or `main`. No force-pushes to either. No blanket resets, cleans, vendored-code formatting or unrelated dependency upgrades. Prefer an explicit merge when bringing newer upstream `main` changes into `mac-port`, followed by regression checks; do not rebase a published integration branch.
 
-The only configured remote currently points to `Supermedo/uncharted_pc`. Its write permissions and intended contribution destination have not been established. Branches and commits in this task stay local. Before publishing, identify the user's fork or authorized remote; preserve the existing remote configuration until then. Remote branch protection and required checks are recommendations to configure when a destination exists, not settings already applied.
+At planning time the configured remote pointed to `Supermedo/uncharted_pc`. On starting M0 it pointed to the user's `ashenwattegedera/uncharted_mac` fork, with published planning and integration refs. M0 was first integrated locally, then prepared as two logical commits on `codex/mac-port-m0` for a user-requested GitHub PR into `mac-port`. Remote branch protection and required checks are recommendations, not settings already applied.
 
-The planning branch should be reviewed and merged into `mac-port` before starting implementation branches. Do not create all planned branches now: they would immediately become stale. Branch names below are proposed scopes, not pre-created branches.
+The planning branch was merged into `mac-port` before M0. Implementation branches are created from the latest integration branch as needed; names below describe scopes, not a collection of branches to create in advance.
 
 ## 3. Architecture boundaries
 
@@ -73,6 +73,8 @@ Define an import signature registry from the actual exported functions, includin
 ## 4. Ordered implementation backlog
 
 ### M0 — Reproducible baseline and test isolation
+
+**Implementation status:** local deliverables implemented in the two branches below. The ARM harness passes its local checks; Linux/Windows reference and full game-build acceptance remain explicitly unverified. See [development commands](MAC_PORT_DEVELOPMENT.md), [execution contracts](EXECUTION_INTERFACE.md) and [verification evidence](M0_VERIFICATION.md).
 
 **Branches:** `codex/mac-port-build-harness`, then `codex/mac-port-execution-interface`.
 
@@ -193,4 +195,4 @@ The critical path is M0 → M1/M2 → M3 → M5; M4 is a separate prerequisite f
 
 Reserve the first one to two weeks as a feasibility timebox, not a promise that M0–M4 will finish. At its end, report what executes on Darwin, measured GPU incompatibilities, candidate-core suitability, and revised scope. Do not promise a playable date until CPU/ABI, VM/fault and representative-renderer gates have passed. A custom translator or major shader-semantic gaps can turn this into a much longer systems project.
 
-The next implementation change is **M0: isolate a CPU-only build/test harness and define the execution interface while preserving native x86 behavior**. Translator selection follows measured Darwin experiments; no game porting code should be built around an untested core choice.
+The next implementation milestone is **M1: evaluate translator candidates through measured Darwin experiments**. Run and review the pending Linux/Windows M0 checks before relying on the modified native loader as a verified reference. No game porting code should be built around an untested core choice.

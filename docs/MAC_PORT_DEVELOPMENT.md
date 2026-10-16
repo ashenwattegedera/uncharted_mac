@@ -49,6 +49,8 @@ cmake -S . -B out/host-only -DBB_EXECUTION_BACKEND=unavailable -DBB_BUILD_NATIVE
 
 `native-x86` on ARM, unknown backend names and unsupported native-loader hosts
 are rejected during configuration. Building an ARM game loader is an M1–M3 task.
+The execution API and its current scope are documented in
+[execution interface](EXECUTION_INTERFACE.md).
 
 ## Dependencies for the existing graphics build
 

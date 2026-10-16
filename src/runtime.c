@@ -111,8 +111,15 @@ void runtime_finalize(void *dso) {
         if (!i) { pthread_mutex_unlock(&handler_lock); return; }
         ExitHandler handler = handlers[i-1]; handlers[i-1].active = 0;
         pthread_mutex_unlock(&handler_lock);
+#ifdef BB_RUNTIME_CORE_ONLY
+        /* Portable harness callbacks are host functions, not guest addresses. */
         if (handler.with_arg) handler.callback.with_arg(handler.argument);
         else handler.callback.plain();
+#else
+        if (handler.with_arg) bb_execution_call(BB_CALL_VOID_PTR,
+            (uintptr_t)handler.callback.with_arg,(uintptr_t)handler.argument,0,0,NULL);
+        else bb_execution_call(BB_CALL_VOID,(uintptr_t)handler.callback.plain,0,0,0,NULL);
+#endif
     }
 }
 static ABI void guest_finalize(void *dso) { runtime_finalize(dso); }
