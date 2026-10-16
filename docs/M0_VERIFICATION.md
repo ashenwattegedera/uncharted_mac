@@ -131,3 +131,7 @@ The illegal-instruction fixture now checks Windows' existing exception status an
 diagnostic instead of requiring Linux's signal exit convention. These are build
 and test portability fixes; successful replacement CI runs are required before
 marking either platform verified.
+
+The next Linux build also exposed a pre-existing Windows-only affinity helper
+compiled but unused on Linux. Its definition is now guarded by `_WIN32`, matching
+its only call site and retaining warnings as errors.
