@@ -235,7 +235,8 @@ static ABI int32_t save_icon(const MountPoint *point, const Icon *icon) {
     int slot=slot_of(point);
     int32_t r=ERR_NOT_MOUNTED;
     if (slot>=0) {
-        char path[700]; snprintf(path,sizeof(path),"%s/icon0.png",slots[slot].meta);
+        char path[sizeof(slots[slot].meta)+sizeof("/icon0.png")-1];
+        snprintf(path,sizeof(path),"%s/icon0.png",slots[slot].meta);
         FILE *f=fopen(path,"wb");
         r=f && fwrite(icon->buffer,1,icon->data_size,f)==icon->data_size ? 0 : ERR_INTERNAL;
         if (f) fclose(f);
@@ -312,8 +313,9 @@ static ABI int32_t save_search(const SearchCond *cond, SearchResult *result) {
         if (e->d_name[0]=='.' || n>=32 || (n>8 && !strcmp(e->d_name+n-8,".sce_sys"))) continue;
         if (cond->dir && cond->dir->data[0] && !like(e->d_name,cond->dir->data)) continue;
         if (count==capacity) { capacity=capacity ? capacity*2 : 16; entries=realloc(entries,capacity*sizeof(*entries)); }
-        snprintf(entries[count].name,32,"%s",e->d_name);
-        char meta[680]; snprintf(meta,sizeof(meta),"%s/%s.sce_sys",base,e->d_name);
+        /* n<32 above: express the same bound to the format checker. */
+        snprintf(entries[count].name,32,"%.31s",e->d_name);
+        char meta[680]; snprintf(meta,sizeof(meta),"%s/%.31s.sce_sys",base,e->d_name);
         read_param(meta,&entries[count].param);
         ++count;
     }

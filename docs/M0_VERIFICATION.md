@@ -137,3 +137,7 @@ compiled but unused on Linux. Its definition is now guarded by `_WIN32`, matchin
 its only call site and retaining warnings as errors.
 GCC additionally identified the missing `<unistd.h>` declaration for `_exit` in
 the fiber runtime; that header is now included explicitly.
+The service exit path now includes the same POSIX header. Save-data formatting
+also expresses its existing 31-character directory-name bound explicitly and
+sizes the icon path for the metadata path plus suffix, satisfying GCC's
+truncation diagnostics without disabling them.
