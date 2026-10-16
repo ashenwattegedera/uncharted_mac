@@ -69,8 +69,8 @@ tree as a new submodule revision or reset it to make the parent status look clea
 ## Validation status
 
 See [M0 verification record](M0_VERIFICATION.md) for executed commands, results
-and pending coverage. The CPU workflow includes Linux, Windows CLANG64 and a
-macOS arm64 runner; its remote results remain unverified until it is run.
+and pending coverage. The CPU workflow has passed on Linux, Windows CLANG64 and a
+macOS arm64 runner; the verification record links the successful code revision.
 Runner labels follow [GitHub's runner reference](https://docs.github.com/en/actions/reference/runners/github-hosted-runners),
 and the Mac job checks `uname -m` explicitly. CI does not build or run the full
 renderer or use game assets.

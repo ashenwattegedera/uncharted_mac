@@ -2,7 +2,7 @@
 
 Date: 2026-10-16. Starting game-runtime revision: `68c8cf9`.
 
-Status: **M0 local implementation complete; cross-platform acceptance pending.**
+Status: **M0 CPU harness verified on macOS, Linux and Windows; full game-build and gameplay baselines pending.**
 The build-harness and execution-interface increments are integrated separately
 through feature branches. This status does not mark the entire acceptance matrix
 as passed.
@@ -83,22 +83,22 @@ One existing mod fixture compared an unresolved macOS `/var/...` temporary path
 to the implementation's canonical `/private/var/...` result. Its assertion now
 compares canonical paths. This changes the test expectation, not overlay behavior.
 
-## Coverage that remains unverified
+## Verification coverage
 
 | Check | Status and reason |
 |---|---|
-| Native x86 Linux loader/runtime fixtures | Not executed: no Linux host locally; CI job supplied |
-| Native x86 Windows loader/runtime fixtures | Not executed: no Windows/CLANG64 host locally; CI job supplied |
-| Remote macOS CI | Not executed: local checks ran on real ARM hardware, workflow not published/run in this task |
+| Native x86 Linux loader/runtime fixtures | Passed in GitHub CI at `833c8ae` |
+| Native x86 Windows loader/runtime fixtures | Passed in GitHub CI at `833c8ae`, using CLANG64 |
+| Remote macOS arm64 CI | Passed in GitHub CI at `833c8ae`, with runner architecture asserted |
 | Existing full Windows/Linux game builds | Not executed: host/dependencies unavailable; CPU CI does not replace this check |
 | Windows POSIX-only file/mod fixtures | Not registered in CMake: these use POSIX symlinks/shebang executables and the Linux shell launcher; Linux/macOS jobs cover them |
 | GPU rendering, audio, input and ATRAC9 | Outside M0 CPU harness; no validation claim |
 | x86 guest instruction execution on ARM | Unavailable by design until M1; host-contract results are not CPU-emulation results |
 | Gameplay baseline and game compatibility | Deferred until a user-provided dump and reference host are available |
 
-Local commits/integration do not waive these gates. M0's local infrastructure
-deliverables can be completed while cross-platform acceptance stays explicitly
-pending. Do not describe the entire M0 acceptance matrix as passed.
+CPU-harness acceptance is verified across all three platforms. The original full
+Windows/Linux game builds, GPU behavior and gameplay baseline remain pending;
+the CPU workflow does not replace those checks.
 
 ## Git integration
 
@@ -112,8 +112,9 @@ pending. Do not describe the entire M0 acceptance matrix as passed.
   previously published planning branch is retained; no remote refs are deleted.
 
 For GitHub review, `codex/mac-port-m0` starts from the planning PR's merge into
-`origin/mac-port` (`96d2f51`) and contains two logical commits: the CPU harness
-and the execution interface. The first review commit is `8ed6ec0`. The local
+`origin/mac-port` (`96d2f51`) with two implementation commits: the CPU harness
+and the execution interface, followed by focused CI fixes and this verification
+update. The first review commit is `8ed6ec0`. The local
 integration merges above remain historical development records; they are not
 included in this review branch. The PR targets `mac-port` and is left for the
 repository owner to merge after reviewing CI results.
@@ -141,3 +142,15 @@ The service exit path now includes the same POSIX header. Save-data formatting
 also expresses its existing 31-character directory-name bound explicitly and
 sizes the icon path for the metadata path plus suffix, satisfying GCC's
 truncation diagnostics without disabling them.
+
+## Successful cross-platform CI
+
+All three jobs passed on the final code revision `833c8ae` in
+[PR workflow run 38854312651](https://github.com/ashenwattegedera/uncharted_mac/actions/runs/38854312651):
+
+- Ubuntu 24.04: native x86 loader/runtime, execution-interface and Python fixtures.
+- Windows 2022 CLANG64: native x86 loader/runtime, execution-interface and Python fixtures.
+- macOS 15 arm64: portable host contracts, unavailable-backend behavior and Python fixtures.
+
+The subsequent verification-document update does not change implementation or
+workflow behavior. Game files were not used by any job.

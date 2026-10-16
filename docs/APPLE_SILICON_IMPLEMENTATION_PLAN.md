@@ -4,7 +4,7 @@ Date: 2026-10-16. Baseline: `68c8cf9` (current local `main` and `origin/main` at
 
 **Decision:** build a native arm64 macOS host with an integrated x86-64 execution backend. Retain the PS4 service layer and shadPS4-derived graphics pipeline, initially using MoltenVK for Metal access. Rosetta is not a product dependency or the implementation strategy.
 
-Status: **M0 local implementation complete; cross-platform acceptance pending; translator not selected**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
+Status: **M0 CPU harness verified across macOS/Linux/Windows; full game-build and gameplay baselines pending; translator not selected**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
 
 ## 1. Scope and initial acceptance target
 
@@ -74,7 +74,7 @@ Define an import signature registry from the actual exported functions, includin
 
 ### M0 — Reproducible baseline and test isolation
 
-**Implementation status:** local deliverables implemented in the two branches below. The ARM harness passes its local checks; Linux/Windows reference and full game-build acceptance remain explicitly unverified. See [development commands](MAC_PORT_DEVELOPMENT.md), [execution contracts](EXECUTION_INTERFACE.md) and [verification evidence](M0_VERIFICATION.md).
+**Implementation status:** deliverables implemented through the two branches below and submitted on `codex/mac-port-m0`. CPU-harness CI passes on Linux, Windows and ARM macOS. Full game-build and gameplay baselines remain unverified. See [development commands](MAC_PORT_DEVELOPMENT.md), [execution contracts](EXECUTION_INTERFACE.md) and [verification evidence](M0_VERIFICATION.md).
 
 **Branches:** `codex/mac-port-build-harness`, then `codex/mac-port-execution-interface`.
 
