@@ -117,3 +117,17 @@ and the execution interface. The first review commit is `8ed6ec0`. The local
 integration merges above remain historical development records; they are not
 included in this review branch. The PR targets `mac-port` and is left for the
 repository owner to merge after reviewing CI results.
+
+## Initial GitHub CI findings
+
+PR #2's first runs confirmed the macOS arm64 job passed. Linux exposed missing
+`-pthread` compile flags: on modern glibc, `Threads::Threads` can be empty, leaving
+POSIX declarations such as `sigjmp_buf` hidden in strict C11. The CMake targets
+now explicitly retain the original build script's thread compile/link flags.
+
+Windows built the CPU targets and passed most fixtures. Its runtime fixture also
+needs the loader's `--disable-high-entropy-va` option to reserve PS4 addresses.
+The illegal-instruction fixture now checks Windows' existing exception status and
+diagnostic instead of requiring Linux's signal exit convention. These are build
+and test portability fixes; successful replacement CI runs are required before
+marking either platform verified.
