@@ -134,14 +134,6 @@ static ABI __attribute__((noreturn)) void unresolved(uint32_t id, uintptr_t argu
     fflush(NULL);
     _exit(20); /* no destructors: GPU, audio and guest threads are still running */
 }
-#ifndef _WIN32
-/* enter_on_stack(entry, arg0, arg1, stack_top): call entry(arg0,arg1) on a new stack. */
-void enter_on_stack(void *entry, void *arg0, void *arg1, void *top);
-__asm__(".text\n.globl enter_on_stack\nenter_on_stack:\n"
-        " push %rbp\n mov %rsp,%rbp\n and $-16,%rcx\n mov %rcx,%rsp\n"
-        " mov %rdi,%rax\n mov %rsi,%rdi\n mov %rdx,%rsi\n call *%rax\n"
-        " mov %rbp,%rsp\n pop %rbp\n ret\n");
-#endif
 static ABI void guest_exit(void) { puts("Runtime: process finalizer callback reached"); }
 #ifdef _WIN32
 static void describe_address(char *out, size_t size, uintptr_t address) {
@@ -598,7 +590,8 @@ static void install_game_callbacks(Segment *segments, uint64_t ns, uint64_t imag
         }
         t[k++]=0x48; t[k++]=0x89; t[k++]=0xf9;                      /* mov rcx, rdi */
         t[k++]=0x48; t[k++]=0x89; t[k++]=0xf2;                      /* mov rdx, rsi */
-        const uintptr_t base=(uintptr_t)image, host=(uintptr_t)c->callback;
+        const uintptr_t base=(uintptr_t)image;
+        const uintptr_t host=bb_execution_import_address(c->name,BB_IMPORT_MS_HOOK,(uintptr_t)c->callback);
         t[k++]=0x49; t[k++]=0xb8; memcpy(t+k,&base,8); k+=8;        /* movabs r8, image */
         t[k++]=0x4d; t[k++]=0x89; t[k++]=0xf1;                      /* mov r9, r14 */
         t[k++]=0x48; t[k++]=0xb8; memcpy(t+k,&host,8); k+=8;        /* movabs rax, callback */
@@ -909,7 +902,7 @@ int main(int argc, char **argv) {
         unsigned char *t = traps + i * 32;
         /* SysV: mov edi, index; movabs rax, handler; jmp rax. No fake return values. */
         uint32_t index = (uint32_t)i;
-        uintptr_t handler = (uintptr_t)unresolved;
+        uintptr_t handler = bb_execution_import_address("unresolved",BB_IMPORT_FUNCTION,(uintptr_t)unresolved);
         t[0] = 0x48; t[1] = 0x89; t[2] = 0xfe; /* mov rsi,rdi: preserve arg0 */
         t[3] = 0xbf; memcpy(t + 4, &index, 4);
         t[8] = 0x48; t[9] = 0xb8; memcpy(t + 10, &handler, 8);
@@ -921,7 +914,8 @@ int main(int argc, char **argv) {
                         : (uintptr_t)image + relocs[i].value;
         if (relocs[i].kind) {
             uintptr_t resolved = runtime_resolve(names[relocs[i].value], relocs[i].kind == 2);
-            if (resolved) value = resolved + relocs[i].addend;
+            if (resolved) value = bb_execution_import_address(names[relocs[i].value],
+                relocs[i].kind==2 ? BB_IMPORT_DATA : BB_IMPORT_FUNCTION,resolved) + relocs[i].addend;
             else if (native_libc && bindings[relocs[i].value]) {
                 uint64_t address=bindings[relocs[i].value];
                 if (binding_kinds[relocs[i].value]!=relocs[i].kind || !mapped(segments,ns,address,relocs[i].addend+1)) fail("native export kind/range mismatch");
@@ -941,6 +935,9 @@ int main(int argc, char **argv) {
 #ifdef _WIN32
     printf("Guest TCB loads redirected to the TEB TLS slot: %" PRIu64 "\n", patch_tcb_loads(segments, ns));
 #endif
+    if(bb_execution_invalidate((uintptr_t)image,round_page(size))!=BB_EXEC_OK ||
+       bb_execution_invalidate((uintptr_t)traps,round_page((import_count+1)*32))!=BB_EXEC_OK)
+        fail("cannot invalidate patched guest code");
     protect(traps, round_page((import_count + 1) * 32), 5);
     protect(image, round_page(size), 0);
     int executable_entry = 0;
@@ -968,8 +965,8 @@ int main(int argc, char **argv) {
         /* Dependencies start in link order (libc first), as the PS4 dynamic linker does. */
         for (uint64_t m=0;m<module_count;++m) {
             printf("Starting linked module %" PRIu64 " at image offset 0x%" PRIx64 "; native bindings=%" PRIu64 "\n",m,modules[m].init,nb);
-            typedef int (ABI *ModuleInit)(uint64_t,void *,void *);
-            int result=((ModuleInit)(image+modules[m].init))(0,NULL,NULL);
+            int result=(int)(intptr_t)bb_execution_call(BB_CALL_MODULE_INIT,
+                (uintptr_t)(image+modules[m].init),0,0,0,NULL);
             printf("Module %" PRIu64 " initializer returned %d\n",m,result);
             if (result) fail("module initializer failed");
         }
@@ -994,15 +991,15 @@ int main(int argc, char **argv) {
         if (n) { params.argc=n; params.argv[n]=NULL; }
         printf("Guest argv: %s (+%" PRIu64 " arguments)\n",params.argv[0],params.argc-1);
     }
-#ifdef _WIN32
-    typedef void (ABI *Entry)(void *, void (ABI *)(void));
-    ((Entry)(image + entry))(&params, guest_exit);
-#else
+    void *stack_top=NULL;
+#ifndef _WIN32
     /* The guest main thread runs on a stack below 1 TiB like PS4 stacks. */
     enum { MAIN_STACK=8*1024*1024 };
     unsigned char *stack=runtime_low_map(MAIN_STACK,PROT_READ|PROT_WRITE);
     if (!stack) fail("cannot allocate guest main stack");
-    enter_on_stack(image+entry,&params,(void *)guest_exit,stack+MAIN_STACK-64);
+    stack_top=stack+MAIN_STACK-64;
 #endif
+    uintptr_t finalizer=bb_execution_import_address("guest_exit",BB_IMPORT_FUNCTION,(uintptr_t)guest_exit);
+    bb_execution_call(BB_CALL_ENTRY,(uintptr_t)(image+entry),(uintptr_t)&params,finalizer,0,stack_top);
     fail("entry unexpectedly returned");
 }

@@ -283,7 +283,8 @@ static void *host_start(void *p) {
     set_host_name(t->name);
     runtime_set_guest_fpu();
     if (t->attr.affinity!=0x7f) apply_affinity(t,1);
-    if (!exit_setjmp(t)) t->result=t->entry(t->argument);
+    if (!exit_setjmp(t)) t->result=(void *)bb_execution_call(BB_CALL_PTR_PTR,
+        (uintptr_t)t->entry,(uintptr_t)t->argument,0,0,NULL);
     runtime_thread_keys_cleanup();
     pthread_mutex_lock(&lock); t->finished=1; ++exited; pthread_mutex_unlock(&lock);
     return t->result;
@@ -364,11 +365,13 @@ static ABI int32_t thread_set_prio(GuestThread *t,int prio) {
 /* BB_AFFINITY=1: the guest's core masks are applied, PS4 core i on host logical processor 2*i
  * (one per physical core where SMT pairs neighbour). Off by default: the PS4 scheduler's
  * guarantees (threads on one core never run at once) are not otherwise reproduced. */
+#ifdef _WIN32
 static int affinity_enabled(void) {
     static int value=-1;
     if (value<0) { const char *env=getenv("BB_AFFINITY"); value=env && env[0]=='1'; }
     return value;
 }
+#endif
 static void apply_affinity(GuestThread *t,int current_thread) {
 #ifdef _WIN32
     if (!affinity_enabled()) return;

@@ -1,9 +1,9 @@
-from paths import ROOT
+from paths import ROOT, native_executable
 from pathlib import Path
 import subprocess
 import unittest
 
-EXE = ROOT / 'out/runtime-test'
+EXE = native_executable('runtime-test')
 
 
 @unittest.skipUnless(EXE.exists(), 'run bash build.sh --test first')
