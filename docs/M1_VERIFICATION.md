@@ -51,7 +51,7 @@ is not counted as a passing sandbox execution result.
 | Check | Local result and interpretation |
 |---|---|
 | Release M1 CTest | **12/12 passed**; smoke, scalar/control flow, SIMD, x87, callbacks, faults, invalidation, serialized threads, limits, hardened suite, JIT policy and signature verification |
-| Debug ASan + UBSan M1 CTest | **12/12 passed**; instrumentation covers compiled host code, not every generated JIT instruction |
+| Debug ASan + UBSan M1 CTest | **12/12 executable exit statuses passed**; M2 log audit found a recoverable upstream UBSan diagnostic, so this is not a sanitizer-clean result; see [M2 sanitizer limits](M2_VERIFICATION.md#sanitizer-limits-and-corrected-interpretation) |
 | Existing M0 ARM harness | **12/12 passed**; default backend behavior preserved |
 | Native executable inspection | arm64 Mach-O; Unicorn statically linked; only libSystem reported as a dynamic dependency |
 | Ad-hoc Hardened Runtime | codesign flags `0x10002(adhoc,runtime)`; only `com.apple.security.cs.allow-jit=true`; full suite passed in that executable |

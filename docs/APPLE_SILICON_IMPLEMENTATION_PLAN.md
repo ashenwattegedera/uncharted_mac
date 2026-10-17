@@ -4,7 +4,7 @@ Date: 2026-10-16. Baseline: `68c8cf9` (current local `main` and `origin/main` at
 
 **Decision:** build a native arm64 macOS host with an integrated x86-64 execution backend. Retain the PS4 service layer and shadPS4-derived graphics pipeline, initially using MoltenVK for Metal access. Rosetta is not a product dependency or the implementation strategy.
 
-Status: **M0 CPU harness verified across macOS/Linux/Windows; M1 game-free feasibility verified with a provisional CPU reference; production translator selection and game validation pending**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
+Status: **M0 CPU harness verified across macOS/Linux/Windows; M1 game-free feasibility verified with a provisional CPU reference; M2 game-free foundations implemented; production VM/ABI/GPU integration, translator selection and game validation pending**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
 
 ## 1. Scope and initial acceptance target
 
@@ -103,6 +103,8 @@ Define an import signature registry from the actual exported functions, includin
 
 ### M2 — Darwin memory and guest/host ABI
 
+**Implementation status:** game-free foundations implemented on the dependent memory → ABI → faults branch stack. Native Darwin aliases, watcher aggregation, supported ABI fixture classes and translated fault restart are verified. Broad M2 production acceptance remains open: the existing VM service, complete import wrappers/relocations and actual GPU/host-signal wiring are not integrated. These are implementation gaps, not coverage inferred from synthetic tests. See [M2 verification](M2_VERIFICATION.md) and [ADR 0002](decisions/0002-darwin-memory-and-abi.md).
+
 **Branches:** `codex/mac-port-darwin-memory`, `codex/mac-port-guest-abi`, `codex/mac-port-faults`. Depends on M0; final CPU integration depends on M1.
 
 - Implement owned guest-address reservations, low-address allocation, aliasing backing storage, protection changes, zero-on-reuse and mapping teardown for Darwin.
@@ -197,4 +199,4 @@ The critical path is M0 → M1/M2 → M3 → M5; M4 is a separate prerequisite f
 
 Reserve the first one to two weeks as a feasibility timebox, not a promise that M0–M4 will finish. At its end, report what executes on Darwin, measured GPU incompatibilities, candidate-core suitability, and revised scope. Do not promise a playable date until CPU/ABI, VM/fault and representative-renderer gates have passed. A custom translator or major shader-semantic gaps can turn this into a much longer systems project.
 
-The next implementation milestone is **M2: Darwin memory and guest/host ABI**, using the isolated M1 correctness reference where useful. M3 must address scheduling and memory ordering before a production CPU backend is accepted. M0 cross-platform CI has passed; full game-build validation remains pending. Review the provisional CPU decision before production integration, and retain the recorded game and distribution gates.
+The M2 game-free foundations now exist. **Close the remaining M2 production VM, import and GPU/fault integration gaps** before declaring that milestone complete. M3 must then address scheduling and memory ordering before a production CPU backend is accepted. M0 cross-platform CI has passed; full game-build validation remains pending. Review the provisional CPU decision before production integration, and retain the recorded game and distribution gates.

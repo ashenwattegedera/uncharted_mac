@@ -116,3 +116,19 @@ set_property(TARGET cpu-memory-hardened APPEND PROPERTY LINK_DEPENDS "${CMAKE_CU
 add_custom_command(TARGET cpu-memory-hardened POST_BUILD
     COMMAND "${BB_CODESIGN}" --force --sign - --options runtime
         --entitlements "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist" "$<TARGET_FILE:cpu-memory-hardened>" VERBATIM)
+
+set(BB_PROBE_SANITIZER none CACHE STRING "Sanitize project-owned probe targets: none, undefined, address,undefined")
+set_property(CACHE BB_PROBE_SANITIZER PROPERTY STRINGS none undefined address,undefined)
+if(NOT BB_PROBE_SANITIZER STREQUAL "none")
+    if(NOT BB_PROBE_SANITIZER MATCHES "^(undefined|address,undefined)$")
+        message(FATAL_ERROR "Unsupported BB_PROBE_SANITIZER=${BB_PROBE_SANITIZER}")
+    endif()
+    # Vendor-wide UBSan currently reports Unicorn's null-pool pointer arithmetic.
+    # Keep its pinned source unchanged; scope this gate explicitly to our code.
+    foreach(target bb-cpu-probe cpu-probe-smoke cpu-probe-suite cpu-probe-hardened
+            cpu-jit-policy cpu-abi-suite cpu-abi-hardened bb-memory-probe
+            cpu-memory-suite cpu-memory-hardened)
+        target_compile_options(${target} PRIVATE "-fsanitize=${BB_PROBE_SANITIZER}" -fno-sanitize-recover=undefined)
+        target_link_options(${target} PRIVATE "-fsanitize=${BB_PROBE_SANITIZER}")
+    endforeach()
+endif()
