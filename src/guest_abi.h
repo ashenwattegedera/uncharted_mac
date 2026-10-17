@@ -23,7 +23,10 @@ typedef struct {
     void *user;
 } BbAbiMemory;
 typedef BbAbiStatus (*BbAbiHost)(const BbAbiValue *,size_t,BbAbiValue *,void *);
-typedef struct { const char *name; BbAbiSignature signature; BbAbiHost host; void *user; } BbAbiImport;
+typedef BbAbiStatus (*BbAbiPrepare)(const BbAbiFrame *,const BbAbiMemory *,BbAbiSignature *,void *);
+typedef struct { const char *name; BbAbiSignature signature; BbAbiHost host; void *user;
+    BbAbiPrepare prepare; /* optional format-aware variadic signature */
+} BbAbiImport;
 BbAbiStatus bb_abi_validate(const BbAbiSignature *signature);
 BbAbiStatus bb_abi_dispatch(const BbAbiImport *binding,BbAbiFrame *frame,const BbAbiMemory *memory);
 /* Duplicate names or malformed entries invalidate the entire registry. */

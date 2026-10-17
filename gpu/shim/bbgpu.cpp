@@ -31,6 +31,7 @@
 #include "core/libraries/libs.h"
 #include "core/memory.h"
 #include "core/signals.h"
+#include "guest_fault_bridge.h"
 #include "sdl_window.h"
 #include "video_core/renderer_vulkan/vk_rasterizer.h"
 
@@ -38,9 +39,11 @@ extern "C" {
 // runtime_memory.c
 int runtime_memory_is_mapped(uintptr_t address, uint64_t size);
 int runtime_memory_write_backing(uintptr_t address, const void* data, uint64_t size);
+int runtime_memory_read_backing(uintptr_t address, void* data, uint64_t size);
 uint64_t runtime_memory_clamp(uintptr_t address, uint64_t size);
 int runtime_memory_region(uintptr_t address, uintptr_t* start, uintptr_t* end, int* mapped);
 void runtime_memory_gpu_protect(uintptr_t address, uint64_t size, int read, int write);
+void runtime_memory_set_guest_gpu_fault_handler(int (*handler)(uint64_t,uintptr_t,uint64_t,int));
 typedef void (*RuntimeGpuRange)(uintptr_t address, uint64_t size);
 // runtime_kernel.c: one clock for guest and GPU timestamps
 uint64_t runtime_process_time_us(void);
@@ -90,6 +93,8 @@ public:
 
 void MemoryManager::SetRasterizer(Vulkan::Rasterizer* rasterizer_) {
     rasterizer = rasterizer_;
+    runtime_memory_set_guest_gpu_fault_handler(rasterizer ? bbgpu_handle_guest_access : nullptr);
+    if(!rasterizer) { runtime_memory_set_gpu_hooks(nullptr,nullptr,nullptr); return; }
     // Existing guest mappings are replayed by the runtime when hooks are installed.
     runtime_memory_set_gpu_hooks(
         [](uintptr_t address, uint64_t size) {
@@ -116,7 +121,9 @@ static void CopySparseSerial(VAddr source, u8* dest, u64 size) {
             end = source + size;
         }
         const u64 n = std::min<u64>(size, end - source);
-        if (mapped) std::memcpy(dest, reinterpret_cast<const void*>(source), n);
+        if (mapped) {
+            if (!runtime_memory_read_backing(source, dest, n)) std::memset(dest, 0, n);
+        }
         else std::memset(dest, 0, n);
         source += n; dest += n; size -= n;
     }
@@ -282,6 +289,20 @@ extern "C" uintptr_t bbgpu_resolve(const char* scoped_nid) {
         }
     }
     return 0;
+}
+
+extern "C" int bbgpu_handle_guest_access(uint64_t guest_pc,uintptr_t address,uint64_t size,int write) {
+    auto* rasterizer=Core::Memory::Instance()->GetRasterizer();
+    const BbGpuGuestSink sink{
+        rasterizer,
+        [](void* object,uint64_t at,size_t length)->int {
+            return static_cast<Vulkan::Rasterizer*>(object)->ReadMemory(at,length,false);
+        },
+        [](void* object,uint64_t at)->int {
+            return static_cast<Vulkan::Rasterizer*>(object)->OnWriteFault(at,false);
+        }
+    };
+    return bb_gpu_guest_dispatch(&sink,guest_pc,address,size,write);
 }
 
 extern "C" int bbgpu_handle_fault(void* ucontext, void* address) {

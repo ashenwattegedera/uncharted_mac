@@ -1,0 +1,6864 @@
+{
+  "schema": 1,
+  "scope": "Explicit M2 reference contracts; diagnostic names do not establish ABI signatures or game coverage.",
+  "source_sha256": {
+    "src/runtime.c": "f7d985e115f690d1c07da1f984b48686b22c4836e27d035594c39ccde94093e5",
+    "src/runtime_ajm.c": "92f62ce7dfffa2bc8a6c13874c40e1a6ca9dc18b0052a99ddd210cd9de207cad",
+    "src/runtime_audio.c": "3ae9546d0e14b341796ff242d7b07fce519080ef1bcc39280d60e0f8e719cd95",
+    "src/runtime_content.c": "9d30ab9aa1f60c12f9fba657462cbe8308a62f3ac990b49327780306d6ef6962",
+    "src/runtime_execution.c": "14c9db92e1f23cc027e05e266e695249e3b704e6ed4a04e4e206209fef171a63",
+    "src/runtime_fiber.c": "f823f4a227a1d0f4ff6909ab3fb2490cb58fe3a7422862f9587f1606f5aaad3f",
+    "src/runtime_file.c": "f4ff11be9fa83534eb75a8dc3547f1ebc9bfb2fe4e26b860864dc4464540d01d",
+    "src/runtime_kernel.c": "4003d5407344e3b966f5f7583e9c7acacfe13cfc4444d994611db1f2c46a70b1",
+    "src/runtime_memory.c": "37ecffb05a52cf63db22c73cb4d4c05a737a789b3e36b645535063333b3c3481",
+    "src/runtime_mutex.c": "b1d46a0a7c5e051bdea089d0d61d2af1b829ebab16178a3f6825fe3fb8446bfa",
+    "src/runtime_pad.c": "cbb538753d945d233b735cadcc766af0ce4dba0db214219bd8cce69115d7179c",
+    "src/runtime_rtc.c": "178f63fa1fabb3d7520301901414edfc4442c383c8f52e16cbfd201209f38922",
+    "src/runtime_rwlock.c": "763d45b35509c9aeb96a789b46e11da312251d4faa8de706b1d0de5570a6e4bf",
+    "src/runtime_savedata.c": "148101a2364ffbb7d5732aadd53feabb90a22661daf1c8058aee7bebe115171e",
+    "src/runtime_sema.c": "34a788b4d4a300f73be3fd5a9b4e05008272df5c5c7d78ab7d749cf09c3d2e01",
+    "src/runtime_services.c": "8a2ef4016552a8ac5a38a05062b6ebee3b0a928116ba7a83bec9f3e0f0f51a9c",
+    "src/runtime_subsystems.c": "6e0434c9172b48cca11d46fab2f259bd48e31ef844a6ff1b647c06ecc45a1ef4",
+    "src/runtime_thread.c": "7a38b1475d62fa8303ab65234e14a8875a57c1625d8da7b602b9d465e33dc0db",
+    "src/runtime_time.c": "66c10a43c9259b475f255dfcb4434de635a78feb026ffee3ecd45495373b60e0",
+    "src/import_names.inc": "7d8b5832fae9f9cdb4108223c8cf8a2ca55dc5708c93201fda5767a39085880b",
+    "src/translated_runtime.c": "f6b162233a5de2836699b734666672a2eb74a81a956cf1aeeb1ba56af1dfaaa5",
+    "src/guest_abi.h": "dbb9099e8fec869f169ec8025b203bb28a9ba9987d7ef62e527ce0ccfc69ab45",
+    "src/guest_layout.h": "31521e9778bb8b64e4a402b788b762d16d6d0f2f7e275949d1b1e0259ef2916f",
+    "src/guest_format.c": "b38347fc74b0e2a4b00daad4b2ef1aa469cce9298a1b79e6aecc99e6d6ec5140"
+  },
+  "contracts": [
+    {
+      "name": "sceKernelGetDirectMemorySize",
+      "kind": 0,
+      "result": 3,
+      "variadic": 0,
+      "data_size": 0,
+      "args": []
+    },
+    {
+      "name": "sceKernelAllocateDirectMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        3,
+        3,
+        3,
+        3,
+        1,
+        4
+      ]
+    },
+    {
+      "name": "sceKernelMapDirectMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        1,
+        1,
+        3,
+        3
+      ]
+    },
+    {
+      "name": "sceKernelMapNamedDirectMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        1,
+        1,
+        3,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "sceKernelReleaseDirectMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        3,
+        3
+      ]
+    },
+    {
+      "name": "sceKernelMunmap",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3
+      ]
+    },
+    {
+      "name": "munmap",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3
+      ]
+    },
+    {
+      "name": "sceKernelMapFlexibleMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "name": "sceKernelMapNamedFlexibleMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        1,
+        1,
+        4
+      ]
+    },
+    {
+      "name": "sceKernelReleaseFlexibleMemory",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3
+      ]
+    },
+    {
+      "name": "sceKernelReserveVirtualRange",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        1,
+        3
+      ]
+    },
+    {
+      "name": "sceKernelMprotect",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        1
+      ]
+    },
+    {
+      "name": "sceKernelQueryMemoryProtection",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "sceKernelVirtualQuery",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        1,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "sceKernelGetDirectMemoryType",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        3,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "sceKernelBatchMap",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        1,
+        4
+      ]
+    },
+    {
+      "name": "sceKernelBatchMap2",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        1,
+        4,
+        1
+      ]
+    },
+    {
+      "name": "memcpy",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "memmove",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "memset",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        1,
+        3
+      ]
+    },
+    {
+      "name": "memcmp",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "strlen",
+      "kind": 0,
+      "result": 3,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "strcmp",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "strncmp",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "strcpy",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "strncpy",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        4,
+        3
+      ]
+    },
+    {
+      "name": "snprintf",
+      "kind": 0,
+      "result": 2,
+      "variadic": 1,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "vsnprintf",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "args": [
+        4,
+        3,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "sprintf",
+      "kind": 0,
+      "result": 2,
+      "variadic": 1,
+      "data_size": 0,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "__stack_chk_guard",
+      "kind": 1,
+      "result": 0,
+      "variadic": 0,
+      "data_size": 8,
+      "args": []
+    },
+    {
+      "name": "Need_sceLibcInternal",
+      "kind": 1,
+      "result": 0,
+      "variadic": 0,
+      "data_size": 4,
+      "args": []
+    }
+  ],
+  "diagnostic_imports": [
+    {
+      "nid": "bzQExy189ZI#q#q",
+      "name": "_init_env",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8G2LB+A3rzg#q#q",
+      "name": "atexit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "XKRegsFpEpk#q#q",
+      "name": "catchReturnFromMain",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "uMei1W9uyNo#q#q",
+      "name": "exit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Ou3iL1abvng#p#J",
+      "name": "__stack_chk_fail",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HUbZmOnT-Dg#q#q",
+      "name": "atan2",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ZtjspkJQ+vw#q#q",
+      "name": "_FSin",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "pKwslsMUmSk#q#q",
+      "name": "fmod",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3GPpjQdAMTw#q#q",
+      "name": "__cxa_guard_acquire",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "tsvEmnenz48#q#q",
+      "name": "__cxa_atexit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9rAeANT2tyE#q#q",
+      "name": "__cxa_guard_release",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Ovb2dSJOAuE#q#q",
+      "name": "strcmp",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Q3VBxCXhUHs#q#q",
+      "name": "memcpy",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "z+P+xCnWLBk#q#q",
+      "name": "_ZdlPv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "7H0iTOciTLo#I#J",
+      "name": "pthread_mutex_lock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2Z+PpY6CaJg#I#J",
+      "name": "pthread_mutex_unlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "dQHWEsJtoE4#I#J",
+      "name": "pthread_mutexattr_init",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mDmgMOGVUqg#I#J",
+      "name": "pthread_mutexattr_settype",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ttHNfU+qDBU#I#J",
+      "name": "pthread_mutex_init",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ltCfaGr2JGE#I#J",
+      "name": "pthread_mutex_destroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9yDWMxEFdJU#q#q",
+      "name": "strrchr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "j4ViWNHEgww#q#q",
+      "name": "strlen",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Q2V+iqvjgC0#q#q",
+      "name": "vsnprintf",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "viiwFMaNamA#q#q",
+      "name": "strstr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "DfivPArhucg#q#q",
+      "name": "memcmp",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ZE6RNL+eLbk#q#q",
+      "name": "tanf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "+P6FRGH4LfA#q#q",
+      "name": "memmove",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "88Vv-AzHVj8#q#q",
+      "name": "fmodf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "q+9E0X3aWpU#q#q",
+      "name": "_Stoull",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8zTFvBIAIN8#q#q",
+      "name": "memset",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "EH-x713A99c#q#q",
+      "name": "atan2f",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "zlfEH8FmyUA#q#q",
+      "name": "_Stoul",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "aesyjrHVWy4#q#q",
+      "name": "strncmp",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "sUP1hBaouOw#q#q",
+      "name": "_Getpctype",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "AV6ipCNa4Rw#q#q",
+      "name": "strcasecmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "pXvbDfchu6k#q#q",
+      "name": "strncasecmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "0hlfW1O4Aa4#q#q",
+      "name": "localeconv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kiZSXIWd9vg#q#q",
+      "name": "strcpy",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "c41UEHVtiEA#q#q",
+      "name": "_Stod",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "n88vx3C5nW8#I#J",
+      "name": "gettimeofday",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "xeYO4u7uyJ0#q#q",
+      "name": "fopen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3QIPIh-GDjw#q#q",
+      "name": "rewind",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9BcDykPmo1I#p#J",
+      "name": "__error",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "Qazy8LmXTvw#q#q",
+      "name": "ftell",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "MUjC4lbHrK4#q#q",
+      "name": "fflush",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "MpxhMh8QFro#q#q",
+      "name": "fwrite",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "lbB+UlZqVG0#q#q",
+      "name": "fread",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rQFVBXp-Cxg#q#q",
+      "name": "fseek",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "uodLYyUip20#q#q",
+      "name": "fclose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "E6ao34wPw+U#I#J",
+      "name": "stat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "EotR8a3ASf4#I#J",
+      "name": "pthread_self",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "K-jXhbt2gn4#I#J",
+      "name": "pthread_mutex_trylock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "0TyVk4MSLt0#I#J",
+      "name": "pthread_cond_init",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "RXXqi4CtF8w#I#J",
+      "name": "pthread_cond_destroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "27bAgiJmOh0#I#J",
+      "name": "pthread_cond_timedwait",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Op8TBGY5KHg#I#J",
+      "name": "pthread_cond_wait",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2MOy+rUfuhQ#I#J",
+      "name": "pthread_cond_signal",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mkx2fVhNMsg#I#J",
+      "name": "pthread_cond_broadcast",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wtkt-teR1so#I#J",
+      "name": "pthread_attr_init",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "E+tyo3lp5Lw#I#J",
+      "name": "pthread_attr_setdetachstate",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "2Q0z6rnBrTE#I#J",
+      "name": "pthread_attr_setstacksize",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "euKRgm0Vn2M#I#J",
+      "name": "pthread_attr_setschedparam",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "OxhIB8LB-PQ#I#J",
+      "name": "pthread_create",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "zHchY8ft5pk#I#J",
+      "name": "pthread_attr_destroy",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "FJrT5LuUBAU#I#J",
+      "name": "pthread_exit",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "0wu33hunNdE#I#J",
+      "name": "sleep",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "QcteRwbsnV0#I#J",
+      "name": "usleep",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "GBUY7ywdULE#p#J",
+      "name": "scePthreadRename",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "gNQ1V2vfXDE#q#q",
+      "name": "setjmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "6sJWiWSRuqk#q#q",
+      "name": "strncpy",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ob5xAW4ln-0#q#q",
+      "name": "strchr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "hdm0YfMa7TQ#q#q",
+      "name": "_Znam",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "MLWl90SFWNE#q#q",
+      "name": "_ZdaPv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "1D0H2KNjshE#q#q",
+      "name": "powf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QI-x0SL8jhw#q#q",
+      "name": "acosf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "hcuQgD53UxM#q#q",
+      "name": "printf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "lKEN2IebgJ0#q#q",
+      "name": "longjmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JBcgYuW8lPU#q#q",
+      "name": "acos",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "T7uyNqP7vQA#q#q",
+      "name": "tan",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fJnpuVVBbKk#q#q",
+      "name": "_Znwm",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mXlxhmLNMPg#q#q",
+      "name": "strtol",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "cCXjU72Z0Ow#q#q",
+      "name": "_Sin",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "q0F6yS-rCms#q#q",
+      "name": "strcspn",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-kU6bB4M-+k#q#q",
+      "name": "strspn",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "7Ly52zaL44Q#q#q",
+      "name": "asin",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OXmauLdQ8kY#q#q",
+      "name": "atan",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "NVadfnzQhHQ#q#q",
+      "name": "exp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "zXCi78bYrEI#q#q",
+      "name": "_Log",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9LCjpWyQ5Zc#q#q",
+      "name": "pow",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "GZWjF-YIFFk#q#q",
+      "name": "asinf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fiiNDnNBKVY#q#q",
+      "name": "localtime_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "0WMHDb5Dt94#q#q",
+      "name": "modf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jjjRS7l1MPM#q#q",
+      "name": "_FLog",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "oVkZ8W8-Q8A#q#q",
+      "name": "strtok",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4J2sUJmuHZQ#p#J",
+      "name": "sceKernelGetProcessTime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "pO96TwzOm5E#p#J",
+      "name": "sceKernelGetDirectMemorySize",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "rTXw65xmLIA#p#J",
+      "name": "sceKernelAllocateDirectMemory",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "L-Q3LEjIbgA#p#J",
+      "name": "sceKernelMapDirectMemory",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "MBuItvba6z8#p#J",
+      "name": "sceKernelReleaseDirectMemory",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "gQX+4GDQjpM#q#q",
+      "name": "malloc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "tIhsqj0qsFE#q#q",
+      "name": "free",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fffwELXNVFA#q#q",
+      "name": "fprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "tcVi5SivF7Q#q#q",
+      "name": "sprintf",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kA-TdiOCsaY#q#q",
+      "name": "frexp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "aZK8lNei-Qw#q#q",
+      "name": "fputc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "L1SBTkC+Cvw#q#q",
+      "name": "abort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "1mecP7RgI2A#q#q",
+      "name": "gmtime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wLlFkwG9UcQ#q#q",
+      "name": "time",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "VPbJwTCgME0#q#q",
+      "name": "srand",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "cpCOXWMgha0#q#q",
+      "name": "rand",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "vNe1w4diLCs#p#J",
+      "name": "__tls_get_addr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "EMutwaQ34Jo#q#q",
+      "name": "perror",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HF7lK46xzjY#I#J",
+      "name": "pthread_mutexattr_destroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Ujf3KzMvRmI#q#q",
+      "name": "memalign",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QZP6I9ZZxpE#q#q",
+      "name": "clock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "h9CcP3J0oVM#I#J",
+      "name": "pthread_join",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "Jmi+9w9u0E4#I#J",
+      "name": "pthread_create_name_np",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "jbz9I9vkqkk#q#q",
+      "name": "vsprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Ls4tzzhimqQ#q#q",
+      "name": "strcat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kHg45qPC6f0#q#q",
+      "name": "strncat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "7pNKcscKrf8#q#q",
+      "name": "_Stoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "1uJgoVq3bQU#q#q",
+      "name": "_Getptolower",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "188x57JYp0g#p#J",
+      "name": "sceKernelCreateSema",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "R1Jvn8bSCW8#p#J",
+      "name": "sceKernelDeleteSema",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Zxa0VhQVTsk#p#J",
+      "name": "sceKernelWaitSema",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4czppHBiriw#p#J",
+      "name": "sceKernelSignalSema",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "bDupEgbQ6Fk#F#G",
+      "name": "sceFiosFileDeleteSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-ULUBK21QgE#F#G",
+      "name": "sceFiosDirectoryCreate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jayvY07C5dk#F#G",
+      "name": "sceFiosStatSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "uCkgJOrYUL4#F#G",
+      "name": "sceFiosDHOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "SnoQQWnGK9I#F#G",
+      "name": "sceFiosOpWait",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "0-p4O8FINmU#F#G",
+      "name": "sceFiosDHCloseSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "+FRvKknUj1I#F#G",
+      "name": "sceFiosOpGetActualCount",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "5cyEcilO-J0#F#G",
+      "name": "sceFiosOpDelete",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "GGqucL9F+YI#F#G",
+      "name": "sceFiosDHOpenSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "odjOGg8harg#F#G",
+      "name": "sceFiosDHReadSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Nlev7Lg8k3A#E#F",
+      "name": "sceNetInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "cTGkc6-TBlI#E#F",
+      "name": "sceNetTerm",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "SF47kB2MNTo#E#F",
+      "name": "sceNetEpollCreate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ZVw46bsasAk#E#F",
+      "name": "sceNetEpollControl",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "HQOwnfMGipQ#E#F",
+      "name": "sceNetErrnoLoc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Inp1lfL+Jdw#E#F",
+      "name": "sceNetEpollDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Q4qBuN-c0ZM#E#F",
+      "name": "sceNetSocket",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "45ggEzakPJQ#E#F",
+      "name": "sceNetSocketClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "9wO9XrMsNhc#E#F",
+      "name": "sceNetRecv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "beRjXBn-z+o#E#F",
+      "name": "sceNetSend",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "8Kcp5d-q1Uo#E#F",
+      "name": "sceNetInetPton",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "OXXX4mUk3uk#E#F",
+      "name": "sceNetConnect",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "iWQWrwiSt8A#E#F",
+      "name": "sceNetHtons",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "bErx49PgxyY#E#F",
+      "name": "sceNetBind",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "kOj1HiAGE54#E#F",
+      "name": "sceNetListen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "drjIbDbA7UQ#E#F",
+      "name": "sceNetEpollWait",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "YQ0navp+YIc#q#q",
+      "name": "puts",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "PIWqhn9oSxc#E#F",
+      "name": "sceNetAccept",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Rbvt+5Y2iEw#E#F",
+      "name": "sceNetNtohs",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "2mKX2Spso7I#E#F",
+      "name": "sceNetSetsockopt",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "b44anV2D7K0#F#G",
+      "name": "sceFiosFHOpenSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "AOujSGqU+ms#F#G",
+      "name": "sceFiosFHCloseSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Kl-TbrDU9YM#F#G",
+      "name": "sceFiosFHWriteSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "EzzSJz6yuMc#F#G",
+      "name": "sceFiosFHSyncSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xReSebwKApA#F#G",
+      "name": "sceFiosFHSeek",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "MrRFrdgpsx8#F#G",
+      "name": "sceFiosFHTell",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Bn2ZF4ZjeuQ#F#G",
+      "name": "sceFiosFHReadSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JGMio+21L4c#I#J",
+      "name": "mkdir",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "SHlt7EhOtqA#q#q",
+      "name": "fgetpos",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "TSM6whtekok#E#F",
+      "name": "sceNetShutdown",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "C4UgDHHPvdw#E#F",
+      "name": "sceNetResolverCreate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Nd91WaWmG2w#E#F",
+      "name": "sceNetResolverStartNtoa",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "kJlYH5uMAWI#E#F",
+      "name": "sceNetResolverDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "obuxdTiwkF8#J#K",
+      "name": "sceNetCtlGetInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "uBPlr0lbuiI#J#K",
+      "name": "sceNetCtlGetState",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "pDBDcY6uLSA#q#q",
+      "name": "vfprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "MZO7FXyAPU8#q#q",
+      "name": "remove",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "NN01qLRhiqU#I#J",
+      "name": "rename",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "c7ZnT7V1B98#I#J",
+      "name": "rmdir",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "LxcEU+ICu8U#q#q",
+      "name": "feof",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "St9nbxSoezk#q#q",
+      "name": "clearerr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "AEuF3F2f8TA#q#q",
+      "name": "fgetc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-LFO7jhD5CE#q#q",
+      "name": "ungetc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "KdP-nULpuGw#q#q",
+      "name": "fgets",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "npLpPTaSuHg#q#q",
+      "name": "fscanf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "AHxyhN96dy4#q#q",
+      "name": "ferror",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QMFyLoqNxIg#q#q",
+      "name": "setvbuf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "gkWgn0p1AfU#q#q",
+      "name": "freopen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "k+AXqu2-eBc#I#J",
+      "name": "getpagesize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "gjbmYpP-XJQ#q#q",
+      "name": "strcoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QNyUWGXmXNc#q#q",
+      "name": "strtoumax",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "AEJdIVZTEmo#q#q",
+      "name": "qsort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "m5wN+SwZOR4#q#q",
+      "name": "putchar",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "aaDMGGkXFxo#q#q",
+      "name": "frexpf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kn0yiYeExgA#q#q",
+      "name": "ldexpf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3+UPM-9E6xY#q#q",
+      "name": "modff",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "RIa6GnWp+iU#q#q",
+      "name": "strerror",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "efhK-YSUYYQ#q#q",
+      "name": "localtime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Av3zjWi64Kw#q#q",
+      "name": "strftime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rcQCUr0EaRU#q#q",
+      "name": "_Getptoupper",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "n7AepwR0s34#q#q",
+      "name": "mktime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-VVn74ZyhEs#q#q",
+      "name": "difftime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "PtsB1Q9wsFA#q#q",
+      "name": "setlocale",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "weDug8QD-lE#q#q",
+      "name": "atanf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "PdnFCFqKGqA#q#q",
+      "name": "_FCosh",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8zsu04XNsZ4#q#q",
+      "name": "expf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "O4L+0oCN9zA#q#q",
+      "name": "_FSinh",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "SAd0Z3wKwLA#q#q",
+      "name": "tanhf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-QgqOT5u2Vk#q#q",
+      "name": "_Assert",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "eT2UsmTewbU#q#q",
+      "name": "_ZSt11_Xbad_allocv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wuAQt-j+p4o#q#q",
+      "name": "exp2f",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ozMAr28BwSY#q#q",
+      "name": "_ZSt14_Xout_of_rangePKc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "tQIo+GIPklo#q#q",
+      "name": "_ZSt14_Xlength_errorPKc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "dnaeGXbjP6E#q#q",
+      "name": "exp2",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JrwFIMzKNr0#q#q",
+      "name": "ldexp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QrZZdJ8XsX0#q#q",
+      "name": "fputs",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "PDX01ziUz+4#q#q",
+      "name": "_ZSt13_Syserror_mapi",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fL3O02ypZFE#q#q",
+      "name": "wmemcpy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Noj9PsJrsa8#q#q",
+      "name": "wmemmove",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "WkkeywLJcgU#q#q",
+      "name": "wcslen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Al8MZJh-4hM#q#q",
+      "name": "wmemset",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Ezzq78ZgHPs#q#q",
+      "name": "wcschr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "g3ShSirD50I#q#q",
+      "name": "wcsrchr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QJ5xVfKkni0#q#q",
+      "name": "wmemcmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fnUEjBCNRVU#q#q",
+      "name": "wmemchr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "12wOHk8ywb0#p#J",
+      "name": "sceKernelPollSema",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "nsYoNRywwNg#p#J",
+      "name": "scePthreadAttrInit",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "UTXzJbWhhTE#p#J",
+      "name": "scePthreadAttrSetstacksize",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "-Wreprtu0Qs#p#J",
+      "name": "scePthreadAttrSetdetachstate",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "4+h9EzwKF4I#p#J",
+      "name": "scePthreadAttrSetschedpolicy",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "6UgtwV+0zb4#p#J",
+      "name": "scePthreadCreate",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "62KCwEMmzcM#p#J",
+      "name": "scePthreadAttrDestroy",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "bt3CTBKmGyI#p#J",
+      "name": "scePthreadSetaffinity",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "4qGrR6eoP9Y#p#J",
+      "name": "scePthreadDetach",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "1tKyG7RlMJo#p#J",
+      "name": "scePthreadGetprio",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "W0Hpm2X0uPE#p#J",
+      "name": "scePthreadSetprio",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "onNY9Byn-W8#p#J",
+      "name": "scePthreadJoin",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "sqWytnhYdEg#q#q",
+      "name": "_ZNSt8ios_base4InitC1Ev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-Bl9-SZ2noc#q#q",
+      "name": "_ZNSt6_WinitC1Ev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "hqi8yMOCmG0#q#q",
+      "name": "_ZNSt8_LocinfoC1EPKc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "DuW5ZqZv-70#q#q",
+      "name": "_ZNKSt9exception6_RaiseEv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "N2f485TmJms#q#q",
+      "name": "_ZNSt8ios_base7failureD1Ev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "iPBqs+YUUFw#q#q",
+      "name": "_Atomic_fetch_add_4",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2HnmKiLmV6s#q#q",
+      "name": "_Atomic_fetch_sub_4",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "pNtJdE3x49E#q#q",
+      "name": "wcscmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kALvdgEv5ME#q#q",
+      "name": "_Locksyslock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9nf8joUTSaQ#q#q",
+      "name": "_Unlocksyslock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "E8wCoUEbfzk#q#q",
+      "name": "wcsncmp",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "1G3lF1Gg1k8#p#J",
+      "name": "sceKernelOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "Cg4srZ6TKbU#p#J",
+      "name": "sceKernelRead",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "4wSze92BhLI#p#J",
+      "name": "sceKernelWrite",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "oib76F-12fk#p#J",
+      "name": "sceKernelLseek",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "UK2Tl2DWUns#p#J",
+      "name": "sceKernelClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "g8cM39EUZ6o#M#N",
+      "name": "sceSysmoduleLoadModule",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Qs0wWulgl7U#U#V",
+      "name": "sceMouseInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "cAnT0Rw-IwU#U#V",
+      "name": "sceMouseClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "eR2bZFAAU0Q#M#N",
+      "name": "sceSysmoduleUnloadModule",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "CdWp0oHWGr0#D#E",
+      "name": "sceUserServiceGetInitialUser",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "RaqxZIf6DvE#U#V",
+      "name": "sceMouseOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "x8qnXqh-tiM#U#V",
+      "name": "sceMouseRead",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "6ncge5+l5Qs#A#B",
+      "name": "scePadClose",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "xk0AcarP3V4#A#B",
+      "name": "scePadOpen",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "YndgXqQVV7c#A#B",
+      "name": "scePadReadState",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "gjP9-KQzoUk#A#B",
+      "name": "scePadGetControllerInformation",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "rIZnR6eSpvk#A#B",
+      "name": "scePadResetOrientation",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "r44mAxdSG+U#A#B",
+      "name": "scePadSetAngularVelocityDeadbandState",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "vDLMoJLde8I#A#B",
+      "name": "scePadSetTiltCorrectionState",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "yFVnOdGxvZY#A#B",
+      "name": "scePadSetVibration",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "WFcfL2lzido#p#J",
+      "name": "sceKernelQueryMemoryProtection",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "rVjRvHJ0X6c#p#J",
+      "name": "sceKernelVirtualQuery",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "BC+OG5m9+bw#p#J",
+      "name": "sceKernelGetDirectMemoryType",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "Up36PTk687E#C#D",
+      "name": "sceVideoOutOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "CBiu4mCE1DA#C#D",
+      "name": "sceVideoOutSetFlipRate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "D0OdFMjp46I#p#J",
+      "name": "sceKernelCreateEqueue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HXzjK9yI30k#C#D",
+      "name": "sceVideoOutAddFlipEvent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "i6-sR91Wt-4#C#D",
+      "name": "sceVideoOutSetBufferAttribute",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jpFjmgAC5AE#p#J",
+      "name": "sceKernelDeleteEqueue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "uquVH4-Du78#C#D",
+      "name": "sceVideoOutClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "w3BY+tAEiQY#C#D",
+      "name": "sceVideoOutRegisterBuffers",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "SbU3dwp80lQ#C#D",
+      "name": "sceVideoOutGetFlipStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fzyMKs9kim0#p#J",
+      "name": "sceKernelWaitEqueue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "FM5NPnLqBc8#q#q",
+      "name": "wcscpy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "w21YgGGNtBk#E#F",
+      "name": "sceNetEpollAbort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "gvD1greCu0A#E#F",
+      "name": "sceNetSendto",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "hoOAofhhRvE#E#F",
+      "name": "sceNetGetsockname",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "304ooNZxWDY#E#F",
+      "name": "sceNetRecvfrom",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "xphrZusl78E#E#F",
+      "name": "sceNetGetsockopt",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "zO9UL3qIINQ#H#I",
+      "name": "sceRtcGetCurrentNetworkTick",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "i8UmXTSq7N4#Q#R",
+      "name": "sceNpCmpNpId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "XDncXQIJUSk#R#S",
+      "name": "sceNpGetOnlineId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "dj+O5aD2a0Q#Q#R",
+      "name": "sceNpCmpOnlineId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "CQtPRSF6Ds8#W#X",
+      "name": "sceNpWebApiReadData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "G3AnLNdRBjE#W#X",
+      "name": "sceNpWebApiInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "x1Y7yiYSk7c#W#X",
+      "name": "sceNpWebApiCreateContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "y5Ta5JCzQHY#W#X",
+      "name": "sceNpWebApiCreatePushEventFilter",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "PfSTDCgNMgc#W#X",
+      "name": "sceNpWebApiRegisterPushEventCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "JzhYTP2fG18#W#X",
+      "name": "sceNpWebApiAbortRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "qK4o2656W4w#W#X",
+      "name": "sceNpWebApiUnregisterPushEventCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "zE+R6Rcx3W0#W#X",
+      "name": "sceNpWebApiDeletePushEventFilter",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "XUjdsSTTZ3U#W#X",
+      "name": "sceNpWebApiDeleteContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "asz3TtIqGF8#W#X",
+      "name": "sceNpWebApiTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "noQgleu+KLE#W#X",
+      "name": "sceNpWebApiDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "eLdDw6l0-bU#q#q",
+      "name": "snprintf",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rdgs5Z1MyFw#W#X",
+      "name": "sceNpWebApiCreateRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "kVbL4hL3K7w#W#X",
+      "name": "sceNpWebApiSendRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "k210oKgP80Y#W#X",
+      "name": "sceNpWebApiGetHttpStatusCode",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "or0e885BlXo#W#X",
+      "name": "sceNpWebApiUtilityParseNpId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0nV21JjYCH8#q#q",
+      "name": "wcsncpy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "743ZzEBzlV8#W#X",
+      "name": "sceNpWebApiGetHttpResponseHeaderValueLength",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "VwJ5L0Higg0#W#X",
+      "name": "sceNpWebApiGetHttpResponseHeaderValue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "bDEVVP4bTjQ#H#I",
+      "name": "sceRtcSetTime_t",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "8w-H19ip48I#H#I",
+      "name": "sceRtcGetTick",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "jMNwqYr4R-k#H#I",
+      "name": "sceRtcGetTickResolution",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "UJ+Z7Q+4ck0#J#K",
+      "name": "sceNetCtlRegisterCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "VfRSmPmj8Q8#R#S",
+      "name": "sceNpRegisterStateCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "uFJpaKNBAj4#R#S",
+      "name": "sceNpRegisterGamePresenceCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "eQH7nWPcAgc#R#S",
+      "name": "sceNpGetState",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "haVZE9FgKqE#h#i",
+      "name": "sceNpProfileDialogUpdateStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "8rhLl1-0W-o#h#i",
+      "name": "sceNpProfileDialogGetResult",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Lg+NCE6pTwQ#h#i",
+      "name": "sceNpProfileDialogInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "uj9Cz7Tk0cc#h#i",
+      "name": "sceNpProfileDialogOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0Sp9vJcB1-w#h#i",
+      "name": "sceNpProfileDialogTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "3Zl8BePTh9Y#R#S",
+      "name": "sceNpCheckCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "iQw3iQPhvUQ#J#K",
+      "name": "sceNetCtlCheckCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "IPb1hd1wAGc#R#S",
+      "name": "sceNpGetGamePresenceStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "mjjTXh+NHWY#R#S",
+      "name": "sceNpUnregisterStateCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Rqm2OnZMCz0#J#K",
+      "name": "sceNetCtlUnregisterCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Ec63y59l9tw#R#S",
+      "name": "sceNpSetNpTitleId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "j3YMu1MVNNo#D#E",
+      "name": "sceUserServiceInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "10t3e5+JPnU#P#Q",
+      "name": "sceNpMatching2Initialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "bwFjS+bX9mA#D#E",
+      "name": "sceUserServiceTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Mqp3lJ+sjy4#P#Q",
+      "name": "sceNpMatching2Terminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "p-o74CnoNzY#R#S",
+      "name": "sceNpGetNpId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "fQQfP87I7hs#P#Q",
+      "name": "sceNpMatching2RegisterContextCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "YfmpW719rMo#P#Q",
+      "name": "sceNpMatching2CreateContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "7vjNQ6Z1op0#P#Q",
+      "name": "sceNpMatching2ContextStart",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "LhCPctIICxQ#P#Q",
+      "name": "sceNpMatching2GetServerId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "+8e7wXLmjds#P#Q",
+      "name": "sceNpMatching2SetDefaultRequestOptParam",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "p+2EnxmaAMM#P#Q",
+      "name": "sceNpMatching2RegisterRoomEventCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0UMeWRGnZKA#P#Q",
+      "name": "sceNpMatching2RegisterSignalingCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "4Nj7u5B5yCA#P#Q",
+      "name": "sceNpMatching2RegisterLobbyEventCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "3KOuC4RmZZU#T#U",
+      "name": "sceNpSignalingInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "5yYjEdd4t8Y#T#U",
+      "name": "sceNpSignalingCreateContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "8533Q+LU7EQ#S#T",
+      "name": "sceNpLookupCreateTitleCtx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "hx+LIg-1koI#T#U",
+      "name": "sceNpSignalingDeleteContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "NPhw0UXaNrk#T#U",
+      "name": "sceNpSignalingTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "mtqDK9zkoIE#S#T",
+      "name": "sceNpLookupDeleteTitleCtx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "6UEembipgrM#T#U",
+      "name": "sceNpSignalingDeactivateConnection",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "n5JmImxTiZU#P#Q",
+      "name": "sceNpMatching2JoinLobby",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "BBbJ92uUdCg#P#Q",
+      "name": "sceNpMatching2LeaveLobby",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "-f6M4caNe8k#P#Q",
+      "name": "sceNpMatching2ContextStop",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Nz-ZE7ur32I#P#Q",
+      "name": "sceNpMatching2DestroyContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "VqZX7POg2Mk#P#Q",
+      "name": "sceNpMatching2SearchRoom",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "wyvlEgZ-55w#P#Q",
+      "name": "sceNpMatching2GetLobbyInfoList",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "rJNPJqDCpiI#P#Q",
+      "name": "sceNpMatching2GetWorldInfoList",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "wUmwXZHaX1w#P#Q",
+      "name": "sceNpMatching2SignalingGetPingInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "zCWZmXXN600#P#Q",
+      "name": "sceNpMatching2CreateJoinRoom",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "CSIMDsVjs-g#P#Q",
+      "name": "sceNpMatching2JoinRoom",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "BD6kfx442Do#P#Q",
+      "name": "sceNpMatching2LeaveRoom",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "AUVfU6byg3c#P#Q",
+      "name": "sceNpMatching2KickoutRoomMember",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "NCP3bLGPt+o#P#Q",
+      "name": "sceNpMatching2GrantRoomOwner",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "S9D8JSYIrjE#P#Q",
+      "name": "sceNpMatching2SetRoomDataInternal",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "q7GK98-nYSE#P#Q",
+      "name": "sceNpMatching2SetRoomDataExternal",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "HoqTrkS9c5Q#P#Q",
+      "name": "sceNpMatching2SetRoomMemberDataInternal",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "tHD5FPFXtu4#P#Q",
+      "name": "sceNpMatching2SignalingGetConnectionStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "b7kJI+nx2hg#i#j",
+      "name": "sceVoiceDeletePort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Oo0S5PH7FIQ#i#j",
+      "name": "sceVoiceEnd",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "9TrhuGzberQ#i#j",
+      "name": "sceVoiceInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "nXpje5yNpaE#i#j",
+      "name": "sceVoiceCreatePort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "oV9GAdJ23Gw#i#j",
+      "name": "sceVoiceConnectIPortToOPort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "54phPH2LZls#i#j",
+      "name": "sceVoiceStart",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Ao2YNSA7-Qo#i#j",
+      "name": "sceVoiceStop",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ajVj3QG2um4#i#j",
+      "name": "sceVoiceDisconnectIPortFromOPort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "CrLqDwWLoXM#i#j",
+      "name": "sceVoiceGetPortInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "cQ6DGsQEjV4#i#j",
+      "name": "sceVoiceReadFromOPort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "YeJl6yDlhW0#i#j",
+      "name": "sceVoiceWriteToIPort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "KnNA1TEgtBI#o#p",
+      "name": "sceNpScoreCreateNpTitleCtx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "G0pE+RNCwfk#o#p",
+      "name": "sceNpScoreDeleteNpTitleCtx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "gW8qyjYrUbk#o#p",
+      "name": "sceNpScoreCreateRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ETS-uM-vH9Q#o#p",
+      "name": "sceNpScoreGetRankingByNpIdPcId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "dK8-SgYf6r4#o#p",
+      "name": "sceNpScoreDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "KBHxDjyk-jA#o#p",
+      "name": "sceNpScoreGetRankingByRange",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "bygbKdHmjn4#o#p",
+      "name": "sceNpScoreSetPlayerCharacterId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "zKoVok6FFEI#o#p",
+      "name": "sceNpScoreGetGameData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "zT0XBtgtOSI#o#p",
+      "name": "sceNpScoreRecordScore",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "LoVMVrijVOk#o#p",
+      "name": "sceNpScoreGetBoardInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "1i7kmKbX6hk#o#p",
+      "name": "sceNpScoreAbortRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "bcoVwcBjQ9E#o#p",
+      "name": "sceNpScoreRecordGameData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "2b3TI0mDYiI#o#p",
+      "name": "sceNpScoreCensorComment",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "r4oAo9in0TA#o#p",
+      "name": "sceNpScoreSanitizeComment",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "eYz4v5Uek9U#S#T",
+      "name": "sceNpLookupAbortRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "wLaxchvEEnk#S#T",
+      "name": "sceNpLookupDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0UvTFeomAUM#T#U",
+      "name": "sceNpSignalingActivateConnection",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "JA4+sS39GMs#S#T",
+      "name": "sceNpLookupCreateAsyncRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "V4EVrruHuy8#S#T",
+      "name": "sceNpLookupPollAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "T6tnM1Uti4g#S#T",
+      "name": "sceNpLookupNpId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "bD-JizUb3JM#T#U",
+      "name": "sceNpSignalingGetConnectionStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "WDpobjImAb4#q#q",
+      "name": "wcsstr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "x9uumWcxhXU#q#q",
+      "name": "wcsspn",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "gfP0im5Z3g0#q#q",
+      "name": "ldiv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "dl+4eHSzUu4#N#O",
+      "name": "sceAjmInitialize",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "Q3dyFuwGn64#N#O",
+      "name": "sceAjmModuleRegister",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "-qLsfDAywIY#N#O",
+      "name": "sceAjmBatchWait",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "Wi7DtlLV+KI#N#O",
+      "name": "sceAjmModuleUnregister",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "MHur6qCsUus#N#O",
+      "name": "sceAjmFinalize",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "AxoDrINp4J8#N#O",
+      "name": "sceAjmInstanceCreate",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "NVDXiUesSbA#N#O",
+      "name": "sceAjmBatchCancel",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "RbLbuKv8zho#N#O",
+      "name": "sceAjmInstanceDestroy",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "dmDybN--Fn8#N#O",
+      "name": "sceAjmBatchJobControlBufferRa",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "ElslOCpOIns#N#O",
+      "name": "sceAjmBatchJobRunBufferRa",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "fFFkk0xfGWs#N#O",
+      "name": "sceAjmBatchStartBuffer",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "WfAiBW8Wcek#N#O",
+      "name": "sceAjmBatchErrorDump",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "Y7aJ1uydPMo#q#q",
+      "name": "realloc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kBwCPsYX-m4#p#J",
+      "name": "sceKernelFstat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "QBi7HCK03hw#p#J",
+      "name": "sceKernelClockGettime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "1jfXLRVzisc#p#J",
+      "name": "sceKernelUsleep",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "aI+OeCz8xrQ#p#J",
+      "name": "scePthreadSelf",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "DzES9hQF4f4#p#J",
+      "name": "scePthreadAttrSetschedparam",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "3qxgM4ezETA#p#J",
+      "name": "scePthreadAttrSetaffinity",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "F8bUHwAG284#p#J",
+      "name": "scePthreadMutexattrInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "iMp8QpE+XO4#p#J",
+      "name": "scePthreadMutexattrSettype",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "cmo1RIYva9o#p#J",
+      "name": "scePthreadMutexInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "smWEktiyyG0#p#J",
+      "name": "scePthreadMutexattrDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2Of0f+3mhhE#p#J",
+      "name": "scePthreadMutexDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9UK1vLZQft4#p#J",
+      "name": "scePthreadMutexLock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "tn3VlD0hG60#p#J",
+      "name": "scePthreadMutexUnlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fPhymKNvK-A#D#E",
+      "name": "sceUserServiceGetLoginUserIdList",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "JfEPXVxhFqA#G#H",
+      "name": "sceAudioOutInit",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "ekNvsT22rsY#G#H",
+      "name": "sceAudioOutOpen",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "b+uAV89IlxE#G#H",
+      "name": "sceAudioOutSetVolume",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "QOQtbeDqsT4#G#H",
+      "name": "sceAudioOutOutput",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "s1--uE9mBFw#G#H",
+      "name": "sceAudioOutClose",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "GrQ9s4IrNaQ#G#H",
+      "name": "sceAudioOutGetPortState",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "1xxcMiGu2fo#D#E",
+      "name": "sceUserServiceGetUserName",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "LozEOU8+anM#Y#Z",
+      "name": "sceAudioInInput",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "5NE8Sjc7VC8#Y#Z",
+      "name": "sceAudioInOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Jh6WbHhnI68#Y#Z",
+      "name": "sceAudioInClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "1Pk0qZQGeWo#q#q",
+      "name": "sscanf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8u8lPzUEq+U#q#q",
+      "name": "memchr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ZkZhskCPXFw#O#P",
+      "name": "sceSaveDataInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "yKDy8S5yLA0#O#P",
+      "name": "sceSaveDataTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "dyIhnXq-0SM#O#P",
+      "name": "sceSaveDataDirNameSearch",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "S1GkePI17zQ#O#P",
+      "name": "sceSaveDataDelete",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "32HQAQdwM2o#O#P",
+      "name": "sceSaveDataMount",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "BMR4F-Uek3E#O#P",
+      "name": "sceSaveDataUmount",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "7Bt5pBC-Aco#O#P",
+      "name": "sceSaveDataGetSaveDataMemory",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "h3YURzXGSVQ#O#P",
+      "name": "sceSaveDataSetSaveDataMemory",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "s9e3+YpRnzw#d#e",
+      "name": "sceSaveDataDialogInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "85zul--eGXs#O#P",
+      "name": "sceSaveDataSetParam",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "c88Yy54Mx0w#O#P",
+      "name": "sceSaveDataSaveIcon",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "4tPhsP6FpDI#d#e",
+      "name": "sceSaveDataDialogOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "KK3Bdg1RWK0#d#e",
+      "name": "sceSaveDataDialogUpdateStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "YuH2FA7azqQ#d#e",
+      "name": "sceSaveDataDialogTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "v7AAAMo0Lz4#O#P",
+      "name": "sceSaveDataSetupSaveDataMemory",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_savedata.c"
+      ]
+    },
+    {
+      "nid": "aS66RI0gGgo#m#n",
+      "name": "sceAvPlayerInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HD1YKVU26-M#m#n",
+      "name": "sceAvPlayerPostInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "KMcEa+rHsIo#m#n",
+      "name": "sceAvPlayerAddSource",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OVths0xGfho#m#n",
+      "name": "sceAvPlayerSetLooping",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "NkJwDzKmIlw#m#n",
+      "name": "sceAvPlayerClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ET4Gr-Uu07s#m#n",
+      "name": "sceAvPlayerStart",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ZC17w3vB5Lo#m#n",
+      "name": "sceAvPlayerStop",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "UbQoYawOsfY#m#n",
+      "name": "sceAvPlayerIsActive",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9y5v+fGN4Wk#m#n",
+      "name": "sceAvPlayerPause",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "w5moABNwnRY#m#n",
+      "name": "sceAvPlayerResume",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JdksQu8pNdQ#m#n",
+      "name": "sceAvPlayerGetVideoDataEx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wwM99gjFf1Y#m#n",
+      "name": "sceAvPlayerCurrentTime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "hdTyRzCXQeQ#m#n",
+      "name": "sceAvPlayerStreamCount",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "d8FcbzfAdQw#m#n",
+      "name": "sceAvPlayerGetStreamInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ODJK2sn9w4A#m#n",
+      "name": "sceAvPlayerEnableStream",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Wnp1OVcrZgk#m#n",
+      "name": "sceAvPlayerGetAudioData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2SKEx6bSq-4#p#J",
+      "name": "sceKernelBatchMap",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "cQke9UuBQOk#p#J",
+      "name": "sceKernelMunmap",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "7oxv3PPCumo#p#J",
+      "name": "sceKernelReserveVirtualRange",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "vSMAm3cxYTY#p#J",
+      "name": "sceKernelMprotect",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "fMP5NHUOaMk#M#N",
+      "name": "sceSysmoduleIsLoaded",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "IADmD4tScBY#b#c",
+      "name": "sceImeDialogGetStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "x01jxu+vxlc#b#c",
+      "name": "sceImeDialogGetResult",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "gyTyVn+bXMw#b#c",
+      "name": "sceImeDialogTerm",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "NUeBrN7hzf0#b#c",
+      "name": "sceImeDialogInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "oBmw4xrmfKs#b#c",
+      "name": "sceImeDialogAbort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "GUuiOcxL-r0#q#q",
+      "name": "_WStof",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4nRn+exUJAM#q#q",
+      "name": "_WStod",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "34nH7v2xvNQ#q#q",
+      "name": "wcstoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "d3dMyWORw8A#q#q",
+      "name": "wcstol",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Im55VJ-Bekc#q#q",
+      "name": "swprintf_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "qISjDHrxONc#K#L",
+      "name": "sceHttpWaitRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0gYjPTR-6cY#K#L",
+      "name": "sceHttpCreateTemplate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "s2-NPIvz+iA#K#L",
+      "name": "sceHttpSetNonblock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "6381dWF+xsQ#K#L",
+      "name": "sceHttpCreateEpoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "sWQiqKvYTVA#K#L",
+      "name": "sceHttpAbortWaitRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "wYhXVfS2Et4#K#L",
+      "name": "sceHttpDestroyEpoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "4I8vEpuEhZ8#K#L",
+      "name": "sceHttpDeleteTemplate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "f42K37mm5RM#K#L",
+      "name": "sceHttpsEnableOption",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "mSQCxzWTwVI#K#L",
+      "name": "sceHttpsDisableOption",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "EY28T2bkN7k#K#L",
+      "name": "sceHttpAddRequestHeader",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "dgJBaeJnGpo#E#F",
+      "name": "sceNetPoolCreate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "hdpVEUDFW3s#L#M",
+      "name": "sceSslInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "A9cVMUtEp4Y#K#L",
+      "name": "sceHttpInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Ik-KpLTlf7Q#K#L",
+      "name": "sceHttpTerm",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0K1yQ6Lv-Yc#L#M",
+      "name": "sceSslTerm",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "K7RlrTkI-mw#E#F",
+      "name": "sceNetPoolDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "qgxDBjorUxs#K#L",
+      "name": "sceHttpCreateConnectionWithURL",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Aeu5wVKkF9w#K#L",
+      "name": "sceHttpCreateRequestWithURL",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "PTiFIUxCpJc#K#L",
+      "name": "sceHttpSetRequestContentLength",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0S9tTH0uqTU#K#L",
+      "name": "sceHttpSetConnectTimeOut",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "-xm7kZQNpHI#K#L",
+      "name": "sceHttpSetEpoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "59tL1AQBb8U#K#L",
+      "name": "sceHttpUnsetEpoll",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "qe7oZ+v4PWA#K#L",
+      "name": "sceHttpDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "P6A3ytpsiYc#K#L",
+      "name": "sceHttpDeleteConnection",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0a2TBNfE3BU#K#L",
+      "name": "sceHttpGetStatusCode",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "yuO2H2Uvnos#K#L",
+      "name": "sceHttpGetResponseContentLength",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "P5pdoykPYTk#K#L",
+      "name": "sceHttpReadData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "1e2BNwI-XzE#K#L",
+      "name": "sceHttpSendRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "nJz16JE1txM#q#q",
+      "name": "swprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OGVdXU3E-xg#q#q",
+      "name": "wprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "0H2vBYbTLHI#B#C",
+      "name": "sceGnmDrawInitDefaultHardwareState200",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "bQVd5YzCal0#B#C",
+      "name": "sceGnmSetPsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4MgRw-bVNQU#B#C",
+      "name": "sceGnmUpdatePsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "gAhCn6UiU4Y#B#C",
+      "name": "sceGnmSetVsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "V31V01UiScY#B#C",
+      "name": "sceGnmUpdateVsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "FUHG8sQ3R58#B#C",
+      "name": "sceGnmSetEsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "VJNjFtqiF5w#B#C",
+      "name": "sceGnmSetHsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "GNlx+y7xPdE#B#C",
+      "name": "sceGnmUpdateHsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "vckdzbQ46SI#B#C",
+      "name": "sceGnmSetLsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "KXltnCwEJHQ#B#C",
+      "name": "sceGnmSetCsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "UJwNuMBcUAk#B#C",
+      "name": "sceGnmSetGsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "nLM2i2+65hA#B#C",
+      "name": "sceGnmUpdateGsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jiItzS6+22g#B#C",
+      "name": "sceGnmInsertSetMarker",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "aj3L-iaFmyk#B#C",
+      "name": "sceGnmInsertSetColorMarker",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "W1Etj-jlW7Y#B#C",
+      "name": "sceGnmInsertPushMarker",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "aPIZJTXC+cU#B#C",
+      "name": "sceGnmInsertPushColorMarker",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "7qZVNgEu+SY#B#C",
+      "name": "sceGnmInsertPopMarker",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "1qXLHIpROPE#B#C",
+      "name": "sceGnmInsertWaitFlipDone",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "26PM5Mzl8zc#B#C",
+      "name": "sceGnmLogicalCuIndexToPhysicalCuIndex",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "RU74kek-N0c#B#C",
+      "name": "sceGnmLogicalCuMaskToPhysicalCuMask",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "zwY0YV91TTI#B#C",
+      "name": "sceGnmSubmitCommandBuffers",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xbxNatawohc#B#C",
+      "name": "sceGnmSubmitAndFlipCommandBuffers",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "iCO804ZgzdA#B#C",
+      "name": "sceGnmValidateCommandBuffers",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "b0xyllnVY-I#B#C",
+      "name": "sceGnmAddEqEvent",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "PVT+fuoS9gU#B#C",
+      "name": "sceGnmDeleteEqEvent",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "UoYY0DWMC0U#B#C",
+      "name": "sceGnmGetEqEventType",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "H7-fgvEutM0#B#C",
+      "name": "sceGnmGetEqTimeStamp",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "29oKvKXzEZo#B#C",
+      "name": "sceGnmMapComputeQueue",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "A+uGq+3KFtQ#B#C",
+      "name": "sceGnmMapComputeQueueWithPriority",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ArSg-TGinhk#B#C",
+      "name": "sceGnmUnmapComputeQueue",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "bX5IbRvECXk#B#C",
+      "name": "sceGnmDingDong",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "iBt3Oe00Kvc#B#C",
+      "name": "sceGnmFlushGarlic",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "qpGITzPE+Zc#B#C",
+      "name": "sceGnmDebugHardwareStatus",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "yvZ73uQUqrk#B#C",
+      "name": "sceGnmSubmitDone",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "b08AgtPlHPg#B#C",
+      "name": "sceGnmAreSubmitsAllowed",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "gObODli-OH8#B#C",
+      "name": "sceGnmRequestFlipAndSubmitDone",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "+xuDhxlWRPg#B#C",
+      "name": "sceGnmSetupMipStatsReport",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "f85orjx7qts#B#C",
+      "name": "sceGnmRequestMipStatsReportAndReset",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HHo1BAljZO8#B#C",
+      "name": "sceGnmDisableMipStatsReport",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jtkqXpAOY6w#B#C",
+      "name": "sceGnmSetGsRingSizes",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ln33zjBrfjk#B#C",
+      "name": "sceGnmGetTheTessellationFactorRingBufferBaseAddress",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "f33OrruQYbM#B#C",
+      "name": "sceRazorIsLoaded",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "u9YKpRRHe-M#B#C",
+      "name": "sceRazorCaptureImmediate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4UFagYlfuAM#B#C",
+      "name": "sceRazorCaptureSinceLastFlip",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xeTLfxVIQO4#B#C",
+      "name": "sceRazorCaptureCommandBuffersOnlyImmediate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9thMn+uB1is#B#C",
+      "name": "sceRazorCaptureCommandBuffersOnlySinceLastFlip",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "d88anrgNoKY#B#C",
+      "name": "sceGnmDriverTriggerCapture",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "TLV4mswiZ4A#B#C",
+      "name": "sceGnmDriverCaptureInProgress",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jg33rEKLfVs#B#C",
+      "name": "sceGnmIsUserPaEnabled",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "nF6bFRUBRAU#B#C",
+      "name": "sceGnmDispatchInitDefaultHardwareState",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "T72hz6ffq08#p#J",
+      "name": "scePthreadYield",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "cfAXurvfl5o#q#q",
+      "name": "__cxa_allocate_exception",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "vkuuLfhnSZI#q#q",
+      "name": "__cxa_throw",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "usKbuvy2hQg#q#q",
+      "name": "__cxa_call_unexpected",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "f1zwJ3jAI2k#q#q",
+      "name": "_Unwind_Resume",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3cUUypQzMiI#q#q",
+      "name": "__cxa_begin_catch",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "lX+4FNUklF0#q#q",
+      "name": "__cxa_end_catch",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "qYhnoevd9bI#q#q",
+      "name": "_ZSt9terminatev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ZL9FV4mJXxo#q#q",
+      "name": "__cxa_rethrow",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "zJGf8xjFnQE#E#F",
+      "name": "sceNetSocketAbort",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "9T2pDF2Ryqg#E#F",
+      "name": "sceNetHtonl",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "pQGpHYopAIY#E#F",
+      "name": "sceNetNtohl",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "U46NwOiJpys#C#D",
+      "name": "sceVideoOutSubmitFlip",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xEszJVGpybs#q#q",
+      "name": "sprintf_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "GMpvxPFW924#q#q",
+      "name": "vprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ryUxD-60bKM#q#q",
+      "name": "_ZnwmRKSt9nothrow_t",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Apb4YDxKsRI#E#F",
+      "name": "sceNetResolverStartAton",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "9vA2aW+CHuA#E#F",
+      "name": "sceNetInetNtop",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "MELi-cKqWq0#q#q",
+      "name": "_ZSt19_Xbad_function_callv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kDZvoVssCgQ#q#q",
+      "name": "strpbrk",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ZPD1YOKI+Kw#H#I",
+      "name": "sceRtcGetCurrentClockLocalTime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "JO4yuTuMoKI#J#K",
+      "name": "sceNetCtlGetNatInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "fZo48un7LK4#V#W",
+      "name": "sceSystemServiceParamGetInt",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "M1TvFst-jrM#H#I",
+      "name": "sceRtcConvertUtcToLocalTime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "8Yr143yEnRo#H#I",
+      "name": "sceRtcConvertLocalTimeToUtc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "rPo6tV8D9bM#V#W",
+      "name": "sceSystemServiceGetStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "656LMQSrg6U#V#W",
+      "name": "sceSystemServiceReceiveEvent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "H4MCONF+Gps#q#q",
+      "name": "wcspbrk",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Gaxrp3EWY-M#R#S",
+      "name": "sceNpNotifyPlusFeature",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Vo5V8KAwCmk#V#W",
+      "name": "sceSystemServiceHideSplashScreen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "-+3hY+y8bNo#V#W",
+      "name": "sceSystemServiceLaunchWebBrowser",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "6fIC3XKt2k0#j#k",
+      "name": "sceMsgDialogUpdateStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ePw-kqZmelo#j#k",
+      "name": "sceMsgDialogTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "lDqxaY1UbEo#j#k",
+      "name": "sceMsgDialogInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "uoUpLGNkygk#Z#a",
+      "name": "sceCommonDialogInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "b06Hh0DPEaE#j#k",
+      "name": "sceMsgDialogOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "LR5cwFMMCVE#k#l",
+      "name": "sceNpCommerceDialogUpdateStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "m-I92Ab50W8#k#l",
+      "name": "sceNpCommerceDialogTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "0aR2aWmQal4#k#l",
+      "name": "sceNpCommerceDialogInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "DfSCDRA3EjY#k#l",
+      "name": "sceNpCommerceDialogOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "eiqMCt9UshI#R#S",
+      "name": "sceNpCreateAsyncRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "gjSyfzSsDcE#X#Y",
+      "name": "sceNpAuthPollAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "OzKvTvg3ZYU#R#S",
+      "name": "sceNpAbortRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "N+mr7GjTvr8#X#Y",
+      "name": "sceNpAuthCreateAsyncRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "KxGkOrQJTqY#X#Y",
+      "name": "sceNpAuthGetAuthorizationCode",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "2rsFmlGWleQ#R#S",
+      "name": "sceNpCheckNpAvailability",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ilwLM4zOmu4#R#S",
+      "name": "sceNpGetParentalControlInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "r6MyYJkryz8#R#S",
+      "name": "sceNpCheckPlus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "uqcPJLWL08M#R#S",
+      "name": "sceNpPollAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "GImICnh+boA#R#S",
+      "name": "sceNpRegisterPlusEventCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "xViqJdDgKl0#R#S",
+      "name": "sceNpUnregisterPlusEventCallback",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "S7QTn72PrDw#R#S",
+      "name": "sceNpDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "H8wG9Bk-nPc#X#Y",
+      "name": "sceNpAuthDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "HNnWdT43ues#q#q",
+      "name": "swscanf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xnd8BJzAxmk#c#d",
+      "name": "sceAppContentGetAddcontInfoList",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "A2CQ3kgSopQ#R#S",
+      "name": "sceNpSetContentRestriction",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ts6GlZOKRrE#n#o",
+      "name": "scePlayGoInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "uWIYLFkkwqk#n#o",
+      "name": "scePlayGoGetLocus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "M1Gma1ocrGE#n#o",
+      "name": "scePlayGoOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "73fF1MFU8hA#n#o",
+      "name": "scePlayGoGetChunkId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "4AAcTU9R3XM#n#o",
+      "name": "scePlayGoSetInstallSpeed",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "AxHBk3eat04#H#I",
+      "name": "sceRtcFormatRFC2822LocalTime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "XbkjbobZlCY#l#m",
+      "name": "sceNpTrophyCreateContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "q7U6tEAQf7c#l#m",
+      "name": "sceNpTrophyCreateHandle",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "TJCAxto9SEU#l#m",
+      "name": "sceNpTrophyRegisterContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "28xmRUFao68#l#m",
+      "name": "sceNpTrophyUnlockTrophy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "YYP3f2W09og#l#m",
+      "name": "sceNpTrophyGetGameInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "qqUVGDgQBm0#l#m",
+      "name": "sceNpTrophyGetTrophyInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "R9lA82OraNs#c#d",
+      "name": "sceAppContentInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "99b82IKXpH4#c#d",
+      "name": "sceAppContentAppParamGetInt",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "taRWhTJFTgE#p#J",
+      "name": "sceKernelGetdirentries",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "eV9wAD2riIA#p#J",
+      "name": "sceKernelStat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "VW3TVZiM4-E#p#J",
+      "name": "sceKernelFtruncate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "WlyEA-sLDf0#p#J",
+      "name": "sceKernelTruncate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "naInUjYt3so#p#J",
+      "name": "sceKernelRmdir",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "AUXVxWeJU-A#p#J",
+      "name": "sceKernelUnlink",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "52NcYU9+lEo#p#J",
+      "name": "sceKernelRename",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "1-LFLmRFxxM#p#J",
+      "name": "sceKernelMkdir",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "+L98PIbGttk#p#J",
+      "name": "scePthreadRwlockUnlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "upoVrzMHFeE#p#J",
+      "name": "scePthreadMutexTrylock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "BB+kb08Tl9A#p#J",
+      "name": "scePthreadRwlockDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "6ULAa0fq4jA#p#J",
+      "name": "scePthreadRwlockInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "adh--6nIqTk#p#J",
+      "name": "scePthreadRwlockTimedwrlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mqdNorrB+gI#p#J",
+      "name": "scePthreadRwlockWrlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "bIHoZCTomsI#p#J",
+      "name": "scePthreadRwlockTrywrlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "iPtZRWICjrM#p#J",
+      "name": "scePthreadRwlockTimedrdlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Ox9i0c7L5w0#p#J",
+      "name": "scePthreadRwlockRdlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3kg7rT0NQIs#p#J",
+      "name": "scePthreadExit",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "IWIBBdTHit4#p#J",
+      "name": "sceKernelMapFlexibleMemory",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "teiItL2boFw#p#J",
+      "name": "sceKernelReleaseFlexibleMemory",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "BmMjYxmew1w#p#J",
+      "name": "scePthreadCondTimedwait",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "WKAXJ4XBPQ4#p#J",
+      "name": "scePthreadCondWait",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "IafI2PxcPnQ#p#J",
+      "name": "scePthreadMutexTimedlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "b-xTWRgI1qw#q#q",
+      "name": "_Dtest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ueega6v3GUw#H#I",
+      "name": "sceRtcSetTick",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "CyIK-i4XdgQ#H#I",
+      "name": "sceRtcGetDayOfWeek",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "8Q60JLJ6Rv4#q#q",
+      "name": "getc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "yH17Q6NWtVg#D#E",
+      "name": "sceUserServiceGetEvent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "-2IRUCO--PM#p#J",
+      "name": "sceKernelReadTsc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "hv1luiJrqQM#A#B",
+      "name": "scePadInit",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "P330P3dFF68#q#q",
+      "name": "Need_sceLibc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "f7uOxY9mM1U#p#J",
+      "name": "__stack_chk_guard",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "zr094EQ39Ww#q#q",
+      "name": "__cxa_pure_virtual",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "H8AprKeZtNg#q#q",
+      "name": "_Stderr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2sWzhYqFH4E#q#q",
+      "name": "_Stdout",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "1TDo-ImqkJc#q#q",
+      "name": "_Stdin",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kxXCvcat1cM#q#q",
+      "name": "_ZNSt8ios_base4InitD1Ev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Uw3OTZFPNt4#q#q",
+      "name": "_ZNSt6_WinitD1Ev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "p6LrHjIQMdk#q#q",
+      "name": "_ZNSt8_LocinfoD1Ev",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "yLE5H3058Ao#q#q",
+      "name": "_ZTVNSt8ios_base7failureE",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-L+-8F0+gBc#q#q",
+      "name": "_ZTVSt13runtime_error",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Bq8m04PN1zw#q#q",
+      "name": "_ZTVSt12system_error",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "FQ9NFbBHb5Y#q#q",
+      "name": "_ZSt7_BADOFF",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "byV+FWlAnB4#q#q",
+      "name": "_ZTVN10__cxxabiv117__class_type_infoE",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9ByRMdo7ywg#q#q",
+      "name": "_ZTVN10__cxxabiv121__vmi_class_type_infoE",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "pZ9WXcClPO8#q#q",
+      "name": "_ZTVN10__cxxabiv120__si_class_type_infoE",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "St4apgcBNfo#q#q",
+      "name": "_ZTIi",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "XwLA5cTHjt4#q#q",
+      "name": "__gxx_personality_v0",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "NLwJ3q+64bY#q#q",
+      "name": "_ZSt7nothrow",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2WVBaSdGIds#q#q",
+      "name": "_ZSt3cin",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "TVfbf1sXt0A#q#q",
+      "name": "_ZSt4cerr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "CvJ3HUPlMIY#q#q",
+      "name": "_ZSt5wcerr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2bASh0rEeXI#q#q",
+      "name": "_ZSt4wcin",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "5PfqUBaQf4g#q#q",
+      "name": "_ZSt4cout",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "d-YRIvO0jXI#q#q",
+      "name": "_ZSt5wcout",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OMDRKKAZ8I4#p#J",
+      "name": "sceKernelDebugRaiseException",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "zE-wXIZjLoM#p#J",
+      "name": "sceKernelDebugRaiseExceptionOnReleaseMode",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "kOcnerypnQA#p#J",
+      "name": "sceKernelGettimezone",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "2Tb92quprl0#p#J",
+      "name": "scePthreadCondInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "g+PZd2hiacg#p#J",
+      "name": "scePthreadCondDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kDh-NfxgMtE#p#J",
+      "name": "scePthreadCondSignal",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JGgj7Uvrl+A#p#J",
+      "name": "scePthreadCondBroadcast",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "yS8U2TGCe1A#p#J",
+      "name": "nanosleep",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "3PtV6p3QNX4#p#J",
+      "name": "scePthreadEqual",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "14bOACANTBo#p#J",
+      "name": "scePthreadOnce",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "geDaqgH9lTg#p#J",
+      "name": "scePthreadKeyCreate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "PrdHuuDekhY#p#J",
+      "name": "scePthreadKeyDelete",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "+BzXYkqYeLE#p#J",
+      "name": "scePthreadSetspecific",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "eoht7mQOCmo#p#J",
+      "name": "scePthreadGetspecific",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "n88vx3C5nW8#p#J",
+      "name": "gettimeofday",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "VADc3MNQ3cM#p#J",
+      "name": "signal",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "959qrazPIrg#p#J",
+      "name": "sceKernelGetProcParam",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "p5EcQeEeJAE#p#J",
+      "name": "_sceKernelRtldSetApplicationHeapAPI",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Wl2o5hOVZdw#p#J",
+      "name": "sceKernelPrintBacktraceWithModuleInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "mL8NDH86iQI#p#J",
+      "name": "sceKernelMapNamedFlexibleMemory",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "3k6kx-zOOSQ#p#J",
+      "name": "sceKernelMlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "8IGjwtnvYwI#F#G",
+      "name": "sceFiosIsValidHandle",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "DRuBt2pvICk#p#J",
+      "name": "_read",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "FxVZqBAA7ks#p#J",
+      "name": "_write",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "w13Ojm7ON9o#F#G",
+      "name": "sceFiosFHOpenWithModeSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "G-39lsdSgXo#F#G",
+      "name": "sceFiosRenameSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "KsVTc04kN9k#F#G",
+      "name": "sceFiosDeleteSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "hHlZQUnlxSM#p#J",
+      "name": "getrusage",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "lLMT9vJAck0#p#J",
+      "name": "clock_gettime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "f7KBOafysXo#p#J",
+      "name": "sceKernelGetModuleInfoFromAddr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Fjc4-n1+y2g#p#J",
+      "name": "__elf_phdr_match_addr",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kbw4UHHSYy0#p#J",
+      "name": "__pthread_cxa_finalize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "6xVpy0Fdq+I#p#J",
+      "name": "_sigprocmask",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "6XG4B33N09g#p#J",
+      "name": "sched_yield",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "DFmMT80xcNI#p#J",
+      "name": "sysctl",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "BPE9s9vQQXo#p#J",
+      "name": "mmap",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "UqDGjXA5yUM#p#J",
+      "name": "munmap",
+      "status": "implemented-m2",
+      "source_export_tables": [
+        "src/runtime_memory.c"
+      ]
+    },
+    {
+      "nid": "mqQMh1zPPT8#p#J",
+      "name": "fstat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "VkTAsrZDcJ0#p#J",
+      "name": "sigfillset",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "aPcyptbOiZs#p#J",
+      "name": "sigprocmask",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "tZY4+SZNFhA#p#J",
+      "name": "msync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HoLVWNanBBc#p#J",
+      "name": "getpid",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "crb5j7mkk1c#p#J",
+      "name": "_is_signal_return",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mo0bFmWppIw#p#J",
+      "name": "sigreturn",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OjWstbIRPUo#p#J",
+      "name": "__Ux86_64_setcontext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "k+AXqu2-eBc#p#J",
+      "name": "getpagesize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "x1X76arYMxU#p#J",
+      "name": "scePthreadAttrGet",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "8+s5BzZjxSg#p#J",
+      "name": "scePthreadAttrGetaffinity",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "6Z83sYWFlA8#p#J",
+      "name": "_exit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "djxxOmW6-aw#p#J",
+      "name": "__progname",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "ejekcaNQNq0#p#J",
+      "name": "sceKernelGettimeofday",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "+r3rMFwItV4#p#J",
+      "name": "sceKernelPread",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "nKWi-N2HBV4#p#J",
+      "name": "sceKernelPwrite",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "fTx66l5iWIA#p#J",
+      "name": "sceKernelFsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "1FGvU0i9saQ#p#J",
+      "name": "scePthreadMutexattrSetprotocol",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rcrVFJsQWRY#p#J",
+      "name": "scePthreadGetaffinity",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "XD3mDeybCnk#p#J",
+      "name": "scePthreadRwlockTryrdlock",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "eXbUSpEaTsA#p#J",
+      "name": "scePthreadAttrSetinheritsched",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "ZT4ODD2Ts9o#libSceLibcInternal",
+      "name": "Need_sceLibcInternal",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "lbQKqsERhtE#libSceDiscMap",
+      "name": "sceDiscMapIsRequestOnHDD",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "ioKMruft1ek#libSceDiscMap",
+      "name": "sceDiscMap_8A828CAEE7EDD5E9",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "+AFvOEXrKJk#B#C",
+      "name": "sceGnmSetEmbeddedVsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "+mfO27a-bEY#F#G",
+      "name": "sceFiosDeallocatePassthruFH",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "--2iRpRn5Bw#F#G",
+      "name": "sceFiosFHStat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "-Q1-u1a7p0g#n#o",
+      "name": "scePlayGoPrefetch",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "-RJWNMK3fC8#n#o",
+      "name": "scePlayGoGetProgress",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "-o5uEDpN+oY#p#J",
+      "name": "sceKernelConvertUtcToLocaltime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "0Cq8ipKr9n0#p#J",
+      "name": "sceKernelUtimes",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "0NTHN1NKONI#p#J",
+      "name": "sceKernelConvertLocaltimeToUtc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "1j3S3n-tTW4#p#J",
+      "name": "sceKernelGetTscFrequency",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "1mecP7RgI2A#libSceLibcInternal",
+      "name": "gmtime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "23CPPI1tyBY#p#J",
+      "name": "sceKernelGetEventFilter",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2ZaHWy3IhKQ#F#G",
+      "name": "sceFiosExistsSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2m9+Opco-hk#F#G",
+      "name": "sceFiosFHPreadSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "2sWzhYqFH4E#libSceLibcInternal",
+      "name": "_Stdout",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3BytPOQgVKc#q#q",
+      "name": "snprintf_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3HAgZPl1v+4#F#G",
+      "name": "sceFiosTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3OMbYZBaa50#n#o",
+      "name": "scePlayGoGetLanguageMask",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "3bh2aBvvmvM#libSceNpTus",
+      "name": "sceNpTusCreateRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "3e+4Iv7IJ8U#I#J",
+      "name": "accept",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4Kgi9D47mC8#F#G",
+      "name": "sceFiosGetAllFHs",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4R6-OvI2cEA#p#J",
+      "name": "sceKernelAddUserEvent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "4fZAv0vbycQ#F#G",
+      "name": "sceFiosOpGetPath",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "51jH2C+it2s#F#G",
+      "name": "sceFiosOpGetRequestCount",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "5Xa2ACNECdo#q#q",
+      "name": "strcpy_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "5bBacGLyLOs#libSceLibcInternal",
+      "name": "gmtime_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "5sYNBNK+W3g#F#G",
+      "name": "sceFiosFHClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "6kPnj51T62Y#C#D",
+      "name": "sceVideoOutGetResolutionStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "7gxh+5QubhY#c#d",
+      "name": "sceAppContentAddcontEnqueueDownload",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "7jdAXK+2fMo#N#O",
+      "name": "sceAjmBatchJobRunSplitBufferRa",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "852F5+q6+iM#libSceVideodec2",
+      "name": "sceVideodec2Decode",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8BLW2WiSIuI#F#G",
+      "name": "sceFiosDebugDumpError",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8dzXU5GxsjI#F#G",
+      "name": "sceFiosFHToFileno",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8nY19bKoiZk#I#J",
+      "name": "fcntl",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "8zTFvBIAIN8#libSceLibcInternal",
+      "name": "memset",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "9XAxK2PMwk8#libSceErrorDialog",
+      "name": "sceErrorDialogTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "AN3h0EBSX7A#T#U",
+      "name": "sceNpSignalingGetConnectionInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "AqBioC2vF3I#I#J",
+      "name": "read",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "B0ZX2hx9DMw#libSceFiber",
+      "name": "sceFiberReturnToThread",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "B6HVJtDYxEE#libSceInvitationDialog",
+      "name": "sceInvitationDialogTerminate",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "BIkMmUfNKWM#libSceNpTus",
+      "name": "sceNpTusCreateNpTitleCtx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "BtqmpTRXHgk#H#I",
+      "name": "sceRtcGetTime_t",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_rtc.c"
+      ]
+    },
+    {
+      "nid": "CNNRoRYd8XI#libSceVideodec2",
+      "name": "sceVideodec2CreateDecoder",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "CcIH40dYS88#libSceNpTus",
+      "name": "sceNpTusDeleteRequest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "CpWcnrEZbLA#q#q",
+      "name": "_Stof",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "DDHG1a6+3q0#q#q",
+      "name": "roundf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "DGMG3JshrZU#p#J",
+      "name": "sceKernelSetVirtualRangeName",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "DYhhWbJSeRg#C#D",
+      "name": "sceVideoOutColorSettingsSetGamma_",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "DscD1i9HX1w#A#B",
+      "name": "scePadResetLightBar",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "E1Wrwd07Lr8#l#m",
+      "name": "sceNpTrophyDestroyContext",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "EI-5-jlq2dE#p#J",
+      "name": "scePthreadGetthreadid",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "ERKzksauAJA#d#e",
+      "name": "sceSaveDataDialogGetStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Ez8xjo9UF4E#I#J",
+      "name": "recv",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "F1dCP7qkqok#F#G",
+      "name": "sceFiosTimeIntervalFromNanoseconds",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "F6e0kwo4cnk#p#J",
+      "name": "sceKernelTriggerUserEvent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "FA7dUleeGik#F#G",
+      "name": "sceFiosOpCancel",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "FN4gaPmuFV8#I#J",
+      "name": "write",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "FdjoqFQOlt0#F#G",
+      "name": "sceFiosFHGetSize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "G68xdfQuiyU#libSceNpTus",
+      "name": "sceNpTusSetDataAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "GMpvxPFW924#libSceLibcInternal",
+      "name": "vprintf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "GNcF4oidY0Y#l#m",
+      "name": "sceNpTrophyDestroyHandle",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "Gl6w5i0JokY#c#d",
+      "name": "sceAppContentDownloadDataGetAvailableSpaceKb",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "H2e8t5ScQGc#libSceLibcInternal",
+      "name": "__cxa_finalize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "H3uq7x0sZOI#libSceNpTus",
+      "name": "sceNpTusDeleteNpTitleCtx",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "HzMN7ANqYEc#B#C",
+      "name": "sceGnmValidateGetVersion",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "I88KChlynSs#libSceErrorDialog",
+      "name": "sceErrorDialogInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "IuxnUuXk6Bg#p#J",
+      "name": "sceKernelGetModuleList",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JaRMy+QcpeU#p#J",
+      "name": "scePthreadAttrGetdetachstate",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_thread.c"
+      ]
+    },
+    {
+      "nid": "JeNX5F-NzQU#libSceFiber",
+      "name": "sceFiberFinalize",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "Jh5qUcwiSEk#q#q",
+      "name": "_ZnamRKSt9nothrow_t",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "JoBqSQt1yyA#V#W",
+      "name": "sceSystemServiceLoadExec",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "JzyT91ucGDc#libSceFiber",
+      "name": "sceFiberRename",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "K+gcnFFJKVc#q#q",
+      "name": "strcat_s",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "KuOmgKoqCdY#I#J",
+      "name": "bind",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "LHqFYb+U52E#F#G",
+      "name": "sceFiosExists",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "LHuSmO3SLd8#l#m",
+      "name": "sceNpTrophyGetTrophyUnlockState",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "LJDwdSNTnDg#p#J",
+      "name": "sceKernelDeleteUserEvent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "LUwvy0MOSqw#libSceNpTus",
+      "name": "sceNpTusGetFriendsDataStatusAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "LosLlHOpNqQ#n#o",
+      "name": "scePlayGoSetLanguageMask",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "LwG8g3niqwA#p#J",
+      "name": "sceKernelDlsym",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Lyx2DzUL7Lc#q#q",
+      "name": "fmaxf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "M2ZF-ClLhgY#libSceErrorDialog",
+      "name": "sceErrorDialogOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "MBMa6EFu4Ko#B#C",
+      "name": "sceGnmValidateResetState",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "MUjC4lbHrK4#libSceLibcInternal",
+      "name": "fflush",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Mif6IzBa0hc#F#G",
+      "name": "sceFiosFHGetPath",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "NUkBGOZARi4#F#G",
+      "name": "sceFiosTimeGetCurrent",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Nn7zKwnA5q0#n#o",
+      "name": "scePlayGoGetToDoList",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "NtXRa3dRzU0#libSceVideodec2",
+      "name": "sceVideodec2GetPictureInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OIGbkgGOu6E#F#G",
+      "name": "sceFiosIOFilterPsarcDearchiver",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "OOuvHKTu4Oc#F#G",
+      "name": "sceFiosDirectoryExistsSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Oy6IpwgtYOk#I#J",
+      "name": "lseek",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "PFT2S-tJ7Uk#libSceFiber",
+      "name": "sceFiberSwitch",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "PbxGVfOvUQY#F#G",
+      "name": "sceFiosFHPwrite",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Q2V+iqvjgC0#libSceLibcInternal",
+      "name": "vsnprintf",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Q3VBxCXhUHs#libSceLibcInternal",
+      "name": "memcpy",
+      "status": "implemented-m2",
+      "source_export_tables": []
+    },
+    {
+      "nid": "Q7t4VEYLafI#B#C",
+      "name": "sceGnmValidationRegisterMemoryCheckCallback",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QKd0qM58Qes#p#J",
+      "name": "sceKernelStopUnloadModule",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "QKsI9N7K1zE#F#G",
+      "name": "sceFiosStat",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "R6z1xM3pW-w#B#C",
+      "name": "sceGnmDriverTraceInProgress",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "RR4novUEENY#A#B",
+      "name": "scePadSetLightBar",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "RnDibcGCPKw#libSceVideodec2",
+      "name": "sceVideodec2QueryComputeMemoryInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "RpQJJVKTiFM#p#J",
+      "name": "sceKernelGetModuleInfoForUnwind",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "RqeErO3cFHU#q#q",
+      "name": "_ZSt15set_new_handlerPFvvE",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "SfQIZcqvvms#q#q",
+      "name": "strlcpy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "T8fER+tIGgk#I#J",
+      "name": "select",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "TU-d9PfIHPM#I#J",
+      "name": "socket",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "UUriaXy7G90#F#G",
+      "name": "sceFiosArchiveGetMountBufferSizeSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "UvtA3FAiF4Y#libSceVideodec2",
+      "name": "sceVideodec2ReleaseComputeQueue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "VANhIWcqYak#c#d",
+      "name": "sceAppContentAddcontMount",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "VAzswvTOCzI#I#J",
+      "name": "unlink",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "VdN2hNRay+E#F#G",
+      "name": "sceFiosGetAllOps",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "WWiGuh9XfgQ#libSceErrorDialog",
+      "name": "sceErrorDialogUpdateStatus",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "X+7rIfY97Ps#F#G",
+      "name": "sceFiosOpGetError",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "X9Omw9dwv5M#B#C",
+      "name": "sceGnmSetEmbeddedPsShader",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "XVL8So3QJUk#I#J",
+      "name": "connect",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "a0LLrZWac0M#libSceFiber",
+      "name": "sceFiberRun",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "aKWnlLIobGA#F#G",
+      "name": "sceFiosIsInitialized",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "asjUJJ+aa8s#libSceFiber",
+      "name": "sceFiberOptParamInitialize",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "b4qaXPzMJxo#T#U",
+      "name": "sceNpSignalingTerminateConnection",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "bY-PO6JhzhQ#I#J",
+      "name": "close",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "bfgo2Otmqz0#F#G",
+      "name": "sceFiosOpIsDone",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "cg-VoPqZYss#F#G",
+      "name": "sceFiosFHRead",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "eD+X2SmxUt4#libSceVideodec2",
+      "name": "sceVideodec2AllocateComputeQueue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "eDFeTyi+G3Y#N#O",
+      "name": "sceAjmDecMp3ParseFrame",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_ajm.c"
+      ]
+    },
+    {
+      "nid": "efhK-YSUYYQ#libSceLibcInternal",
+      "name": "localtime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "en7gNVnh878#d#e",
+      "name": "sceSaveDataDialogIsReadyToDisplay",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "enqPGLfmVNU#q#q",
+      "name": "strtok_r",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "er6TkQFUvp0#F#G",
+      "name": "sceFiosFHOpen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fFxGkxF2bVo#I#J",
+      "name": "setsockopt",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "fH46Lag88XY#d#e",
+      "name": "sceSaveDataDialogClose",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "fZOeZIOEmLw#I#J",
+      "name": "send",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "gMcfOtHW6zk#F#G",
+      "name": "sceFiosFHPwriteSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "gQX+4GDQjpM#libSceLibcInternal",
+      "name": "malloc",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "hVYD7Ou2pCQ#libSceFiber",
+      "name": "_sceFiberInitializeImpl",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "hay1CfTmLyA#d#e",
+      "name": "sceSaveDataDialogProgressBarSetValue",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "hcuQgD53UxM#libSceLibcInternal",
+      "name": "printf",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "jjzbvzquenM#F#G",
+      "name": "sceFiosFHOpenWithMode",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "juWbTNM+8hw#I#J",
+      "name": "fsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "jwImxXRGSKA#libSceVideodec2",
+      "name": "sceVideodec2DeleteDecoder",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "k1SwgkMSOM8#libSceRemoteplay",
+      "name": "sceRemoteplayInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "kUpgrXIrz7Q#p#J",
+      "name": "sceKernelGetModuleInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "kwGyyjohI50#p#J",
+      "name": "sceKernelGetEventData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "l1hXwscLuCY#libSceVideodec2",
+      "name": "sceVideodec2Flush",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "l4OVTpJCyQI#F#G",
+      "name": "sceFiosUpdateParameters",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "lLMT9vJAck0#I#J",
+      "name": "clock_gettime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "lgITuBsRo2o#F#G",
+      "name": "sceFiosIOFilterAdd",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "m1DfNRstkSQ#o#p",
+      "name": "sceNpScorePollAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "m5-2bsNfv7s#p#J",
+      "name": "scePthreadCondattrInit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mJ7aghmgvfc#p#J",
+      "name": "sceKernelGetEventId",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mKoTx03HRWA#I#J",
+      "name": "pthread_condattr_init",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "mnufPlYbnN0#q#q",
+      "name": "_FDtest",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "n5TUlwdhGSA#F#G",
+      "name": "sceFiosDirectoryDeleteSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "n7AepwR0s34#libSceLibcInternal",
+      "name": "mktime",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "nWuza0ZdfqA#F#G",
+      "name": "sceFiosDirectoryCreateSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "oRgsgfJY3Mc#F#G",
+      "name": "sceFiosFilenoToFH",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "p+zLIOg27zU#libSceFiber",
+      "name": "sceFiberGetSelf",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "pv9CI5VC+R0#C#D",
+      "name": "sceVideoOutAdjustColor_",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "pxnCmagrtao#I#J",
+      "name": "listen",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "q1cHNfGycLI#A#B",
+      "name": "scePadRead",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_pad.c"
+      ]
+    },
+    {
+      "nid": "qqMCwlULR+E#libSceVideodec2",
+      "name": "sceVideodec2QueryDecoderMemoryInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rR8wq7YFRZs#F#G",
+      "name": "sceFiosFHPread",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rTIV11nMQuM#B#C",
+      "name": "sceGnmValidateOnSubmitEnabled",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": []
+    },
+    {
+      "nid": "rvBSfTimejE#n#o",
+      "name": "scePlayGoGetInstallSpeed",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "t7b6dmpQNiI#libSceNpTus",
+      "name": "sceNpTusPollAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "tIhsqj0qsFE#libSceLibcInternal",
+      "name": "free",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "uHtKS5V1T5k#libSceNpTus",
+      "name": "sceNpTusGetDataAsync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "uq2Y5BFz0PE#libSceFiber",
+      "name": "sceFiberGetInfo",
+      "status": "deferred-m3-thread-fiber-lifecycle",
+      "source_export_tables": [
+        "src/runtime_fiber.c"
+      ]
+    },
+    {
+      "nid": "urUHkGGweA4#F#G",
+      "name": "sceFiosFHWrite",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "v6EZ-YWRdMs#n#o",
+      "name": "scePlayGoGetEta",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "vZNIcB3n+bg#F#G",
+      "name": "sceFiosTimeIntervalToNanoseconds",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "vz+pg2zdopI#p#J",
+      "name": "sceKernelGetEventUserData",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "w3PdaSTSwGE#G#H",
+      "name": "sceAudioOutOutputs",
+      "status": "deferred-m4-device-renderer",
+      "source_export_tables": [
+        "src/runtime_audio.c"
+      ]
+    },
+    {
+      "nid": "wAKZ-det+yo#F#G",
+      "name": "sceFiosInitialize",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wJXikG6QFN8#libSceVideodec2",
+      "name": "sceVideodec2Reset",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wLlFkwG9UcQ#libSceLibcInternal",
+      "name": "time",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_kernel.c"
+      ]
+    },
+    {
+      "nid": "wZi5ly2guNw#q#q",
+      "name": "_Exit",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "waPcxYiR3WA#p#J",
+      "name": "scePthreadCondattrDestroy",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "wuCroIGjt2g#I#J",
+      "name": "open",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_file.c"
+      ]
+    },
+    {
+      "nid": "wzvqT4UqKX8#p#J",
+      "name": "sceKernelLoadStartModule",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xP45eIntEis#F#G",
+      "name": "sceFiosFHStatSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "xutLbQdqyb4#F#G",
+      "name": "sceFiosArchiveMountSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "yEiJ-qqr6Cg#d#e",
+      "name": "sceSaveDataDialogGetResult",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": [
+        "src/runtime_services.c"
+      ]
+    },
+    {
+      "nid": "yy6C7k7FPZY#F#G",
+      "name": "sceFiosArchiveUnmountSync",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    },
+    {
+      "nid": "zFgFHId7vAE#T#U",
+      "name": "sceNpSignalingGetPeerNetInfo",
+      "status": "unsupported-needs-contract-review-before-use",
+      "source_export_tables": []
+    }
+  ]
+}

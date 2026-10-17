@@ -33,7 +33,16 @@ const BbAbiImport *bb_abi_find(const BbAbiImport *table,size_t count,const char 
 BbAbiStatus bb_abi_dispatch(const BbAbiImport *b,BbAbiFrame *f,const BbAbiMemory *m) {
     if(!b || !f || !b->host || !m || !m->check || !m->read || !m->write ||
        bb_abi_validate(&b->signature)!=BB_ABI_OK) return BB_ABI_INVALID;
-    const BbAbiSignature *s=&b->signature;
+    BbAbiSignature prepared=b->signature;
+    if(b->prepare) {
+        if(!prepared.variadic) return BB_ABI_INVALID;
+        BbAbiStatus status=b->prepare(f,m,&prepared,b->user);
+        if(status!=BB_ABI_OK) return status;
+        if(bb_abi_validate(&prepared)!=BB_ABI_OK || prepared.fixed_count!=b->signature.fixed_count ||
+           prepared.result!=b->signature.result || !prepared.variadic) return BB_ABI_INVALID;
+        for(size_t i=0;i<prepared.fixed_count;++i) if(prepared.args[i]!=b->signature.args[i]) return BB_ABI_INVALID;
+    }
+    const BbAbiSignature *s=&prepared;
     const Type *ret=&types[s->result];
     uint64_t hidden=ret->classes[0]==2 ? f->gp[0] : 0;
     if(ret->classes[0]==2 && !m->check(m->user,hidden,ret->size,1)) return BB_ABI_MEMORY;

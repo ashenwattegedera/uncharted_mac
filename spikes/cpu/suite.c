@@ -208,7 +208,7 @@ static void limits(void) {
     uint64_t bridge=0;
     OK(bb_probe_bind(p,recurse,&bridge,&bridge)); call.target=bridge;
     assert(bb_probe_invoke(p,&call,NULL)==BB_PROBE_LIMIT && call.result==123);
-    for(unsigned i=1;i<16;++i) { uint64_t ignored; OK(bb_probe_bind(p,recurse,&bridge,&ignored)); }
+    for(unsigned i=1;i<BB_PROBE_MAX_BINDINGS;++i) { uint64_t ignored; OK(bb_probe_bind(p,recurse,&bridge,&ignored)); }
     uint64_t sentinel=123;
     assert(bb_probe_bind(p,recurse,&bridge,&sentinel)==BB_PROBE_LIMIT && sentinel==123);
     assert(bb_probe_write(p,UINT64_MAX,loop,2)==BB_PROBE_INVALID);

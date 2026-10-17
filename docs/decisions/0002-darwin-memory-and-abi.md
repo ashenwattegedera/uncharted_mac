@@ -108,3 +108,30 @@ These foundations are opt-in and have synthetic acceptance tests. Production
 runtime/renderer wiring, complete import metadata and the game's actual ABI
 remain open M2 integration work; M3 scheduling and game boot are separate gates.
 See [M2 verification](../M2_VERIFICATION.md) for executed evidence and limitations.
+
+## M2 closeout amendment
+
+The [integration closeout](../M2_CLOSEOUT.md) supersedes the foundation's 256 MiB
+limit and identity-only runtime assumption. `bb_vm_create_address_space` reserves
+host space with `VM_FLAGS_ANYWHERE` and exposes an independent logical guest
+base. Fixed replacements translate into that owned host reservation. Live pages
+use sorted sparse metadata; physical backing remains sparse. The actual runtime
+uses its full PS4 user range and 5056 MiB direct plus 1 GiB flexible budgets.
+`bb_vm_create` retains the older identity-window contract for native metadata
+and regression fixtures. Its ASan reservation limitation remains recorded.
+
+Runtime-owned allocations preserve physical bytes until allocation release,
+independent of virtual-alias lifetimes. GPU read/write masks are per virtual
+4 KiB subpage and aggregate across physical aliases. Read denial removes host
+access for the containing host page; synchronization acknowledges all relevant
+subpages before translated execution resumes. Ordinary thread-context callbacks
+may release their own masks but cannot reenter guest execution, migrate the VM
+or mutate mappings. Missing consumers leave faults unresolved.
+
+Actual memory-service imports, explicit libc/format contracts, guest-owned data
+exports and validated relocation requests now connect to the opt-in reference
+execution interface. A compiled registry/source inventory makes unsupported
+imports visible without inventing signatures from NID names. Arbitrary module
+binding and full renderer/thread lifecycle integration remain gated. Executable
+physical aliases trigger invalidation before the next guest instruction, outside
+emulation. No host signal context or host function address becomes guest state.

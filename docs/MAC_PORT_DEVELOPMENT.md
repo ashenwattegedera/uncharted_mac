@@ -61,19 +61,17 @@ remains dependency-free with respect to Unicorn. It does not enable the ARM
 game loader. See the [decision](decisions/0001-cpu-reference-core.md) and
 [M1 verification record](M1_VERIFICATION.md) for signing, measurements and limits.
 
-## M2 memory, ABI and fault foundations
+## M2 reference runtime integration
 
-The root harness now also tests the portable SysV marshaller and, on macOS,
-owned Darwin mappings and protection. The independent CPU experiment includes
-compiler-generated x86 ABI callers and an adapter that mirrors owned mappings,
-watch changes and fault recovery into translated execution. See
-[M2 verification and reproduction](M2_VERIFICATION.md) for the commands and
-[ADR 0002](decisions/0002-darwin-memory-and-abi.md) for ownership contracts.
+Native arm64 Darwin can opt into `-DBB_BUILD_TRANSLATED_M2=ON` from the root
+CMake project. This builds the pinned CPU reference, actual PS4 memory-service
+adapters, checked formatting/import/relocation support and signed synthetic module
+tests. Normal root builds retain the unavailable ARM execution backend and do not
+fetch Unicorn. Use the [M2 closeout](M2_CLOSEOUT.md) for exact Release, project
+UBSan and explicit ASan-subset commands, inventory checks and remaining gates.
 
-Use `-DBB_PROBE_SANITIZER=undefined` in a separate probe build for fail-fast
-project-code UBSan. Vendor-wide UBSan and ASan low-address mappings have explicit
-limitations; a successful executable exit code alone does not prove clean
-sanitizer output. M2 does not yet enable the ARM game loader or renderer.
+The protocol tests use synthetic renderer callbacks. They do not build the full
+GPU library, load game modules or establish runtime/gameplay compatibility.
 
 ## Dependencies for the existing graphics build
 

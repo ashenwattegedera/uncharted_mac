@@ -8,6 +8,7 @@
  * One engine is serialized across callers; callbacks execute outside uc_emu_start.
  * Nested calls preserve CPU state and use separate stack slices. */
 typedef struct BbCpuProbe BbCpuProbe;
+enum { BB_PROBE_MAX_BINDINGS=512 };
 typedef enum { BB_PROBE_OK, BB_PROBE_INVALID, BB_PROBE_ENGINE, BB_PROBE_FAULT, BB_PROBE_LIMIT,
                BB_PROBE_UNSUPPORTED } BbProbeStatus;
 typedef struct {
@@ -30,6 +31,8 @@ BbProbeStatus bb_probe_map(BbCpuProbe *probe,uint64_t address,size_t size,unsign
 BbProbeStatus bb_probe_map_host(BbCpuProbe *probe,uint64_t address,size_t size,unsigned permissions,void *host);
 BbProbeStatus bb_probe_unmap(BbCpuProbe *probe,uint64_t address,size_t size);
 BbProbeStatus bb_probe_invalidate(BbCpuProbe *probe,uint64_t address,size_t size);
+typedef int (*BbProbeWriteFilter)(void *,uint64_t,size_t);
+BbProbeStatus bb_probe_filter_writes(BbCpuProbe *probe,BbProbeWriteFilter filter,void *user);
 typedef int (*BbProbeWriteObserver)(BbCpuProbe *,uint64_t,size_t,void *);
 BbProbeStatus bb_probe_watch_writes(BbCpuProbe *probe,uint64_t start,uint64_t end,BbProbeWriteObserver observer,void *user);
 BbProbeStatus bb_probe_write(BbCpuProbe *probe,uint64_t address,const void *data,size_t size);

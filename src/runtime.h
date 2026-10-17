@@ -37,7 +37,14 @@ void runtime_finalize(void *dso);
 uintptr_t runtime_mutex_resolve(const char *name);
 void runtime_mutex_report(void);
 uintptr_t runtime_memory_resolve(const char *name);
+uintptr_t runtime_memory_resolve_symbol(const char *name);
 void runtime_memory_report(void);
+typedef int (*RuntimeGpuGuestFault)(uint64_t guest_pc,uintptr_t address,uint64_t size,int write);
+void runtime_memory_set_guest_gpu_fault_handler(RuntimeGpuGuestFault handler);
+int runtime_memory_ack_guest_gpu(uint64_t guest_pc,uint64_t address,uint64_t backing_offset,int write);
+void runtime_memory_gpu_protect(uintptr_t address,uint64_t size,int read,int write);
+int runtime_memory_read_backing(uintptr_t address,void *data,uint64_t size);
+int runtime_memory_write_backing(uintptr_t address,const void *data,uint64_t size);
 int runtime_memory_is_mapped(uintptr_t address, uint64_t size);
 const char *runtime_import_name(const char *name);
 uintptr_t runtime_rwlock_resolve(const char *name);
@@ -88,6 +95,11 @@ void *runtime_low_map(size_t size, int prot);
 void *runtime_image_map(size_t size, int prot);
 /* Windows: reserves the PS4 user address range as a placeholder (no-op elsewhere). */
 void runtime_memory_reserve(void);
+#ifdef __APPLE__
+#include "guest_memory.h"
+BbGuestMemory *runtime_memory_darwin_vm(void);
+int runtime_memory_darwin_shutdown(void);
+#endif
 uintptr_t runtime_ajm_resolve(const char *name);
 void runtime_ajm_report(void);
 uintptr_t runtime_audio_resolve(const char *name);

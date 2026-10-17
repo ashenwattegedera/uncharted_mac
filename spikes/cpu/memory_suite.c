@@ -92,6 +92,12 @@ int main(void) {
     OK(bb_probe_write(p,BB_PROBE_CODE,modify,sizeof(modify)));
     OK(run(s,BB_PROBE_CODE,a+3*G+1,0,&result,&fault));
     OK(run(s,a+2*G,0,0,&result,&fault)); assert(result==3);
+    /* Modify a later instruction through another alias in the SAME cached block. */
+    const unsigned char same_block[]={0xc6,0x07,0x03,0xb8,0x01,0,0,0,0xc3};
+    VM(bb_vm_write(v,a+2*G,same_block,sizeof(same_block)));
+    OK(run(s,a+2*G,a+3*G+4,0,&result,&fault)); assert(result==3);
+    VM(bb_vm_write(v,a+2*G,code,sizeof(code))); code[1]=3;
+    VM(bb_vm_write(v,a+2*G,code,sizeof(code)));
     VM(bb_vm_protect(v,a+2*G,G,BB_VM_READ));
     assert(run(s,a+2*G,0,0,&result,&fault)==BB_PROBE_FAULT && fault.engine_error==UC_ERR_FETCH_PROT);
     assert(fault.pc==a+2*G);
