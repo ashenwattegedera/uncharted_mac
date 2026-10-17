@@ -17,7 +17,7 @@ def inventory(binary=None):
     if not contracts or len(names) != len(set(names)):
         raise ValueError('compiled registry is empty or contains duplicate names')
     paths = sorted((ROOT / 'src').glob('runtime*.c')) + [ROOT / 'src/import_names.inc', ROOT / 'src/translated_runtime.c', ROOT / 'src/guest_abi.h', ROOT / 'src/guest_layout.h', ROOT / 'src/guest_format.c']
-    hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes().replace(b'\r\n', b'\n')).hexdigest() for p in paths}
+    hashes = {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes().replace(b'\r\n', b'\n')).hexdigest() for p in paths}
     imports = re.findall(r'\{"([^"]+)","([^"]+)"\}', (ROOT / 'src/import_names.inc').read_text())
     if len({nid for nid, _ in imports}) != len(imports):
         raise ValueError('duplicate NID in import name inventory')
@@ -28,12 +28,12 @@ def inventory(binary=None):
             tables = re.findall(r'RuntimeExport\s+\w+\[\]\s*=\s*\{(.*?)\n\};', path.read_text(), re.S)
             for table in tables:
                 for name in re.findall(r'\{\s*"([^"]+)"\s*,', table):
-                    providers.setdefault(name, []).append(str(path.relative_to(ROOT)))
+                    providers.setdefault(name, []).append(path.relative_to(ROOT).as_posix())
             if path.name == 'runtime_thread.c':
                 known = dict(imports)
                 for nid in re.findall(r'\{\s*"([^"]+)"\s*,', path.read_text()):
                     if nid in known:
-                        providers.setdefault(known[nid], []).append(str(path.relative_to(ROOT)))
+                        providers.setdefault(known[nid], []).append(path.relative_to(ROOT).as_posix())
     memory_exports = {name for name, sources in providers.items() if 'src/runtime_memory.c' in sources}
     if not memory_exports or memory_exports - set(names):
         raise ValueError(f'unregistered actual memory exports: {sorted(memory_exports-set(names))}')
