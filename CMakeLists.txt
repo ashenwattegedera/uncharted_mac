@@ -122,6 +122,8 @@ if(BUILD_TESTING)
     target_compile_options(guest-format-test PRIVATE -UNDEBUG)
     target_link_libraries(guest-format-test PRIVATE bb-guest-abi)
     add_test(NAME guest-format COMMAND guest-format-test)
+    add_test(NAME m2-import-source-inventory COMMAND "${Python3_EXECUTABLE}"
+        "${PROJECT_SOURCE_DIR}/scripts/audit_m2_imports.py")
 endif()
 
 if(APPLE)
@@ -221,6 +223,8 @@ if(BB_BUILD_TRANSLATED_M2)
             target_link_libraries(${target} PRIVATE bb-translated-runtime)
             add_test(NAME ${target} COMMAND ${target})
         endforeach()
+        add_test(NAME m2-import-compiled-inventory COMMAND "${Python3_EXECUTABLE}"
+            "${PROJECT_SOURCE_DIR}/scripts/audit_m2_imports.py" --binary "$<TARGET_FILE:translated-runtime-test>")
         add_executable(translated-gpu-test tests/test_translated_gpu.c)
         bb_runtime_target(translated-gpu-test)
         target_compile_options(translated-gpu-test PRIVATE -UNDEBUG)
@@ -235,6 +239,19 @@ if(BB_BUILD_TRANSLATED_M2)
             COMMAND codesign --force --sign - --options runtime --entitlements
                 "${CMAKE_CURRENT_SOURCE_DIR}/spikes/cpu/jit.entitlements.plist" "$<TARGET_FILE:translated-runtime-hardened>" VERBATIM)
     endif()
+endif()
+
+# Instrument project targets only. Global flags would also instrument Unicorn,
+# whose pinned revision has a separately documented upstream UBSan finding.
+if(BB_BUILD_TRANSLATED_M2 AND NOT BB_PROBE_SANITIZER STREQUAL "none")
+    get_property(bb_owned_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(target IN LISTS bb_owned_targets)
+        get_target_property(kind ${target} TYPE)
+        if(kind MATCHES "^(STATIC_LIBRARY|EXECUTABLE)$")
+            target_compile_options(${target} PRIVATE -fsanitize=${BB_PROBE_SANITIZER} -fno-sanitize-recover=all)
+            target_link_options(${target} PUBLIC -fsanitize=${BB_PROBE_SANITIZER})
+        endif()
+    endforeach()
 endif()
 
 if(BUILD_TESTING)
