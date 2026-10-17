@@ -8,6 +8,7 @@
  * encode 40-bit addresses, so host-default 0x7f... addresses would not fit. */
 #define _GNU_SOURCE
 #include "runtime.h"
+#include "guest_layout.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -53,11 +54,8 @@ static uint64_t pool_size_bytes(void) {
 enum { KIND_RESERVED=1, KIND_DIRECT, KIND_FLEXIBLE };
 typedef struct { uint64_t start, size; int type, used; } Block;
 typedef struct { uintptr_t start, end; int kind, prot, type; uint64_t phys; } Vma;
-typedef struct {
-    uintptr_t start, end; uint64_t offset; int32_t protection, memory_type;
-    uint32_t flags; char name[32];
-} VirtualQueryInfo; /* flags: flexible, direct, stack, pooled, committed */
-typedef struct { void *start; uint64_t offset, length; int8_t prot, type; int16_t reserved; int32_t operation; } BatchEntry;
+typedef BbGuestVirtualQuery VirtualQueryInfo;
+typedef BbGuestBatchEntry BatchEntry;
 _Static_assert(sizeof(VirtualQueryInfo)==72,"PS4 virtual query info layout");
 _Static_assert(sizeof(BatchEntry)==32,"PS4 batch map entry layout");
 
@@ -706,13 +704,17 @@ static ABI int32_t batch_map2(BatchEntry *entries, int count, int *processed, in
         BatchEntry *e=&entries[done];
         if (memory_log())
             printf("Memory: batch op=%d start=%p length=0x%" PRIx64 " offset=0x%" PRIx64 " prot=0x%x type=%d flags=0x%x\n",
-                   (int)e->operation,e->start,(uint64_t)e->length,(uint64_t)e->offset,(unsigned)(uint8_t)e->prot,(int)e->type,flags);
+                   (int)e->operation,(void *)(uintptr_t)e->start,(uint64_t)e->length,(uint64_t)e->offset,(unsigned)(uint8_t)e->protection,(int)e->type,flags);
         switch (e->operation) {
-        case 0: result=map_direct_locked(&e->start,e->length,(uint8_t)e->prot,flags,(int64_t)e->offset,0); break;
+        case 0: { void *target=(void *)(uintptr_t)e->start;
+            result=map_direct_locked(&target,e->length,(uint8_t)e->protection,flags,(int64_t)e->offset,0);
+            e->start=(uintptr_t)target; break; }
         case 1: result=unmap_locked((uintptr_t)e->start,e->length); break;
-        case 2: result=protect_locked((uintptr_t)e->start,e->length,(uint8_t)e->prot,-1); break;
-        case 3: result=map_flexible_locked(&e->start,e->length,(uint8_t)e->prot,flags); break;
-        case 4: result=protect_locked((uintptr_t)e->start,e->length,(uint8_t)e->prot,e->type); break;
+        case 2: result=protect_locked((uintptr_t)e->start,e->length,(uint8_t)e->protection,-1); break;
+        case 3: { void *target=(void *)(uintptr_t)e->start;
+            result=map_flexible_locked(&target,e->length,(uint8_t)e->protection,flags);
+            e->start=(uintptr_t)target; break; }
+        case 4: result=protect_locked((uintptr_t)e->start,e->length,(uint8_t)e->protection,e->type); break;
         default: result=INVALID;
         }
         if (result) break;

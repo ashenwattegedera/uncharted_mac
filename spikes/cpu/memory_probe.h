@@ -4,6 +4,9 @@
 #include "guest_fault.h"
 typedef struct BbMemoryProbe BbMemoryProbe;
 BbProbeStatus bb_memory_probe_open(BbMemoryProbe **out,size_t window,size_t backing);
+/* Attach before mappings exist. The external owner closes VM after this session. */
+BbProbeStatus bb_memory_probe_attach(BbMemoryProbe **out,BbGuestMemory *vm);
+BbAbiMemory bb_memory_probe_memory(BbMemoryProbe *session);
 BbProbeStatus bb_memory_probe_close(BbMemoryProbe *session);
 BbGuestMemory *bb_memory_probe_vm(BbMemoryProbe *session);
 BbCpuProbe *bb_memory_probe_cpu(BbMemoryProbe *session);

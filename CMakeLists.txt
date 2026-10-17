@@ -196,6 +196,37 @@ if(BB_BUILD_NATIVE_LOADER)
         endforeach()
     endif()
 endif()
+option(BB_BUILD_TRANSLATED_M2 "Build the opt-in native ARM reference runtime and synthetic module tests" OFF)
+if(BB_BUILD_TRANSLATED_M2)
+    if(NOT APPLE OR BB_X86_HOST)
+        message(FATAL_ERROR "BB_BUILD_TRANSLATED_M2 requires native arm64 Darwin")
+    endif()
+    add_subdirectory(spikes/cpu)
+    add_library(bb-translated-runtime STATIC src/translated_runtime.c src/translated_execution.c)
+    bb_runtime_target(bb-translated-runtime)
+    target_link_libraries(bb-translated-runtime PUBLIC bb-memory-probe bb-runtime-darwin-memory bb-guest-abi)
+    if(BUILD_TESTING)
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/m2_runtime_text.h"
+            COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding -fno-stack-protector
+                -fno-pic -mno-red-zone -fno-unwind-tables -fno-asynchronous-unwind-tables -O1
+                -c "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/m2_runtime_calls.c" -o "${CMAKE_CURRENT_BINARY_DIR}/m2_runtime_calls.o"
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/extract_guest_text.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/m2_runtime_calls.o" "${CMAKE_CURRENT_BINARY_DIR}/m2_runtime_text.h"
+            DEPENDS tests/fixtures/m2_runtime_calls.c tests/fixtures/m2_runtime_types.h tests/fixtures/extract_guest_text.py VERBATIM)
+        foreach(target translated-runtime-test translated-runtime-hardened)
+            add_executable(${target} tests/test_translated_runtime.c "${CMAKE_CURRENT_BINARY_DIR}/m2_runtime_text.h")
+            bb_runtime_target(${target})
+            target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+            target_compile_options(${target} PRIVATE -UNDEBUG)
+            target_link_libraries(${target} PRIVATE bb-translated-runtime)
+            add_test(NAME ${target} COMMAND ${target})
+        endforeach()
+        add_custom_command(TARGET translated-runtime-hardened POST_BUILD
+            COMMAND codesign --force --sign - --options runtime --entitlements
+                "${CMAKE_CURRENT_SOURCE_DIR}/spikes/cpu/jit.entitlements.plist" "$<TARGET_FILE:translated-runtime-hardened>" VERBATIM)
+    endif()
+endif()
+
 if(BUILD_TESTING)
     get_property(bb_tests DIRECTORY PROPERTY TESTS)
     set_tests_properties(${bb_tests} PROPERTIES TIMEOUT 60)

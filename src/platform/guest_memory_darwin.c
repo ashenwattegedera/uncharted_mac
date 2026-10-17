@@ -17,7 +17,7 @@ struct BbGuestMemory {
     int fd,poisoned,notifying,preserve_backing;
     pthread_t owner;
     Page *pages;
-    unsigned *references,*watchers;
+    unsigned *references,*watchers,*executable;
     BbVmObserver observer;
     void *observer_user;
 };
@@ -83,7 +83,8 @@ BbVmStatus bb_vm_create(BbGuestMemory **out,size_t n,size_t backing_size,uint64_
     v->pages=calloc(n/granule,sizeof(Page));
     v->references=calloc(backing_size/granule,sizeof(unsigned));
     v->watchers=calloc(backing_size/BB_VM_TRACKER_PAGE,sizeof(unsigned));
-    if(!v->pages || !v->references || !v->watchers) goto fail;
+    v->executable=calloc(backing_size/granule,sizeof(unsigned));
+    if(!v->pages || !v->references || !v->watchers || !v->executable) goto fail;
     for(unsigned i=0;i<(preferred ? 1u : 60u);++i) {
         mach_vm_address_t candidate=preferred ? preferred : UINT64_C(0x1000000000)+(uint64_t)i*UINT64_C(0x400000000);
         /* FIXED without OVERWRITE claims only an empty range. Unlike mmap's
@@ -118,7 +119,7 @@ static BbVmStatus destroy(BbGuestMemory *v) {
     if(v->base!=MAP_FAILED) failed|=munmap(v->base,v->size)!=0;
     if(v->backing!=MAP_FAILED) failed|=munmap(v->backing,v->backing_size)!=0;
     if(v->fd>=0) failed|=close(v->fd)!=0;
-    free(v->pages); free(v->references); free(v->watchers); free(v);
+    free(v->pages); free(v->references); free(v->watchers); free(v->executable); free(v);
     return failed ? BB_VM_SYSTEM : BB_VM_OK;
 }
 uint64_t bb_vm_base(const BbGuestMemory *v) { return v ? (uintptr_t)v->base : 0; }
@@ -148,6 +149,12 @@ BbVmStatus bb_vm_observe(BbGuestMemory *v,BbVmObserver observer,void *user) {
     for(size_t i=0;i<v->size/v->granule;++i) if(v->pages[i].mapped) return BB_VM_BUSY;
     v->observer=observer; v->observer_user=user; return BB_VM_OK;
 }
+BbVmStatus bb_vm_detach_observer(BbGuestMemory *v,BbVmObserver observer,void *user) {
+    BbVmStatus s=check(v); if(s!=BB_VM_OK && s!=BB_VM_POISONED) return s;
+    if(v->notifying) return BB_VM_BUSY;
+    if(v->observer!=observer || v->observer_user!=user) return BB_VM_INVALID;
+    v->observer=NULL; v->observer_user=NULL; return BB_VM_OK;
+}
 BbVmStatus bb_vm_map(BbGuestMemory *v,uint64_t at,size_t n,size_t off,unsigned perm) {
     BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
     if(v->notifying) return BB_VM_BUSY;
@@ -164,6 +171,7 @@ BbVmStatus bb_vm_map(BbGuestMemory *v,uint64_t at,size_t n,size_t off,unsigned p
         Page *page=&v->pages[first+i];
         *page=(Page){off+i*v->granule,perm,1};
         ++v->references[off/v->granule+i];
+        if(perm&BB_VM_EXEC) ++v->executable[off/v->granule+i];
         if(mprotect((char *)p+i*v->granule,v->granule,host_permissions(effective(v,page)))) {
             v->poisoned=1; return BB_VM_POISONED;
         }
@@ -186,6 +194,7 @@ BbVmStatus bb_vm_unmap(BbGuestMemory *v,uint64_t at,size_t n) {
     size_t a=(at-(uintptr_t)v->base)/v->granule;
     for(size_t i=0;i<n/v->granule;++i) {
         Page *p=&v->pages[a+i];
+        if(p->permissions&BB_VM_EXEC) --v->executable[p->offset/v->granule];
         if(!--v->references[p->offset/v->granule])
             memset(v->watchers+p->offset/BB_VM_TRACKER_PAGE,0,v->granule/BB_VM_TRACKER_PAGE*sizeof(unsigned));
         *p=(Page){0};
@@ -197,7 +206,12 @@ BbVmStatus bb_vm_protect(BbGuestMemory *v,uint64_t at,size_t n,unsigned perm) {
     if(v->notifying) return BB_VM_BUSY;
     if(perm>7 || !range(v,at,n,v->granule) || !mapped(v,at,n)) return BB_VM_INVALID;
     size_t a=(at-(uintptr_t)v->base)/v->granule;
-    for(size_t i=0;i<n/v->granule;++i) v->pages[a+i].permissions=perm;
+    for(size_t i=0;i<n/v->granule;++i) {
+        Page *p=&v->pages[a+i];
+        if((p->permissions&BB_VM_EXEC) && !(perm&BB_VM_EXEC)) --v->executable[p->offset/v->granule];
+        if(!(p->permissions&BB_VM_EXEC) && (perm&BB_VM_EXEC)) ++v->executable[p->offset/v->granule];
+        p->permissions=perm;
+    }
     return update_aliases(v);
 }
 BbVmStatus bb_vm_watch_write(BbGuestMemory *v,uint64_t at,size_t n,int delta) {
@@ -247,6 +261,16 @@ static BbVmStatus written(BbGuestMemory *v) {
         if(s!=BB_VM_OK) return s;
     }
     return BB_VM_OK;
+}
+int bb_vm_code_write_needed(BbGuestMemory *v,uint64_t at,size_t n) {
+    if(check(v)!=BB_VM_OK) return -1;
+    if(!range(v,at,n,1)) return 0;
+    size_t first=(at-(uintptr_t)v->base)/v->granule,last=(at-(uintptr_t)v->base+n-1)/v->granule;
+    for(size_t i=first;i<=last;++i) {
+        Page *p=&v->pages[i];
+        if(p->mapped && v->executable[p->offset/v->granule]) return 1;
+    }
+    return 0;
 }
 BbVmStatus bb_vm_sync_code(BbGuestMemory *v) {
     BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;

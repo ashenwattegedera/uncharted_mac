@@ -1,6 +1,6 @@
 #include "memory_probe.h"
 #include <stdlib.h>
-struct BbMemoryProbe { BbCpuProbe *cpu; BbGuestMemory *vm; BbFaultRouter router; BbGuestFault last; int active; };
+struct BbMemoryProbe { BbCpuProbe *cpu; BbGuestMemory *vm; BbFaultRouter router; BbGuestFault last; int active,owns_vm; };
 static int mirror(BbGuestMemory *vm,BbVmEvent event,uint64_t at,size_t size,void *user) {
     BbMemoryProbe *s=user;
     if(event==BB_VM_UNMAPPING) return bb_probe_unmap(s->cpu,at,size)==BB_PROBE_OK;
@@ -35,22 +35,35 @@ static int guest_write(BbCpuProbe *cpu,uint64_t at,size_t size,void *user) {
     (void)at; (void)size;
     return bb_vm_sync_code(s->vm)==BB_VM_OK;
 }
-BbProbeStatus bb_memory_probe_open(BbMemoryProbe **out,size_t window,size_t backing) {
-    if(!out) return BB_PROBE_INVALID;
+static int code_write(void *user,uint64_t at,size_t size) {
+    BbMemoryProbe *s=user; return bb_vm_code_write_needed(s->vm,at,size);
+}
+static BbProbeStatus attach(BbMemoryProbe **out,BbGuestMemory *vm,int owned) {
+    if(!out || !vm || bb_vm_status(vm)!=BB_VM_OK) return BB_PROBE_INVALID;
     *out=NULL; BbMemoryProbe *s=calloc(1,sizeof(*s)); if(!s) return BB_PROBE_ENGINE;
-    if(bb_vm_create(&s->vm,window,backing,0)!=BB_VM_OK) { free(s); return BB_PROBE_ENGINE; }
+    s->vm=vm; s->owns_vm=owned;
     BbProbeStatus status=bb_probe_open(&s->cpu);
     if(status==BB_PROBE_OK && bb_vm_observe(s->vm,mirror,s)!=BB_VM_OK) status=BB_PROBE_ENGINE;
-    if(status==BB_PROBE_OK) status=bb_probe_watch_writes(s->cpu,bb_vm_base(s->vm),bb_vm_base(s->vm)+window-1,guest_write,s);
-    if(status!=BB_PROBE_OK) { bb_memory_probe_close(s); return status; }
+    if(status==BB_PROBE_OK) status=bb_probe_watch_writes(s->cpu,bb_vm_base(s->vm),bb_vm_base(s->vm)+bb_vm_window_size(s->vm)-1,guest_write,s);
+    if(status==BB_PROBE_OK) status=bb_probe_filter_writes(s->cpu,code_write,s);
+    if(status!=BB_PROBE_OK) { bb_vm_detach_observer(vm,mirror,s); bb_probe_close(s->cpu); if(owned) bb_vm_close(vm); free(s); return status; }
     s->router.memory=s->vm; bb_probe_set_fault_handler(s->cpu,fault,s);
     *out=s; return BB_PROBE_OK;
+}
+BbProbeStatus bb_memory_probe_attach(BbMemoryProbe **out,BbGuestMemory *vm) { return attach(out,vm,0); }
+BbProbeStatus bb_memory_probe_open(BbMemoryProbe **out,size_t window,size_t backing) {
+    if(!out) return BB_PROBE_INVALID;
+    *out=NULL; BbGuestMemory *vm=NULL;
+    if(bb_vm_create(&vm,window,backing,0)!=BB_VM_OK) return BB_PROBE_ENGINE;
+    return attach(out,vm,1);
 }
 BbProbeStatus bb_memory_probe_close(BbMemoryProbe *s) {
     if(!s) return BB_PROBE_OK;
     if(s->active) return BB_PROBE_INVALID;
     if(bb_vm_status(s->vm)==BB_VM_WRONG_THREAD) return BB_PROBE_INVALID;
-    bb_probe_close(s->cpu); BbVmStatus status=bb_vm_close(s->vm); free(s);
+    bb_probe_close(s->cpu);
+    BbVmStatus status=s->owns_vm ? bb_vm_close(s->vm) : bb_vm_detach_observer(s->vm,mirror,s);
+    free(s);
     return status==BB_VM_OK ? BB_PROBE_OK : BB_PROBE_ENGINE;
 }
 BbGuestMemory *bb_memory_probe_vm(BbMemoryProbe *s) { return s ? s->vm : NULL; }
@@ -82,6 +95,9 @@ static int abi_write(void *user,uint64_t at,const void *in,size_t n) {
     if(!abi_range(s,at,n,1)) return 0;
     return bb_vm_contains(s->vm,at,n) ? bb_vm_write(s->vm,at,in,n)==BB_VM_OK :
         bb_probe_write(s->cpu,at,in,n)==BB_PROBE_OK;
+}
+BbAbiMemory bb_memory_probe_memory(BbMemoryProbe *s) {
+    return (BbAbiMemory){abi_range,abi_read,abi_write,s};
 }
 BbProbeStatus bb_memory_probe_bind_abi(BbMemoryProbe *s,const BbAbiImport *binding,uint64_t *address) {
     if(!s || bb_vm_status(s->vm)!=BB_VM_OK) return BB_PROBE_INVALID;

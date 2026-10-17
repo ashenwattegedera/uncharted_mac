@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { MAX_BINDINGS=16, MAX_DEPTH=8, STACK_SLICE=65536, MAX_RESUMES=64 };
+enum { MAX_BINDINGS=BB_PROBE_MAX_BINDINGS, MAX_DEPTH=8, STACK_SLICE=65536, MAX_RESUMES=64 };
 #define BRIDGE_BASE UINT64_C(0x200000)
 struct BbCpuProbe {
     uc_engine *engine;
     pthread_mutex_t lock;
     uc_hook bridge_hook,fault_hook,syscall_hook,write_hook,write_block_hook;
     BbProbeWriteObserver write_observer; void *write_user; int external_error;
+    BbProbeWriteFilter write_filter; void *filter_user;
     int memory_fault;
     int dirty_write,write_stopped;
     uint64_t write_start,write_end,write_resume;
@@ -105,6 +106,11 @@ static void write_hook(uc_engine *engine,uc_mem_type type,uint64_t at,int size,i
     (void)type; (void)value;
     BbCpuProbe *p=user;
     if(size<=0 || !range_valid(at,(size_t)size)) { p->external_error=1; uc_emu_stop(engine); return; }
+    if(p->write_filter) {
+        int needed=p->write_filter(p->filter_user,at,(size_t)size);
+        if(needed<0) { p->external_error=1; uc_emu_stop(engine); return; }
+        if(!needed) return;
+    }
     if(!p->dirty_write) { p->write_start=at; p->write_end=at+(size_t)size; }
     else { if(at<p->write_start) p->write_start=at; if(at+(size_t)size>p->write_end) p->write_end=at+(size_t)size; }
     p->dirty_write=1;
@@ -114,8 +120,13 @@ static void write_block_hook(uc_engine *engine,uint64_t pc,uint32_t size,void *u
     BbCpuProbe *p=user;
     if(p->dirty_write) {
         p->write_stopped=1; p->write_resume=pc;
-        uc_emu_stop(engine); /* Store completed; flush before the next block executes. */
+        uc_emu_stop(engine); /* Store completed; flush before the next instruction executes. */
     }
+}
+BbProbeStatus bb_probe_filter_writes(BbCpuProbe *p,BbProbeWriteFilter filter,void *user) {
+    if(!p || !filter) return BB_PROBE_INVALID;
+    pthread_mutex_lock(&p->lock); p->write_filter=filter; p->filter_user=user;
+    pthread_mutex_unlock(&p->lock); return BB_PROBE_OK;
 }
 BbProbeStatus bb_probe_watch_writes(BbCpuProbe *p,uint64_t start,uint64_t end,BbProbeWriteObserver observer,void *user) {
     if(!p || !observer || !start || end<start) return BB_PROBE_INVALID;
@@ -123,7 +134,7 @@ BbProbeStatus bb_probe_watch_writes(BbCpuProbe *p,uint64_t start,uint64_t end,Bb
     if(p->write_observer) { pthread_mutex_unlock(&p->lock); return BB_PROBE_INVALID; }
     uc_err e=uc_hook_add(p->engine,&p->write_hook,UC_HOOK_MEM_WRITE,(void *)write_hook,p,start,end);
     if(e==UC_ERR_OK) {
-        e=uc_hook_add(p->engine,&p->write_block_hook,UC_HOOK_BLOCK,(void *)write_block_hook,p,1,0);
+        e=uc_hook_add(p->engine,&p->write_block_hook,UC_HOOK_CODE,(void *)write_block_hook,p,1,0);
         if(e!=UC_ERR_OK) uc_hook_del(p->engine,p->write_hook);
     }
     if(e==UC_ERR_OK) { p->write_observer=observer; p->write_user=user; }
