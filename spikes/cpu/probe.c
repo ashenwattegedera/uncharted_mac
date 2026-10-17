@@ -8,7 +8,11 @@ enum { MAX_BINDINGS=16, MAX_DEPTH=8, STACK_SLICE=65536, MAX_RESUMES=64 };
 struct BbCpuProbe {
     uc_engine *engine;
     pthread_mutex_t lock;
-    uc_hook bridge_hook,fault_hook,syscall_hook;
+    uc_hook bridge_hook,fault_hook,syscall_hook,write_hook,write_block_hook;
+    BbProbeWriteObserver write_observer; void *write_user; int external_error;
+    int memory_fault;
+    int dirty_write,write_stopped;
+    uint64_t write_start,write_end,write_resume;
     struct { BbProbeHostCall call; void *user;
         BbAbiImport abi; BbAbiMemory memory; } bindings[MAX_BINDINGS];
     unsigned count,depth;
@@ -32,11 +36,12 @@ static void syscall_hook(uc_engine *engine,void *user) {
     uc_emu_stop(engine);
 }
 static bool fault_hook(uc_engine *engine,uc_mem_type access,uint64_t address,int size,int64_t value,void *user) {
-    (void)size; (void)value;
+    (void)value;
     BbCpuProbe *p=user;
-    p->fault.address=address; p->fault.access=access;
+    p->fault.address=address; p->fault.access=access; p->fault.size=size>0 ? (size_t)size : 0;
     uc_reg_read(engine,UC_X86_REG_RIP,&p->fault.pc);
-    return p->fault_handler && p->fault_handler(p,&p->fault,p->fault_user);
+    p->memory_fault=1;
+    return false; /* Recovery mutates mappings only after uc_emu_start returns. */
 }
 BbProbeStatus bb_probe_open(BbCpuProbe **out) {
     if(!out) return BB_PROBE_INVALID;
@@ -82,6 +87,47 @@ BbProbeStatus bb_probe_map_host(BbCpuProbe *p,uint64_t address,size_t size,unsig
     uc_err e=uc_mem_map_ptr(p->engine,address,size,permissions,host);
     pthread_mutex_unlock(&p->lock);
     return engine_status(e);
+}
+BbProbeStatus bb_probe_invalidate(BbCpuProbe *p,uint64_t at,size_t size) {
+    if(!p || !range_valid(at,size)) return BB_PROBE_INVALID;
+    pthread_mutex_lock(&p->lock);
+    uc_err e=uc_ctl_remove_cache(p->engine,at,at+size);
+    pthread_mutex_unlock(&p->lock); return engine_status(e);
+}
+BbProbeStatus bb_probe_unmap(BbCpuProbe *p,uint64_t at,size_t size) {
+    if(!p || !range_valid(at,size)) return BB_PROBE_INVALID;
+    pthread_mutex_lock(&p->lock);
+    uc_err e=uc_mem_unmap(p->engine,at,size);
+    if(e==UC_ERR_OK) e=uc_ctl_remove_cache(p->engine,at,at+size);
+    pthread_mutex_unlock(&p->lock); return engine_status(e);
+}
+static void write_hook(uc_engine *engine,uc_mem_type type,uint64_t at,int size,int64_t value,void *user) {
+    (void)type; (void)value;
+    BbCpuProbe *p=user;
+    if(size<=0 || !range_valid(at,(size_t)size)) { p->external_error=1; uc_emu_stop(engine); return; }
+    if(!p->dirty_write) { p->write_start=at; p->write_end=at+(size_t)size; }
+    else { if(at<p->write_start) p->write_start=at; if(at+(size_t)size>p->write_end) p->write_end=at+(size_t)size; }
+    p->dirty_write=1;
+}
+static void write_block_hook(uc_engine *engine,uint64_t pc,uint32_t size,void *user) {
+    (void)size;
+    BbCpuProbe *p=user;
+    if(p->dirty_write) {
+        p->write_stopped=1; p->write_resume=pc;
+        uc_emu_stop(engine); /* Store completed; flush before the next block executes. */
+    }
+}
+BbProbeStatus bb_probe_watch_writes(BbCpuProbe *p,uint64_t start,uint64_t end,BbProbeWriteObserver observer,void *user) {
+    if(!p || !observer || !start || end<start) return BB_PROBE_INVALID;
+    pthread_mutex_lock(&p->lock);
+    if(p->write_observer) { pthread_mutex_unlock(&p->lock); return BB_PROBE_INVALID; }
+    uc_err e=uc_hook_add(p->engine,&p->write_hook,UC_HOOK_MEM_WRITE,(void *)write_hook,p,start,end);
+    if(e==UC_ERR_OK) {
+        e=uc_hook_add(p->engine,&p->write_block_hook,UC_HOOK_BLOCK,(void *)write_block_hook,p,1,0);
+        if(e!=UC_ERR_OK) uc_hook_del(p->engine,p->write_hook);
+    }
+    if(e==UC_ERR_OK) { p->write_observer=observer; p->write_user=user; }
+    pthread_mutex_unlock(&p->lock); return engine_status(e);
 }
 BbProbeStatus bb_probe_write(BbCpuProbe *p,uint64_t address,const void *data,size_t size) {
     if(!p || !data || !range_valid(address,size)) return BB_PROBE_INVALID;
@@ -210,10 +256,26 @@ BbProbeStatus bb_probe_invoke(BbCpuProbe *p,BbGuestCall *call,BbProbeFault *faul
     for(unsigned resume=0;e==UC_ERR_OK && resume<MAX_RESUMES;++resume) {
         p->pending=-1;
         p->unsupported=0;
+        p->external_error=0;
+        p->memory_fault=0;
+        p->dirty_write=0; p->write_stopped=0;
         e=uc_emu_start(p->engine,pc,BB_PROBE_RETURN,1000000,5000000);
         uc_reg_read(p->engine,UC_X86_REG_RIP,&pc);
+        if(p->dirty_write && !p->write_observer(p,p->write_start,(size_t)(p->write_end-p->write_start),p->write_user)) p->external_error=1;
+        if(p->external_error) { status=BB_PROBE_ENGINE; break; }
+        if(p->write_stopped && e==UC_ERR_OK) { pc=p->write_resume; continue; }
         if(p->unsupported) { p->fault.pc=pc; status=BB_PROBE_UNSUPPORTED; break; }
-        if(e!=UC_ERR_OK) { p->fault.pc=pc; p->fault.engine_error=e; status=BB_PROBE_FAULT; break; }
+        if(e!=UC_ERR_OK) {
+            if(p->memory_fault) {
+                BbProbeFault stopped=p->fault; stopped.engine_error=e;
+                if(p->fault_handler && p->fault_handler(p,&stopped,p->fault_user)) {
+                    p->fault=stopped; pc=stopped.pc; e=UC_ERR_OK;
+                    continue; /* Explicit retry of the faulting instruction. */
+                }
+                p->fault=stopped;
+            } else { p->fault.pc=pc; p->fault.engine_error=e; }
+            status=BB_PROBE_FAULT; break;
+        }
         if(pc==BB_PROBE_RETURN) { status=BB_PROBE_OK; break; }
         int i=p->pending;
         if(i<0 || (unsigned)i>=p->count || pc!=BRIDGE_BASE+16*(unsigned)i) break;

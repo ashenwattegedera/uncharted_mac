@@ -100,3 +100,19 @@ set_property(TARGET cpu-abi-hardened APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRE
 add_custom_command(TARGET cpu-abi-hardened POST_BUILD
     COMMAND "${BB_CODESIGN}" --force --sign - --options runtime
         --entitlements "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist" "$<TARGET_FILE:cpu-abi-hardened>" VERBATIM)
+
+add_library(bb-memory-probe STATIC memory_probe.c ../../src/platform/guest_memory_darwin.c ../../src/guest_fault.c)
+target_include_directories(bb-memory-probe PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../src")
+target_compile_options(bb-memory-probe PRIVATE -Wall -Wextra -Werror)
+target_link_libraries(bb-memory-probe PUBLIC bb-cpu-probe)
+foreach(target cpu-memory-suite cpu-memory-hardened)
+    add_executable(${target} memory_suite.c)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+    target_link_libraries(${target} PRIVATE bb-memory-probe)
+    add_test(NAME ${target} COMMAND ${target})
+    set_tests_properties(${target} PROPERTIES TIMEOUT 60)
+endforeach()
+set_property(TARGET cpu-memory-hardened APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist")
+add_custom_command(TARGET cpu-memory-hardened POST_BUILD
+    COMMAND "${BB_CODESIGN}" --force --sign - --options runtime
+        --entitlements "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist" "$<TARGET_FILE:cpu-memory-hardened>" VERBATIM)

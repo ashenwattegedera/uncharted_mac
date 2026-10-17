@@ -2,6 +2,8 @@
 #include "guest_memory.h"
 #include <fcntl.h>
 #include <limits.h>
+#include <mach/mach.h>
+#include <mach/mach_vm.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,16 +83,16 @@ BbVmStatus bb_vm_create(BbGuestMemory **out,size_t n,size_t backing_size,uint64_
     v->references=calloc(backing_size/granule,sizeof(unsigned));
     v->watchers=calloc(backing_size/BB_VM_TRACKER_PAGE,sizeof(unsigned));
     if(!v->pages || !v->references || !v->watchers) goto fail;
-    for(unsigned i=0;i<(preferred ? 1u : 64u);++i) {
-        uintptr_t candidate=preferred ? preferred : UINT64_C(0x1000000000)+(uint64_t)i*UINT64_C(0x40000000);
-        /* A hint never replaces somebody else's mapping. For an explicit preference require
-         * an exact result; otherwise accept any result below 1 TiB. MAP_FIXED
-         * is reserved for ranges already owned below. */
-        void *p=mmap((void *)candidate,n,PROT_NONE,MAP_PRIVATE|MAP_ANON,-1,0);
-        uintptr_t got=(uintptr_t)p;
-        if(p!=MAP_FAILED && (preferred ? got==candidate :
-           (got>=UINT64_C(0x100000000) && got<UINT64_C(0x10000000000)-n))) { v->base=p; break; }
-        if(p!=MAP_FAILED) munmap(p,n);
+    for(unsigned i=0;i<(preferred ? 1u : 60u);++i) {
+        mach_vm_address_t candidate=preferred ? preferred : UINT64_C(0x1000000000)+(uint64_t)i*UINT64_C(0x400000000);
+        /* FIXED without OVERWRITE claims only an empty range. Unlike mmap's
+         * advisory hint this also works when ASan interposes mmap allocation. */
+        kern_return_t result=mach_vm_allocate(mach_task_self(),&candidate,n,VM_FLAGS_FIXED);
+        if(result!=KERN_SUCCESS) continue;
+        if(mach_vm_protect(mach_task_self(),candidate,n,FALSE,VM_PROT_NONE)!=KERN_SUCCESS) {
+            mach_vm_deallocate(mach_task_self(),candidate,n); continue;
+        }
+        v->base=(void *)(uintptr_t)candidate; break;
     }
     if(v->base==MAP_FAILED) goto fail;
     char path[]="/tmp/bb-guest-memory-XXXXXX";
@@ -194,6 +196,20 @@ BbVmStatus bb_vm_watch_write(BbGuestMemory *v,uint64_t at,size_t n,int delta) {
     memcpy(v->watchers,next,bytes); free(next);
     return update_aliases(v);
 }
+BbVmStatus bb_vm_status(BbGuestMemory *v) { return check(v); }
+int bb_vm_contains(BbGuestMemory *v,uint64_t at,size_t n) {
+    return check(v)==BB_VM_OK && range(v,at,n,1);
+}
+BbVmStatus bb_vm_clear_write_watches(BbGuestMemory *v,uint64_t at,size_t n) {
+    BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
+    if(v->notifying) return BB_VM_BUSY;
+    if(!range(v,at,n,v->granule) || !mapped(v,at,n)) return BB_VM_INVALID;
+    for(size_t i=0;i<n;i+=v->granule) {
+        Page *p=&v->pages[(at-(uintptr_t)v->base+i)/v->granule];
+        memset(v->watchers+p->offset/BB_VM_TRACKER_PAGE,0,v->granule/BB_VM_TRACKER_PAGE*sizeof(unsigned));
+    }
+    return update_aliases(v);
+}
 BbVmStatus bb_vm_query(BbGuestMemory *v,uint64_t at,BbVmView *out) {
     BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
     if(!out || !mapped(v,at,1)) return BB_VM_INVALID;
@@ -202,6 +218,17 @@ BbVmStatus bb_vm_query(BbGuestMemory *v,uint64_t at,BbVmView *out) {
     *out=(BbVmView){at,p->offset+within,v->granule-within,p->permissions,effective(v,p),
         v->watchers[(p->offset+within)/BB_VM_TRACKER_PAGE],(void *)(uintptr_t)at};
     return BB_VM_OK;
+}
+static BbVmStatus written(BbGuestMemory *v) {
+    for(size_t i=0;i<v->size/v->granule;++i) if(v->pages[i].mapped) {
+        BbVmStatus s=notify(v,BB_VM_WRITE_EVENT,(uintptr_t)v->base+i*v->granule,v->granule);
+        if(s!=BB_VM_OK) return s;
+    }
+    return BB_VM_OK;
+}
+BbVmStatus bb_vm_sync_code(BbGuestMemory *v) {
+    BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
+    return v->notifying ? BB_VM_BUSY : written(v);
 }
 static BbVmStatus transfer(BbGuestMemory *v,uint64_t at,void *data,size_t n,int write) {
     BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
@@ -221,7 +248,7 @@ static BbVmStatus transfer(BbGuestMemory *v,uint64_t at,void *data,size_t n,int 
         i+=part;
     }
     /* Invalidate every alias: the written range may contain translated code. */
-    return write ? update_aliases(v) : BB_VM_OK;
+    return write ? written(v) : BB_VM_OK;
 }
 BbVmStatus bb_vm_read(BbGuestMemory *v,uint64_t at,void *out,size_t n) { return transfer(v,at,out,n,0); }
 BbVmStatus bb_vm_write(BbGuestMemory *v,uint64_t at,const void *data,size_t n) { return transfer(v,at,(void *)data,n,1); }

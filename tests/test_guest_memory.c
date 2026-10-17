@@ -14,6 +14,7 @@ static void expect_fault(uint64_t address,int write) {
     pid_t child=fork(); assert(child>=0);
     if(!child) {
         struct rlimit limit={0,0}; setrlimit(RLIMIT_CORE,&limit);
+        signal(SIGBUS,SIG_DFL); signal(SIGSEGV,SIG_DFL);
         volatile unsigned char *p=(void *)(uintptr_t)address;
         if(write) *p=99; else { volatile unsigned char value=*p; (void)value; }
         _exit(0);

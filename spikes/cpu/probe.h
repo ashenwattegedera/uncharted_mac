@@ -12,6 +12,7 @@ typedef enum { BB_PROBE_OK, BB_PROBE_INVALID, BB_PROBE_ENGINE, BB_PROBE_FAULT, B
                BB_PROBE_UNSUPPORTED } BbProbeStatus;
 typedef struct {
     uint64_t pc,address;
+    size_t size;
     int access;
     uc_err engine_error;
 } BbProbeFault;
@@ -27,6 +28,10 @@ BbProbeStatus bb_probe_open(BbCpuProbe **out);
 void bb_probe_close(BbCpuProbe *probe);
 BbProbeStatus bb_probe_map(BbCpuProbe *probe,uint64_t address,size_t size,unsigned permissions);
 BbProbeStatus bb_probe_map_host(BbCpuProbe *probe,uint64_t address,size_t size,unsigned permissions,void *host);
+BbProbeStatus bb_probe_unmap(BbCpuProbe *probe,uint64_t address,size_t size);
+BbProbeStatus bb_probe_invalidate(BbCpuProbe *probe,uint64_t address,size_t size);
+typedef int (*BbProbeWriteObserver)(BbCpuProbe *,uint64_t,size_t,void *);
+BbProbeStatus bb_probe_watch_writes(BbCpuProbe *probe,uint64_t start,uint64_t end,BbProbeWriteObserver observer,void *user);
 BbProbeStatus bb_probe_write(BbCpuProbe *probe,uint64_t address,const void *data,size_t size);
 BbProbeStatus bb_probe_read(BbCpuProbe *probe,uint64_t address,void *data,size_t size);
 BbProbeStatus bb_probe_protect(BbCpuProbe *probe,uint64_t address,size_t size,unsigned permissions);
