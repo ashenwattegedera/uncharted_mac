@@ -52,6 +52,15 @@ are rejected during configuration. Building an ARM game loader is an M1–M3 tas
 The execution API and its current scope are documented in
 [execution interface](EXECUTION_INTERFACE.md).
 
+## Native ARM translation experiment (M1)
+
+The independent [M1 experiment](../spikes/cpu/README.md) executes synthetic x86-64
+code in a native Apple Silicon process through a pinned Unicorn dependency. It
+requires pkg-config and downloads its own source dependency; the root harness
+remains dependency-free with respect to Unicorn. It does not enable the ARM
+game loader. See the [decision](decisions/0001-cpu-reference-core.md) and
+[M1 verification record](M1_VERIFICATION.md) for signing, measurements and limits.
+
 ## Dependencies for the existing graphics build
 
 ```bash

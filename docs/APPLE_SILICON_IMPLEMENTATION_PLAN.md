@@ -4,7 +4,7 @@ Date: 2026-10-16. Baseline: `68c8cf9` (current local `main` and `origin/main` at
 
 **Decision:** build a native arm64 macOS host with an integrated x86-64 execution backend. Retain the PS4 service layer and shadPS4-derived graphics pipeline, initially using MoltenVK for Metal access. Rosetta is not a product dependency or the implementation strategy.
 
-Status: **M0 CPU harness verified across macOS/Linux/Windows; full game-build and gameplay baselines pending; translator not selected**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
+Status: **M0 CPU harness verified across macOS/Linux/Windows; M1 game-free feasibility verified with a provisional CPU reference; production translator selection and game validation pending**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
 
 ## 1. Scope and initial acceptance target
 
@@ -87,6 +87,8 @@ Define an import signature registry from the actual exported functions, includin
 **Acceptance:** Windows/Linux reference builds and relevant loader/runtime tests pass; Python preparation/linking tests pass; an arm64 macOS CPU harness configures and builds without executing x86 guest code yet. Capture baseline logs when a supported machine is available; if unavailable, explicitly retain that gate as unverified.
 
 ### M1 — Translator selection on Darwin
+
+**Implementation status:** game-free feasibility acceptance met by the native ARM Unicorn experiment on Apple M2. The isolated runner is a provisional correctness reference; production integration and performance selection remain open. See [ADR 0001](decisions/0001-cpu-reference-core.md), [verification and limitations](M1_VERIFICATION.md) and [reproduction commands](../spikes/cpu/README.md).
 
 **Branches:** `codex/spike-mac-cpu-backend`, followed by `codex/mac-port-cpu-backend` for the selected implementation. Depends on M0.
 
@@ -195,4 +197,4 @@ The critical path is M0 → M1/M2 → M3 → M5; M4 is a separate prerequisite f
 
 Reserve the first one to two weeks as a feasibility timebox, not a promise that M0–M4 will finish. At its end, report what executes on Darwin, measured GPU incompatibilities, candidate-core suitability, and revised scope. Do not promise a playable date until CPU/ABI, VM/fault and representative-renderer gates have passed. A custom translator or major shader-semantic gaps can turn this into a much longer systems project.
 
-The next implementation milestone is **M1: evaluate translator candidates through measured Darwin experiments**. Run and review the pending Linux/Windows M0 checks before relying on the modified native loader as a verified reference. No game porting code should be built around an untested core choice.
+The next implementation milestone is **M2: Darwin memory and guest/host ABI**, using the isolated M1 correctness reference where useful. M3 must address scheduling and memory ordering before a production CPU backend is accepted. M0 cross-platform CI has passed; full game-build validation remains pending. Review the provisional CPU decision before production integration, and retain the recorded game and distribution gates.

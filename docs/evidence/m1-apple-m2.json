@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-17",
+  "hardware": "Apple M2",
+  "architecture": "arm64",
+  "macos": "26.7.1",
+  "source_state": "Fixture commit 5644cb4; block-hook runner and synthetic suite",
+  "unicorn_commit": "8028ec436f2d9376525352dd38ed9ed6b9f6be10",
+  "build_type": "Release",
+  "samples": [
+    {
+      "engine": "unicorn-2.1.4",
+      "host": "arm64-darwin",
+      "cold_loop_ns": 4468000,
+      "warm_10_loops_ns": 47930000,
+      "guest_instructions_per_loop": 300003,
+      "entry_100_calls_ns": 3010000,
+      "bridge_100_calls_ns": 4523000
+    },
+    {
+      "engine": "unicorn-2.1.4",
+      "host": "arm64-darwin",
+      "cold_loop_ns": 4550000,
+      "warm_10_loops_ns": 43587000,
+      "guest_instructions_per_loop": 300003,
+      "entry_100_calls_ns": 2983000,
+      "bridge_100_calls_ns": 5272000
+    },
+    {
+      "engine": "unicorn-2.1.4",
+      "host": "arm64-darwin",
+      "cold_loop_ns": 1780000,
+      "warm_10_loops_ns": 17290000,
+      "guest_instructions_per_loop": 300003,
+      "entry_100_calls_ns": 3118000,
+      "bridge_100_calls_ns": 5371000
+    }
+  ],
+  "limitations": [
+    "Synthetic bounded loop only; not game FPS",
+    "Includes instruction budget, watchdog, context save/restore and bridge overhead",
+    "One serialized engine; no parallel guest CPUs"
+  ]
+}
