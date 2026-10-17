@@ -2,6 +2,9 @@
 #define BB_GUEST_MEMORY_H
 #include <stddef.h>
 #include <stdint.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Owned Darwin address window. All operations, observers and teardown belong to
  * the creating host thread. No API here is async-signal-safe. */
 typedef struct BbGuestMemory BbGuestMemory;
@@ -35,4 +38,7 @@ BbVmStatus bb_vm_query(BbGuestMemory *vm,uint64_t address,BbVmView *view);
 BbVmStatus bb_vm_sync_code(BbGuestMemory *vm);
 BbVmStatus bb_vm_read(BbGuestMemory *vm,uint64_t address,void *out,size_t size);
 BbVmStatus bb_vm_write(BbGuestMemory *vm,uint64_t address,const void *data,size_t size);
+#ifdef __cplusplus
+}
+#endif
 #endif

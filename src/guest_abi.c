@@ -40,7 +40,7 @@ BbAbiStatus bb_abi_dispatch(const BbAbiImport *b,BbAbiFrame *f,const BbAbiMemory
     unsigned gp=ret->classes[0]==2 ? 1 : 0,fp=0;
     if(f->rsp>UINT64_MAX-8) return BB_ABI_MEMORY;
     uint64_t stack=f->rsp+8;
-    BbAbiValue args[BB_ABI_MAX_ARGS]={{0}},result={{0}};
+    BbAbiValue args[BB_ABI_MAX_ARGS]={0},result={0};
     for(size_t i=0;i<s->count;++i) {
         const Type *t=&types[s->args[i]];
         unsigned need_gp=0,need_fp=0;
