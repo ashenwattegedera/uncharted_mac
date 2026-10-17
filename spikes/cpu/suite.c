@@ -186,6 +186,11 @@ static BbProbeStatus recurse(BbCpuProbe *p,const uint64_t args[6],uint64_t *resu
     BbGuestCall call={.kind=BB_CALL_PTR_PTR,.target=*(uint64_t *)user};
     return bb_probe_invoke(p,&call,NULL);
 }
+static BbProbeStatus count_bridge(BbCpuProbe *p,const uint64_t args[6],uint64_t *result,void *user) {
+    (void)p; (void)args;
+    ++*(unsigned *)user; *result=0;
+    return BB_PROBE_OK;
+}
 static void limits(void) {
     BbCpuProbe *p=create();
     const unsigned char illegal[]={0x0f,0x0b};
@@ -209,6 +214,16 @@ static void limits(void) {
     assert(bb_probe_write(p,UINT64_MAX,loop,2)==BB_PROBE_INVALID);
     call.stack_top=&call;
     assert(bb_probe_invoke(p,&call,NULL)==BB_PROBE_INVALID);
+    bb_probe_close(p);
+    /* Repeated nonrecursive bridges must also terminate at the resume bound. */
+    p=create();
+    unsigned calls=0;
+    OK(bb_probe_bind(p,count_bridge,&calls,&bridge));
+    unsigned char repeat[]={0x48,0xb8,0,0,0,0,0,0,0,0,0x48,0x83,0xec,0x08,
+        0xff,0xd0,0x48,0x83,0xc4,0x08,0xeb,0xea};
+    memcpy(repeat+2,&bridge,8); put(p,BB_PROBE_CODE,repeat,sizeof(repeat));
+    call=(BbGuestCall){.kind=BB_CALL_PTR_PTR,.target=BB_PROBE_CODE,.result=123};
+    assert(bb_probe_invoke(p,&call,NULL)==BB_PROBE_LIMIT && call.result==123 && calls==64);
     bb_probe_close(p);
 }
 static uint64_t now_ns(void) {

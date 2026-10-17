@@ -57,7 +57,11 @@ is not counted as a passing sandbox execution result.
 | Ad-hoc Hardened Runtime | codesign flags `0x10002(adhoc,runtime)`; only `com.apple.security.cs.allow-jit=true`; full suite passed in that executable |
 | Public JIT policy probe | `MAP_JIT`, supported per-thread protection, ARM instruction rewrite from return 42 to return 43, cache invalidation and execution passed |
 | Whitespace/diff checks | `git diff --check` passed |
-| GitHub Actions | Dedicated native ARM workflow added; remote run evidence is recorded below once available |
+| GitHub Actions | Native ARM experiment **passed** on `75ed5a3`: [run 39001533127](https://github.com/ashenwattegedera/uncharted_mac/actions/runs/39001533127), including the default archive download/hash path and artifact upload. Final revision checks are attached to [PR #3](https://github.com/ashenwattegedera/uncharted_mac/pull/3). |
+
+The final review also added an explicit nonrecursive bridge-loop regression: exactly
+sixty-four callbacks occur before the runner returns its limit error. Release and
+ASan/UBSan suites were rerun successfully after this addition.
 
 The synthetic suite specifically checks:
 
