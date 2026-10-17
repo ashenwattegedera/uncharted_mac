@@ -21,24 +21,28 @@ BbFaultResult bb_guest_fault_route(BbFaultRouter *r,const BbGuestFault *f) {
         if(r->demand_map && r->demand_map(r->user,f) && allowed(r->memory,f,1)) result=BB_FAULT_RECOVERED;
         goto done;
     }
-    /* GPU watches cannot grant a permission forbidden by the guest itself. */
-    if(f->access!=BB_VM_WRITE || !allowed(r->memory,f,0) || !r->gpu_write) goto done;
+    /* A GPU synchronization must never grant a guest-forbidden access. */
+    if(!allowed(r->memory,f,0)) goto done;
     size_t granule=bb_vm_host_page(r->memory);
     if(granule<BB_VM_GUEST_PAGE) granule=BB_VM_GUEST_PAGE;
     uint64_t first=f->address-(f->address%granule),end=f->address+f->size;
-    unsigned found=0;
-    for(uint64_t at=first;at<end;at+=granule) {
-        for(size_t offset=0;offset<granule;offset+=BB_VM_TRACKER_PAGE) {
-            if(bb_vm_query(r->memory,at+offset,&view)!=BB_VM_OK) goto done;
-            if(view.write_watchers) {
-                if(!r->gpu_write(r->user,at+offset,view.backing_offset,view.write_watchers)) goto done;
-                ++found;
-            }
+    unsigned found_read=0,found_write=0;
+    for(uint64_t at=first;at<end;at+=granule) for(size_t offset=0;offset<granule;offset+=BB_VM_TRACKER_PAGE) {
+        if(bb_vm_query(r->memory,at+offset,&view)!=BB_VM_OK) goto done;
+        if(view.read_watchers) {
+            if(!r->gpu_read || !r->gpu_read(r->user,at+offset,view.backing_offset,view.read_watchers)) goto done;
+            ++found_read;
+        }
+        if(bb_vm_query(r->memory,at+offset,&view)!=BB_VM_OK) goto done;
+        if(f->access==BB_VM_WRITE && view.write_watchers) {
+            if(!r->gpu_write || !r->gpu_write(r->user,at+offset,view.backing_offset,view.write_watchers)) goto done;
+            ++found_write;
         }
     }
-    if(!found) goto done;
+    if(!found_read && !found_write) goto done;
     for(uint64_t at=first;at<end;at+=granule) {
-        if(bb_vm_clear_write_watches(r->memory,at,granule)!=BB_VM_OK) { result=BB_FAULT_ERROR; goto done; }
+        if((found_read && bb_vm_clear_read_watches(r->memory,at,granule)!=BB_VM_OK) ||
+           (found_write && bb_vm_clear_write_watches(r->memory,at,granule)!=BB_VM_OK)) { result=BB_FAULT_ERROR; goto done; }
     }
     if(allowed(r->memory,f,1)) result=BB_FAULT_RECOVERED;
 done:

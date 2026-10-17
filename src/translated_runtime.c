@@ -56,6 +56,15 @@ static const Import imports[]={
 #undef P
 #undef I
 #undef U
+size_t bb_translated_import_count(void) { return sizeof(imports)/sizeof(*imports)+2; }
+int bb_translated_import_info(size_t index,BbTranslatedImport *out) {
+    if(!out || index>=bb_translated_import_count()) return 0;
+    size_t functions=sizeof(imports)/sizeof(*imports);
+    *out=(BbTranslatedImport){0};
+    if(index<functions) { out->name=imports[index].name; out->kind=BB_IMPORT_FUNCTION; out->signature=imports[index].signature; }
+    else { out->name=index==functions ? "__stack_chk_guard" : "Need_sceLibcInternal"; out->kind=BB_IMPORT_DATA; out->data_size=index==functions ? 8 : 4; }
+    return 1;
+}
 static uint64_t integer(const BbAbiValue *v) { uint64_t value; memcpy(&value,v->bytes,8); return value; }
 static int range_access(BbAbiMemory *m,uint64_t at,size_t n,int write) { return !n || m->check(m->user,at,n,write); }
 static BbAbiStatus failure(BbTranslatedRuntime *r,const char *message) {
@@ -70,14 +79,16 @@ static BbAbiStatus memory_call(BbTranslatedRuntime *r,const Import *entry,const 
     switch(entry->operation) {
     case 0: out=((uint64_t (*)(void))target)(); memcpy(result->bytes,&out,8); return BB_ABI_OK;
     case 1: {
-        if(!a[5] || !range_access(&m,a[5],8,1)) return failure(r,"allocate output is not writable guest memory");
+        if(!a[5]) { rc=BB_GUEST_EINVAL; break; }
+        if(!range_access(&m,a[5],8,1)) return failure(r,"allocate output is not writable guest memory");
         int64_t physical=0;
         rc=((int32_t (*)(int64_t,int64_t,uint64_t,uint64_t,int,int64_t *))target)((int64_t)a[0],(int64_t)a[1],a[2],a[3],(int)a[4],&physical);
         if(!rc && !put(&m,a[5],&physical,8)) return failure(r,"allocate output mapping changed");
         break;
     }
     case 2: case 3: case 6: case 7: case 8:
-        if(!a[0] || !range_access(&m,a[0],8,1) || !m.read(m.user,a[0],&out,8)) return failure(r,"map output is not readable/writable guest memory");
+        if(!a[0]) { rc=BB_GUEST_EINVAL; break; }
+        if(!range_access(&m,a[0],8,1) || !m.read(m.user,a[0],&out,8)) return failure(r,"map output is not readable/writable guest memory");
         pointer=(void *)(uintptr_t)out;
         if(entry->operation==2 || entry->operation==3) {
             if(entry->operation==2) rc=((int32_t (*)(void **,uint64_t,int,int,int64_t,uint64_t))target)(&pointer,a[1],(int)a[2],(int)a[3],(int64_t)a[4],a[5]);
@@ -108,7 +119,8 @@ static BbAbiStatus memory_call(BbTranslatedRuntime *r,const Import *entry,const 
         break;
     }
     case 11: {
-        if(!a[2] || !range_access(&m,a[2],sizeof(BbGuestVirtualQuery),1)) return failure(r,"virtual query output is not writable");
+        if(!a[2] || a[3]!=sizeof(BbGuestVirtualQuery)) { rc=BB_GUEST_EINVAL; break; }
+        if(!range_access(&m,a[2],sizeof(BbGuestVirtualQuery),1)) return failure(r,"virtual query output is not writable");
         BbGuestVirtualQuery info={0};
         rc=((int32_t (*)(const void *,int,BbGuestVirtualQuery *,uint64_t))target)((void *)(uintptr_t)a[0],(int)a[1],&info,a[3]);
         if(!rc && !put(&m,a[2],&info,sizeof(info))) return failure(r,"virtual query output commit failed");
@@ -116,7 +128,7 @@ static BbAbiStatus memory_call(BbTranslatedRuntime *r,const Import *entry,const 
     }
     case 13: case 14: {
         int count=(int32_t)a[1],done=0;
-        if(count<0 || count>4096) { rc=BB_GUEST_EINVAL; break; }
+        if(!a[0] || count<0 || count>4096) { rc=BB_GUEST_EINVAL; break; }
         size_t size=(size_t)count*sizeof(BbGuestBatchEntry);
         if(!range_access(&m,a[0],size,1) || !range_access(&m,a[0],size,0) || (a[2] && !range_access(&m,a[2],4,1))) return failure(r,"batch buffer is not accessible");
         BbGuestBatchEntry *entries=calloc((size_t)count+1,sizeof(*entries)); if(!entries) return BB_ABI_HOST;
@@ -218,6 +230,14 @@ static BbAbiStatus host_call(const BbAbiValue *values,size_t count,BbAbiValue *r
     if(status==BB_ABI_OK && bb_vm_sync_code(runtime_memory_darwin_vm())!=BB_VM_OK) return BB_ABI_HOST;
     return status;
 }
+static int gpu_read(void *user,uint64_t at,uint64_t physical,unsigned watchers) {
+    (void)watchers; BbTranslatedRuntime *r=user;
+    return runtime_memory_ack_guest_gpu(bb_memory_probe_last_fault(r->session)->pc,at,physical,0);
+}
+static int gpu_write(void *user,uint64_t at,uint64_t physical,unsigned watchers) {
+    (void)watchers; BbTranslatedRuntime *r=user;
+    return runtime_memory_ack_guest_gpu(bb_memory_probe_last_fault(r->session)->pc,at,physical,1);
+}
 static BbTranslatedRuntime *process_runtime;
 BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out) {
     if(!out) return BB_TRANSLATED_INVALID;
@@ -227,6 +247,8 @@ BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out) {
     BbGuestMemory *vm=runtime_memory_darwin_vm();
     if(!vm || bb_memory_probe_attach(&r->session,vm)!=BB_PROBE_OK) { free(r); return BB_TRANSLATED_MEMORY; }
     process_runtime=r;
+    BbFaultRouter *router=bb_memory_probe_router(r->session);
+    router->gpu_read=gpu_read; router->gpu_write=gpu_write; router->user=r;
     for(size_t i=0;i<sizeof(imports)/sizeof(*imports);++i) {
         r->handlers[i].runtime=r; r->handlers[i].entry=imports+i;
         BbAbiImport binding={.name=imports[i].name,.signature=imports[i].signature,.host=host_call,.user=r->handlers+i,
@@ -247,10 +269,12 @@ BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out) {
 }
 BbTranslatedStatus bb_translated_close(BbTranslatedRuntime *r) {
     if(!r || r!=process_runtime || r->active) return BB_TRANSLATED_INVALID;
-    if(bb_memory_probe_close(r->session)!=BB_PROBE_OK) return BB_TRANSLATED_EXECUTION;
-    if(runtime_memory_darwin_shutdown()) return BB_TRANSLATED_MEMORY;
+    if(bb_vm_status(bb_memory_probe_vm(r->session))==BB_VM_WRONG_THREAD) return BB_TRANSLATED_INVALID;
+    BbProbeStatus session=bb_memory_probe_close(r->session);
+    int memory=runtime_memory_darwin_shutdown();
     bb_translated_attach_execution(NULL);
-    process_runtime=NULL; free(r); return BB_TRANSLATED_OK;
+    process_runtime=NULL; free(r);
+    return memory ? BB_TRANSLATED_MEMORY : session!=BB_PROBE_OK ? BB_TRANSLATED_EXECUTION : BB_TRANSLATED_OK;
 }
 BbGuestMemory *bb_translated_memory(BbTranslatedRuntime *r) { return r && r==process_runtime ? runtime_memory_darwin_vm() : NULL; }
 BbAbiMemory bb_translated_memory_access(BbTranslatedRuntime *r) { return bb_memory_probe_memory(r->session); }
@@ -284,7 +308,7 @@ static int relocation_order(const void *a,const void *b) {
 }
 BbTranslatedStatus bb_translated_relocate(BbTranslatedRuntime *r,uint64_t image,size_t size,
     const BbTranslatedReloc *relocations,size_t count) {
-    if(!r || r!=process_runtime || (!relocations && count) || !size || size>UINT64_MAX-image || count>65536) return BB_TRANSLATED_INVALID;
+    if(!r || r!=process_runtime || bb_vm_status(bb_memory_probe_vm(r->session))!=BB_VM_OK || (!relocations && count) || !size || size>UINT64_MAX-image || count>65536) return BB_TRANSLATED_INVALID;
     BbAbiMemory memory=bb_translated_memory_access(r);
     Resolved *resolved=calloc(count+1,sizeof(*resolved)); if(!resolved) return BB_TRANSLATED_MEMORY;
     BbTranslatedStatus status=BB_TRANSLATED_INVALID;

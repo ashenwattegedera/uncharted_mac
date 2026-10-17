@@ -40,7 +40,7 @@ static int code_write(void *user,uint64_t at,size_t size) {
 }
 static BbProbeStatus attach(BbMemoryProbe **out,BbGuestMemory *vm,int owned) {
     if(!out || !vm || bb_vm_status(vm)!=BB_VM_OK) return BB_PROBE_INVALID;
-    *out=NULL; BbMemoryProbe *s=calloc(1,sizeof(*s)); if(!s) return BB_PROBE_ENGINE;
+    *out=NULL; BbMemoryProbe *s=calloc(1,sizeof(*s)); if(!s) { if(owned) bb_vm_close(vm); return BB_PROBE_ENGINE; }
     s->vm=vm; s->owns_vm=owned;
     BbProbeStatus status=bb_probe_open(&s->cpu);
     if(status==BB_PROBE_OK && bb_vm_observe(s->vm,mirror,s)!=BB_VM_OK) status=BB_PROBE_ENGINE;

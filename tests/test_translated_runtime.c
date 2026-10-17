@@ -9,7 +9,17 @@
 #define G BB_VM_GUEST_PAGE
 #define OK(x) assert((x)==BB_TRANSLATED_OK)
 static BbTranslatedReloc function(size_t offset,const char *name) { return (BbTranslatedReloc){.offset=G+offset,.name=name,.kind=BB_RELOC_FUNCTION}; }
-int main(void) {
+int main(int argc,char **argv) {
+    if(argc==2 && !strcmp(argv[1],"inventory")) {
+        puts("[");
+        for(size_t i=0;i<bb_translated_import_count();++i) {
+            BbTranslatedImport entry; assert(bb_translated_import_info(i,&entry));
+            printf("%s{\"name\":\"%s\",\"kind\":%d,\"result\":%d,\"variadic\":%d,\"data_size\":%zu,\"args\":[",i ? "," : "",entry.name,entry.kind,entry.signature.result,entry.signature.variadic,entry.data_size);
+            for(size_t j=0;j<entry.signature.count;++j) printf("%s%d",j ? "," : "",entry.signature.args[j]);
+            puts("]}");
+        }
+        puts("]"); return 0;
+    }
     BbTranslatedRuntime *r=NULL; OK(bb_translated_open(&r));
     assert(!bb_execution_info()->can_execute_guest); OK(bb_translated_attach_execution(r)); assert(bb_execution_info()->can_execute_guest);
     BbGuestMemory *vm=bb_translated_memory(r);
@@ -38,6 +48,18 @@ int main(void) {
     unsigned char snapshot[sizeof(bindings)]; memcpy(snapshot,&bindings,sizeof(bindings));
     BbTranslatedReloc invalid[]={relocations[0],function(offsetof(Imports,format),"unknown-import")};
     assert(bb_translated_relocate(r,base,3*G,invalid,2)==BB_TRANSLATED_UNSUPPORTED);
+    assert(bb_vm_read(vm,base+G,&bindings,sizeof(bindings))==BB_VM_OK && !memcmp(snapshot,&bindings,sizeof(bindings)));
+    BbTranslatedReloc rejected[]={
+        {.offset=3*G-7,.kind=BB_RELOC_IMAGE},
+        {.offset=G,.value=3*G,.kind=BB_RELOC_IMAGE},
+        {.offset=G,.kind=(BbTranslatedRelocKind)99},
+        {.offset=G,.name="__stack_chk_guard",.kind=BB_RELOC_DATA,.addend=8},
+        {.offset=G,.name="memcpy",.kind=BB_RELOC_FUNCTION,.addend=1},
+    };
+    for(size_t i=0;i<sizeof(rejected)/sizeof(*rejected);++i)
+        assert(bb_translated_relocate(r,base,3*G,rejected+i,1)==BB_TRANSLATED_INVALID);
+    BbTranslatedReloc overlap[]={relocations[0],relocations[0]}; overlap[1].offset+=4;
+    assert(bb_translated_relocate(r,base,3*G,overlap,2)==BB_TRANSLATED_INVALID);
     assert(bb_vm_read(vm,base+G,&bindings,sizeof(bindings))==BB_VM_OK && !memcmp(snapshot,&bindings,sizeof(bindings)));
     BbHostImport unsafe={"unknown-import",BB_IMPORT_FUNCTION,UINTPTR_MAX}; uintptr_t sentinel=123;
     assert(bb_execution_bind_import(&unsafe,&sentinel)==BB_EXEC_UNAVAILABLE && sentinel==123);

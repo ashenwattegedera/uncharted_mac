@@ -40,6 +40,10 @@ int main(void) {
     args[0]=value(64); assert(bb_format_write(&p,args,&memory,2048,4,&result)==BB_FORMAT_OK && result==12 && !strcmp((char *)data+2048,"gue"));
     assert(bb_format_write(&p,args,&memory,UINT64_MAX,0,&result)==BB_FORMAT_OK && result==12);
     assert(bb_format_write(&p,args,&memory,UINT64_MAX,2,&result)==BB_FORMAT_MEMORY);
+    assert(bb_format_plan("literal",&p)==BB_FORMAT_OK);
+    assert(bb_format_write(&p,NULL,&memory,2048,16,&result)==BB_FORMAT_OK && result==7);
+    p.parts[0].arg=24; p.count=1;
+    assert(bb_format_write(&p,NULL,&memory,2048,16,&result)==BB_FORMAT_INVALID);
     puts("PASS: checked guest formatting, positional/star operands, promoted doubles, LP64, %n, truncation and failure preservation");
     return 0;
 }

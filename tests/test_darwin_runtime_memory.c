@@ -22,10 +22,15 @@ int main(void) {
     Release release=GET(Release,"sceKernelReleaseDirectMemory"); Unmap unmap=GET(Unmap,"sceKernelMunmap");
     int64_t physical=-1; assert(!alloc(0,(int64_t)total,3*page,page,3,&physical));
     void *a=NULL,*b=NULL; assert(!map(&a,page,3,0,physical,page)); assert(!map(&b,page,3,0,physical,page));
-    *(uint64_t *)a=42; assert(*(uint64_t *)b==42);
-    assert(!unmap(a,page)); a=NULL; assert(!map(&a,page,3,0,physical,page)); assert(*(uint64_t *)a==42);
-    void *outside=(void *)0x1000000000ULL;
-    assert((uint32_t)map(&outside,page,3,0x10,physical,page)==0x8002000c && *(uint64_t *)a==42);
+    BbVmView host; uint64_t value=42;
+    assert(bb_vm_query(vm,(uintptr_t)a,&host)==BB_VM_OK && host.host!=a);
+    assert(bb_vm_write(vm,(uintptr_t)a,&value,8)==BB_VM_OK);
+    assert(bb_vm_read(vm,(uintptr_t)b,&value,8)==BB_VM_OK && value==42);
+    assert(runtime_memory_read_backing((uintptr_t)b,&value,8) && value==42);
+    assert(!runtime_memory_read_backing(UINTPTR_MAX,&value,8));
+    assert(!unmap(a,page)); a=NULL; assert(!map(&a,page,3,0,physical,page)); assert(bb_vm_read(vm,(uintptr_t)a,&value,8)==BB_VM_OK && value==42);
+    void *outside=(void *)0x100000000ULL;
+    assert((uint32_t)map(&outside,page,3,0x10,physical,page)==0x8002000c && bb_vm_read(vm,(uintptr_t)a,&value,8)==BB_VM_OK && value==42);
     Protect protect=GET(Protect,"sceKernelMprotect"); assert(!protect(a,page,1));
     BbVmView view; assert(bb_vm_query(vm,(uintptr_t)a,&view)==BB_VM_OK && !(view.effective_permissions&BB_VM_WRITE));
     assert(!protect(a,page,3));
@@ -34,10 +39,11 @@ int main(void) {
     assert(!release(physical,page)); assert(!runtime_memory_is_mapped((uintptr_t)a,page));
     assert(!runtime_memory_is_mapped((uintptr_t)b,page));
     int64_t reused=-1; assert(!alloc(0,(int64_t)total,page,page,3,&reused)); assert(reused==physical);
-    a=NULL; assert(!map(&a,page,3,0,reused,page)); assert(*(uint64_t *)a==0);
+    a=NULL; assert(!map(&a,page,3,0,reused,page)); assert(bb_vm_read(vm,(uintptr_t)a,&value,8)==BB_VM_OK && !value);
     void *reservation=NULL; assert(!GET(Reserve,"sceKernelReserveVirtualRange")(&reservation,2*page,0,page));
     void *flex=NULL; assert(!GET(Flexible,"sceKernelMapFlexibleMemory")(&flex,2*page,3,0));
-    memset(flex,0x5a,2*page);
+    unsigned char bytes[32768]; memset(bytes,0x5a,sizeof(bytes));
+    assert(bb_vm_write(vm,(uintptr_t)flex,bytes,sizeof(bytes))==BB_VM_OK);
     BbGuestBatchEntry entries[]={ {.start=(uintptr_t)flex,.length=page,.protection=1,.operation=2},
         {.start=(uintptr_t)flex+page,.length=page,.operation=1}, {.start=(uintptr_t)flex,.length=page,.operation=99}};
     int processed=-1; assert((uint32_t)GET(Batch,"sceKernelBatchMap2")(entries,3,&processed,0x10)==0x80020016 && processed==2);

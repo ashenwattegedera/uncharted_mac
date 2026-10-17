@@ -87,6 +87,7 @@ static uint64_t flex_bitmap[FLEX_SPAN/PAGE/64];
 /* GPU hooks (bbgpu): notified outside the lock, in order, after each operation. */
 typedef void (*GpuRange)(uintptr_t address, uint64_t size);
 static GpuRange hook_map, hook_unmap, hook_invalidate;
+static RuntimeGpuGuestFault guest_gpu_fault;
 enum { HOOK_MAP, HOOK_UNMAP, HOOK_INVALIDATE };
 typedef struct { int kind; uintptr_t address; uint64_t size; } PendingHook;
 static PendingHook *pending; static size_t pending_count, pending_capacity;
@@ -250,13 +251,13 @@ static BbGuestMemory *darwin_low[1024];
 static size_t darwin_low_count;
 static int pool(void) {
     if(darwin_memory) return bb_vm_status(darwin_memory)==BB_VM_OK ? 0 : -1;
-    uint64_t mb=1024;
+    uint64_t bytes=USER_MAX-USER_MIN;
     const char *env=getenv("BB_DARWIN_VM_MB");
     if(env) { char *end; unsigned long long value=strtoull(env,&end,10);
         if(!*env || *end || value<64 || value>65536) return -1;
-        mb=value;
+        bytes=value*1024*1024;
     }
-    if(bb_vm_create(&darwin_memory,(size_t)mb*1024*1024,POOL_SIZE+FLEX_SPAN,0)!=BB_VM_OK) return -1;
+    if(bb_vm_create_address_space(&darwin_memory,(size_t)bytes,POOL_SIZE+FLEX_SPAN,USER_MIN)!=BB_VM_OK) return -1;
     if(bb_vm_preserve_backing(darwin_memory)!=BB_VM_OK) { bb_vm_close(darwin_memory); darwin_memory=NULL; return -1; }
     backing_base=bb_vm_backing_view(darwin_memory,0,POOL_SIZE+FLEX_SPAN);
     return backing_base ? 0 : -1;
@@ -286,7 +287,7 @@ static void host_discard(uint64_t phys,uint64_t size) {
     }
 }
 int runtime_memory_darwin_shutdown(void) {
-    if(darwin_memory && bb_vm_status(darwin_memory)!=BB_VM_OK) return -1;
+    if(darwin_memory && bb_vm_status(darwin_memory)!=BB_VM_OK && bb_vm_status(darwin_memory)!=BB_VM_POISONED) return -1;
     for(size_t i=0;i<darwin_low_count;++i) if(bb_vm_close(darwin_low[i])!=BB_VM_OK) return -1;
     darwin_low_count=0;
     if(bb_vm_close(darwin_memory)!=BB_VM_OK) return -1;
@@ -294,7 +295,7 @@ int runtime_memory_darwin_shutdown(void) {
     free(vmas); vmas=NULL; vma_count=0; vma_capacity=0;
     free(pending); pending=NULL; pending_count=0; pending_capacity=0;
     memset(blocks,0,sizeof(blocks)); memset(flex_bitmap,0,sizeof(flex_bitmap));
-    hook_map=NULL; hook_unmap=NULL; hook_invalidate=NULL;
+    hook_map=NULL; hook_unmap=NULL; hook_invalidate=NULL; guest_gpu_fault=NULL;
     live_bytes=0; flexible_bytes=0;
     ++table_generation; ++table_generation;
     return 0;
@@ -369,6 +370,16 @@ static size_t vma_index(uintptr_t a) { /* first VMA with end > a */
     size_t lo=0, hi=vma_count;
     while (lo<hi) { size_t mid=(lo+hi)/2; if (vmas[mid].end<=a) lo=mid+1; else hi=mid; }
     return lo;
+}
+static int vma_reserve(size_t extra) {
+    if(extra>SIZE_MAX-vma_count) return -1;
+    size_t wanted=vma_count+extra;
+    if(wanted<=vma_capacity) return 0;
+    size_t capacity=vma_capacity ? vma_capacity : 256;
+    while(capacity<wanted) { if(capacity>SIZE_MAX/2) return -1; capacity*=2; }
+    if(capacity>SIZE_MAX/sizeof(*vmas)) return -1;
+    Vma *next=realloc(vmas,capacity*sizeof(*vmas)); if(!next) return -1;
+    vmas=next; vma_capacity=capacity; return 0;
 }
 static int vma_insert(size_t at, Vma v) {
     if (vma_count==vma_capacity) {
@@ -448,6 +459,7 @@ static int32_t place(void **inout, uint64_t size, int prot, int flags, uint64_t 
         address=find_free(address,size,alignment);
         if (!address) return NO_MEMORY;
     }
+    if(vma_reserve(3)) return NO_MEMORY;
     if (host_map(address,size,host_prot(prot),kind==KIND_RESERVED,phys)) return NO_MEMORY;
     void *mapped=(void *)address;
     drop_range(address,address+size);
@@ -536,6 +548,7 @@ static ABI int32_t direct_map_named(void **out, uint64_t size, int prot, int fla
 }
 static int32_t unmap_locked(uintptr_t start, uint64_t size) {
     if (start%PAGE || !size || size>UINT64_MAX-(PAGE-1) || start>UINTPTR_MAX-align_up(size,PAGE)) return INVALID;
+    if(vma_reserve(2)) return NO_MEMORY;
     uint64_t end=start+align_up(size,PAGE);
     for (size_t i=vma_index(start); i<vma_count && vmas[i].start<end; ++i)
         if (vmas[i].kind!=KIND_RESERVED) {
@@ -565,6 +578,10 @@ static ABI int32_t direct_release(uint64_t start, uint64_t size) {
     if (!size) return 0;
     write_lock();
     if (!direct_range_allocated(start,size)) { write_unlock(); return INVALID; }
+    for(int i=0;i<LIMIT;++i) if(blocks[i].used && blocks[i].start<start && start+size<blocks[i].start+blocks[i].size) {
+        int free_slot=0; for(int j=0;j<LIMIT;++j) if(!blocks[j].used) { free_slot=1; break; }
+        if(!free_slot) { write_unlock(); return NO_MEMORY; }
+    }
     /* Mappings of released physical pages disappear with them. */
     for (size_t i=0; i<vma_count;) {
         Vma v=vmas[i];
@@ -636,6 +653,7 @@ static int32_t protect_locked(uintptr_t start, uint64_t size, int prot, int type
     uintptr_t end=start+align_up(size,PAGE);
     start&=~(uintptr_t)(PAGE-1);
     if ((prot & ~0x37) || !covered(start,end,0)) return INVALID;
+    if(vma_reserve(2)) return NO_MEMORY;
     if (host_protect(start,end-start,host_prot(prot))) return INVALID;
     int error; size_t i=carve(start,end,&error);
     if (error) return NO_MEMORY;
@@ -863,8 +881,21 @@ void runtime_memory_set_gpu_hooks(GpuRange map, GpuRange unmap, GpuRange invalid
     write_unlock();
     flush_hooks();
 }
+/* Renderer workers use backing offsets, never logical guest pointers. */
+int runtime_memory_read_backing(uintptr_t address,void *data,uint64_t size) {
+    if(!data || !size || size>UINTPTR_MAX-address) return 0;
+    read_lock(); int ok=1;
+    for(uintptr_t at=address,end=address+size;at<end;) {
+        size_t i=vma_index(at);
+        if(i==vma_count || vmas[i].start>at || vmas[i].kind==KIND_RESERVED) { ok=0; break; }
+        uint64_t n=(vmas[i].end<end ? vmas[i].end : end)-at;
+        memcpy((unsigned char *)data+(at-address),backing_base+vmas[i].phys+(at-vmas[i].start),n); at+=n;
+    }
+    read_unlock(); return ok;
+}
 /* Writes through the backing view; 0 when part of the range has no backing. */
 int runtime_memory_write_backing(uintptr_t address, const void *data, uint64_t size) {
+    if(!data || !size || size>UINTPTR_MAX-address) return 0;
     read_lock();
     int ok=1;
     for (uintptr_t at=address, end=address+size; at<end && ok;) {
@@ -930,6 +961,33 @@ int runtime_memory_region(uintptr_t address, uintptr_t *start, uintptr_t *end, i
     read_unlock();
     return found;
 }
+void runtime_memory_set_guest_gpu_fault_handler(RuntimeGpuGuestFault handler) {
+    write_lock(); guest_gpu_fault=handler; write_unlock();
+}
+int runtime_memory_ack_guest_gpu(uint64_t pc,uint64_t address,uint64_t physical,int write) {
+#ifdef __APPLE__
+    (void)address;
+    if(!darwin_memory || bb_vm_status(darwin_memory)!=BB_VM_OK) return 0;
+    /* Snapshot all virtual aliases before invoking the renderer. Its callbacks
+     * can synchronously release their own protection masks. No VMA lock is held. */
+    read_lock(); RuntimeGpuGuestFault handler=guest_gpu_fault;
+    uintptr_t *aliases=calloc(vma_count ? vma_count : 1,sizeof(*aliases)); size_t count=0;
+    if(handler && aliases) for(size_t i=0;i<vma_count;++i) {
+        Vma v=vmas[i];
+        if(v.kind==KIND_RESERVED || physical<v.phys || physical-v.phys>=v.end-v.start) continue;
+        uintptr_t at=v.start+(physical-v.phys); BbVmView view;
+        if(bb_vm_query(darwin_memory,at,&view)==BB_VM_OK &&
+           (view.gpu_denied&(write ? BB_VM_WRITE : BB_VM_READ))) aliases[count++]=at;
+    }
+    read_unlock();
+    if(!handler || !aliases || !count) { free(aliases); return 0; }
+    int result=1;
+    for(size_t i=0;i<count;++i) if(!handler(pc,aliases[i],BB_VM_TRACKER_PAGE,write)) { result=0; break; }
+    free(aliases); return result;
+#else
+    (void)pc; (void)address; (void)physical; (void)write; return 0;
+#endif
+}
 /* GPU page tracking: restrict host access, never beyond the guest's own protection. */
 void runtime_memory_gpu_protect(uintptr_t address, uint64_t size, int read, int write) {
     read_lock();
@@ -937,9 +995,15 @@ void runtime_memory_gpu_protect(uintptr_t address, uint64_t size, int read, int 
         if (vmas[i].kind==KIND_RESERVED) continue;
         uintptr_t a=vmas[i].start>address ? vmas[i].start : address;
         uintptr_t b=vmas[i].end<address+size ? vmas[i].end : address+size;
+#ifdef __APPLE__
+        if(!darwin_memory || bb_vm_set_gpu_permissions(darwin_memory,a,b-a,read,write)!=BB_VM_OK) {
+            read_unlock(); fputs("STOP: Darwin GPU protection requires mapped subpages on the VM owner thread\n",stderr); exit(21);
+        }
+#else
         int guest=host_prot(vmas[i].prot);
         int want=(read ? PROT_READ : 0)|(write ? PROT_WRITE|PROT_READ : 0)|(guest & PROT_EXEC);
         host_protect(a,b-a,guest & want);
+#endif
     }
     read_unlock();
 }

@@ -102,6 +102,11 @@ static int append(char *output,size_t *used,const char *data,size_t n) {
 BbFormatStatus bb_format_write(const BbFormatPlan *p,const BbAbiValue *v,const BbAbiMemory *m,
     uint64_t destination,uint64_t capacity,int32_t *result) {
     if(!p || (!v && p->argument_count) || !m || !m->check || !m->read || !m->write || !result) return BB_FORMAT_INVALID;
+    /* Plans are public values: reject forged indices/bounds before rendering. */
+    BbFormatPlan validated;
+    if(bb_format_plan(p->text,&validated)!=BB_FORMAT_OK || memcmp(p,&validated,sizeof(validated))) return BB_FORMAT_INVALID;
+    static const BbAbiValue empty[BB_ABI_MAX_ARGS]={0};
+    if(!v) v=empty;
     char *output=calloc(BB_FORMAT_LIMIT+1,1),*temp=malloc(BB_FORMAT_LIMIT+1),*string=malloc(BB_FORMAT_LIMIT+1);
     if(!output || !temp || !string) { free(output); free(temp); free(string); return BB_FORMAT_SYSTEM; }
 #ifdef _WIN32

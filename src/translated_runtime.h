@@ -9,6 +9,10 @@ extern "C" {
 typedef struct BbTranslatedRuntime BbTranslatedRuntime;
 typedef enum { BB_TRANSLATED_OK, BB_TRANSLATED_INVALID, BB_TRANSLATED_UNSUPPORTED,
     BB_TRANSLATED_MEMORY, BB_TRANSLATED_EXECUTION } BbTranslatedStatus;
+/* Registry metadata contains guest contracts only; no host function addresses. */
+typedef struct { const char *name; BbImportKind kind; BbAbiSignature signature; size_t data_size; } BbTranslatedImport;
+size_t bb_translated_import_count(void);
+int bb_translated_import_info(size_t index,BbTranslatedImport *out);
 /* One explicitly attached, owner-thread runtime; no M3 scheduling/TLS is implied. */
 BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out);
 BbTranslatedStatus bb_translated_close(BbTranslatedRuntime *runtime);
