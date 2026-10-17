@@ -34,6 +34,21 @@ outside the JIT and preserve CPU state with separate stack slices. It is bounded
 to eight nested calls, sixteen bridges, sixty-four bridge resumptions per call,
 and an instruction/time budget per emulation segment. It deliberately does not
 implement concurrent guest CPUs, a PS4 VM, real import signatures or blocking HLE.
+Guest `syscall` instructions stop with an unsupported-service result; no host
+system call is made on the guest's behalf. Permission changes invalidate cached
+blocks before subsequent execution.
+
+CTest covers scalar/control flow, SSE2/double precision/MXCSR, x87, nested host
+callbacks with register/flag/SIMD preservation, recoverable/protected guest memory,
+host and guest code modification, serialized atomic accesses through aliases,
+and limits/unsupported instructions. A second suite runs in an ad-hoc signed
+Hardened Runtime executable with only `com.apple.security.cs.allow-jit` enabled.
+The separate signed JIT-policy probe verifies public `MAP_JIT`, thread W^X
+transitions and instruction-cache invalidation using tiny ARM instructions.
+
+`out/m1-cpu/cpu-probe-suite benchmark` prints JSON for a bounded arithmetic loop
+and 100 entry/bridge calls. It includes context-save, watchdog, instruction-budget
+and bridge overhead. These numbers have no pass threshold and are not game FPS.
 
 Guest pages here are software mappings, distinct from Darwin VM permissions.
 Host-backed mappings borrow memory whose owner must keep it alive until the

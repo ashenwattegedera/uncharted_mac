@@ -7,7 +7,8 @@
  * One engine is serialized across callers; callbacks execute outside uc_emu_start.
  * Nested calls preserve CPU state and use separate stack slices. */
 typedef struct BbCpuProbe BbCpuProbe;
-typedef enum { BB_PROBE_OK, BB_PROBE_INVALID, BB_PROBE_ENGINE, BB_PROBE_FAULT, BB_PROBE_LIMIT } BbProbeStatus;
+typedef enum { BB_PROBE_OK, BB_PROBE_INVALID, BB_PROBE_ENGINE, BB_PROBE_FAULT, BB_PROBE_LIMIT,
+               BB_PROBE_UNSUPPORTED } BbProbeStatus;
 typedef struct {
     uint64_t pc,address;
     int access;

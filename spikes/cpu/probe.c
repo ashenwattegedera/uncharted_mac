@@ -8,10 +8,11 @@ enum { MAX_BINDINGS=16, MAX_DEPTH=8, STACK_SLICE=65536, MAX_RESUMES=64 };
 struct BbCpuProbe {
     uc_engine *engine;
     pthread_mutex_t lock;
-    uc_hook bridge_hook,fault_hook;
+    uc_hook bridge_hook,fault_hook,syscall_hook;
     struct { BbProbeHostCall call; void *user; } bindings[MAX_BINDINGS];
     unsigned count,depth;
     int pending;
+    int unsupported;
     BbProbeFault fault;
     BbProbeFaultHandler fault_handler;
     void *fault_user;
@@ -22,6 +23,11 @@ static void bridge_hook(uc_engine *engine,uint64_t address,uint32_t size,void *u
     (void)size;
     BbCpuProbe *p=user;
     p->pending=(int)((address-BRIDGE_BASE)/16);
+    uc_emu_stop(engine);
+}
+static void syscall_hook(uc_engine *engine,void *user) {
+    BbCpuProbe *p=user;
+    p->unsupported=1;
     uc_emu_stop(engine);
 }
 static bool fault_hook(uc_engine *engine,uc_mem_type access,uint64_t address,int size,int64_t value,void *user) {
@@ -47,8 +53,11 @@ BbProbeStatus bb_probe_open(BbCpuProbe **out) {
     if(e==UC_ERR_OK) e=uc_mem_map(p->engine,BB_PROBE_CODE,65536,UC_PROT_ALL);
     if(e==UC_ERR_OK) e=uc_mem_map(p->engine,BRIDGE_BASE,65536,UC_PROT_READ|UC_PROT_EXEC);
     if(e==UC_ERR_OK) e=uc_mem_map(p->engine,BB_PROBE_STACK,MAX_DEPTH*STACK_SLICE,UC_PROT_READ|UC_PROT_WRITE);
-    if(e==UC_ERR_OK) e=uc_hook_add(p->engine,&p->bridge_hook,UC_HOOK_CODE,(void *)bridge_hook,p,BRIDGE_BASE,BRIDGE_BASE+16*MAX_BINDINGS-1);
+    /* Each bridge is entered by a call/jump and starts its own translated block.
+     * A block hook avoids instrumenting every guest instruction for host calls. */
+    if(e==UC_ERR_OK) e=uc_hook_add(p->engine,&p->bridge_hook,UC_HOOK_BLOCK,(void *)bridge_hook,p,BRIDGE_BASE,BRIDGE_BASE+16*MAX_BINDINGS-1);
     if(e==UC_ERR_OK) e=uc_hook_add(p->engine,&p->fault_hook,UC_HOOK_MEM_INVALID,(void *)fault_hook,p,1,0);
+    if(e==UC_ERR_OK) e=uc_hook_add(p->engine,&p->syscall_hook,UC_HOOK_INSN,(void *)syscall_hook,p,1,0,UC_X86_INS_SYSCALL);
     if(e!=UC_ERR_OK) { bb_probe_close(p); return BB_PROBE_ENGINE; }
     *out=p;
     return BB_PROBE_OK;
@@ -92,6 +101,7 @@ BbProbeStatus bb_probe_protect(BbCpuProbe *p,uint64_t address,size_t size,unsign
     if(!p || !range_valid(address,size)) return BB_PROBE_INVALID;
     pthread_mutex_lock(&p->lock);
     uc_err e=uc_mem_protect(p->engine,address,size,permissions);
+    if(e==UC_ERR_OK) e=uc_ctl_remove_cache(p->engine,address,address+size);
     pthread_mutex_unlock(&p->lock);
     return engine_status(e);
 }
@@ -108,6 +118,7 @@ BbProbeStatus bb_probe_bind(BbCpuProbe *p,BbProbeHostCall call,void *user,uint64
     return status;
 }
 void bb_probe_set_fault_handler(BbCpuProbe *p,BbProbeFaultHandler handler,void *user) {
+    if(!p) return;
     pthread_mutex_lock(&p->lock);
     p->fault_handler=handler; p->fault_user=user;
     pthread_mutex_unlock(&p->lock);
@@ -136,8 +147,10 @@ BbProbeStatus bb_probe_invoke(BbCpuProbe *p,BbGuestCall *call,BbProbeFault *faul
     memset(&p->fault,0,sizeof(p->fault));
     for(unsigned resume=0;e==UC_ERR_OK && resume<MAX_RESUMES;++resume) {
         p->pending=-1;
+        p->unsupported=0;
         e=uc_emu_start(p->engine,pc,BB_PROBE_RETURN,1000000,5000000);
         uc_reg_read(p->engine,UC_X86_REG_RIP,&pc);
+        if(p->unsupported) { p->fault.pc=pc; status=BB_PROBE_UNSUPPORTED; break; }
         if(e!=UC_ERR_OK) { p->fault.pc=pc; p->fault.engine_error=e; status=BB_PROBE_FAULT; break; }
         if(pc==BB_PROBE_RETURN) { status=BB_PROBE_OK; break; }
         int i=p->pending;
@@ -180,6 +193,7 @@ const char *bb_probe_status_name(BbProbeStatus status) {
     case BB_PROBE_ENGINE: return "engine API failure";
     case BB_PROBE_FAULT: return "guest fault";
     case BB_PROBE_LIMIT: return "execution/depth/binding limit";
+    case BB_PROBE_UNSUPPORTED: return "guest syscall is not provided";
     }
     return "unknown status";
 }
