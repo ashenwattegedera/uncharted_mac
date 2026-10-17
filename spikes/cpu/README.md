@@ -59,3 +59,24 @@ Run JIT tests in a normal macOS process. The Codex tool sandbox on the tested M2
 rejects a dependency cache-initialization system-register read with SIGILL;
 the same binary passes outside that sandbox. This is a recorded environment
 limitation, not permission to disable macOS Hardened Runtime protections.
+
+## M2 extension
+
+The same build now has 16 CTest checks, adding ordinary/signed compiler-generated
+SysV ABI callers and owned Darwin memory/fault integration. Python 3.10+ and
+Clang's x86 object-emission support are needed to regenerate the caller fixture.
+No x86 executable runs directly on the host. Root CMake also exposes the reusable
+ABI and Darwin memory modules without a Unicorn dependency.
+
+For project-owned probe code, add `-DBB_PROBE_SANITIZER=undefined` to a separate
+Debug build. `address,undefined` is also accepted, but the low-address memory
+cases cannot reserve their windows under ASan on the tested M2. Vendor-wide
+UBSan reports an upstream TCG initialization diagnostic; project-scoped results
+do not validate vendor sanitizer cleanliness. See the full
+[M2 verification record](../../docs/M2_VERIFICATION.md).
+
+`BbMemoryProbe` owns its engine and Darwin window. Use its invoke/bind APIs;
+borrowed CPU/VM/router accessors must not be used to replace its observer, destroy
+its resources or mutate raw backing. Keep all operations on its creating thread.
+Its GPU callback is an explicit synchronization contract exercised by fixtures,
+not a renderer or async-signal handler integration.

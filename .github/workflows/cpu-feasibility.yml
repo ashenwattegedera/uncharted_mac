@@ -1,13 +1,17 @@
 name: Native ARM CPU feasibility (no game files)
 on:
   push:
-    branches: [mac-port, 'codex/spike-mac-*']
+    branches: [mac-port, 'codex/spike-mac-*', 'codex/mac-port-*']
   pull_request:
     branches: [mac-port]
 permissions:
   contents: read
 jobs:
   darwin-arm64:
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [release, ubsan]
     runs-on: macos-15
     timeout-minutes: 20
     steps:
@@ -20,23 +24,39 @@ jobs:
       - name: Ensure pkg-config is available
         run: command -v pkg-config || HOMEBREW_NO_AUTO_UPDATE=1 brew install pkgconf
       - name: Configure pinned translation experiment
-        run: cmake -S spikes/cpu -B out/m1-cpu -DCMAKE_BUILD_TYPE=Release
+        run: |
+          if [ "${{ matrix.profile }}" = ubsan ]; then
+            cmake -S spikes/cpu -B out/m1-cpu -DCMAKE_BUILD_TYPE=Debug -DBB_PROBE_SANITIZER=undefined
+          else
+            cmake -S spikes/cpu -B out/m1-cpu -DCMAKE_BUILD_TYPE=Release
+          fi
       - name: Build
         run: cmake --build out/m1-cpu --parallel 4
       - name: Test translated execution and signed JIT policy
         run: ctest --test-dir out/m1-cpu --output-on-failure
+      - name: Verify host memory and ABI with UBSan
+        if: matrix.profile == 'ubsan'
+        run: |
+          cmake -S . -B out/m2-host -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="-fsanitize=undefined -fno-sanitize-recover=undefined" -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=undefined
+          cmake --build out/m2-host --parallel 4
+          ctest --test-dir out/m2-host --output-on-failure
       - name: Capture synthetic timing and binary evidence
         run: |
           out/m1-cpu/cpu-probe-suite benchmark > out/m1-cpu/benchmark.json
           file out/m1-cpu/cpu-probe-hardened > out/m1-cpu/binary-evidence.txt
           otool -L out/m1-cpu/cpu-probe-hardened >> out/m1-cpu/binary-evidence.txt
-          codesign --display --verbose=4 --entitlements :- out/m1-cpu/cpu-probe-hardened >> out/m1-cpu/binary-evidence.txt 2>&1
+          for binary in cpu-probe-hardened cpu-abi-hardened cpu-memory-hardened; do
+            codesign --verify --strict "out/m1-cpu/$binary"
+            codesign --display --verbose=4 --entitlements :- "out/m1-cpu/$binary" >> out/m1-cpu/binary-evidence.txt 2>&1
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: m1-darwin-arm64-evidence
+          name: m2-darwin-arm64-${{ matrix.profile }}-evidence
           path: |
             out/m1-cpu/benchmark.json
             out/m1-cpu/binary-evidence.txt
             out/m1-cpu/Testing/Temporary/LastTest.log
+            out/m2-host/Testing/Temporary/LastTest.log
+            out/m1-cpu/guest_abi_text.h
           if-no-files-found: warn

@@ -57,3 +57,16 @@ The native adapter tests cover every implemented call shape, import identity,
 nested callback reentry, signed returns and (on POSIX) stack switching. ARM tests
 cover refusal to invoke/bind/invalidate and preserve output sentinels on failure.
 See [M0 verification](M0_VERIFICATION.md) for the platforms actually executed.
+
+## M2 opt-in typed bridge
+
+`src/guest_abi.h` now describes supported SysV values and validated memory
+providers. It handles independent register banks, stack overflow arguments,
+explicit aggregate classes, structure returns and guest variadic state.
+`bb_probe_bind_abi` adapts it to M1's reference engine; `memory_probe.h` adds
+owned Darwin mappings and a memory-aware binding entry point. These are opt-in
+fixtures and reusable modules, not a replacement for `bb_execution_bind_import`
+or an audited production registry. The production ARM binding refusal remains.
+
+See [M2 verification](M2_VERIFICATION.md) for supported classes, fault restart,
+known sanitizer limits and remaining per-service/renderer integration.

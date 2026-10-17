@@ -43,7 +43,7 @@ file(READ "${CMAKE_BINARY_DIR}/config-host.h" bb_unicorn_host_config)
 if(NOT bb_unicorn_host_config MATCHES "#define HAVE_PTHREAD_JIT_PROTECT 1")
     message(FATAL_ERROR "Unicorn did not detect Apple's JIT protection API; inspect dependency configure output.")
 endif()
-add_library(bb-cpu-probe STATIC probe.c)
+add_library(bb-cpu-probe STATIC probe.c ../../src/guest_abi.c)
 target_include_directories(bb-cpu-probe PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../src")
 target_compile_options(bb-cpu-probe PRIVATE -Wall -Wextra -Werror -fno-omit-frame-pointer)
 target_link_libraries(bb-cpu-probe PUBLIC unicorn Threads::Threads)
@@ -75,3 +75,60 @@ add_test(NAME cpu-probe-hardened COMMAND cpu-probe-hardened all)
 add_test(NAME cpu-jit-policy COMMAND cpu-jit-policy)
 add_test(NAME cpu-probe-signature COMMAND "${BB_CODESIGN}" --verify --strict "$<TARGET_FILE:cpu-probe-hardened>")
 set_tests_properties(cpu-probe-hardened cpu-jit-policy cpu-probe-signature PROPERTIES TIMEOUT 60)
+
+# Independently compiled SysV callers verify placement against the marshaller.
+find_package(Python3 3.10 REQUIRED COMPONENTS Interpreter)
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/guest_abi_text.h"
+    COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding
+        -fno-stack-protector -fno-pic -mno-red-zone -fno-unwind-tables
+        -fno-asynchronous-unwind-tables -O1 -c
+        "${CMAKE_CURRENT_SOURCE_DIR}/../../tests/fixtures/guest_abi_calls.c"
+        -o "${CMAKE_CURRENT_BINARY_DIR}/guest_abi_calls.o"
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../../tests/fixtures/extract_guest_text.py"
+        "${CMAKE_CURRENT_BINARY_DIR}/guest_abi_calls.o" "${CMAKE_CURRENT_BINARY_DIR}/guest_abi_text.h"
+    DEPENDS ../../tests/fixtures/guest_abi_calls.c ../../tests/fixtures/guest_abi_types.h
+        ../../tests/fixtures/extract_guest_text.py VERBATIM)
+foreach(target cpu-abi-suite cpu-abi-hardened)
+    add_executable(${target} abi_suite.c "${CMAKE_CURRENT_BINARY_DIR}/guest_abi_text.h")
+    target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+    target_link_libraries(${target} PRIVATE bb-cpu-probe)
+    add_test(NAME ${target} COMMAND ${target})
+    set_tests_properties(${target} PROPERTIES TIMEOUT 60)
+endforeach()
+set_property(TARGET cpu-abi-hardened APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist")
+add_custom_command(TARGET cpu-abi-hardened POST_BUILD
+    COMMAND "${BB_CODESIGN}" --force --sign - --options runtime
+        --entitlements "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist" "$<TARGET_FILE:cpu-abi-hardened>" VERBATIM)
+
+add_library(bb-memory-probe STATIC memory_probe.c ../../src/platform/guest_memory_darwin.c ../../src/guest_fault.c)
+target_include_directories(bb-memory-probe PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../src")
+target_compile_options(bb-memory-probe PRIVATE -Wall -Wextra -Werror)
+target_link_libraries(bb-memory-probe PUBLIC bb-cpu-probe)
+foreach(target cpu-memory-suite cpu-memory-hardened)
+    add_executable(${target} memory_suite.c)
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Werror -UNDEBUG)
+    target_link_libraries(${target} PRIVATE bb-memory-probe)
+    add_test(NAME ${target} COMMAND ${target})
+    set_tests_properties(${target} PROPERTIES TIMEOUT 60)
+endforeach()
+set_property(TARGET cpu-memory-hardened APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist")
+add_custom_command(TARGET cpu-memory-hardened POST_BUILD
+    COMMAND "${BB_CODESIGN}" --force --sign - --options runtime
+        --entitlements "${CMAKE_CURRENT_SOURCE_DIR}/jit.entitlements.plist" "$<TARGET_FILE:cpu-memory-hardened>" VERBATIM)
+
+set(BB_PROBE_SANITIZER none CACHE STRING "Sanitize project-owned probe targets: none, undefined, address,undefined")
+set_property(CACHE BB_PROBE_SANITIZER PROPERTY STRINGS none undefined address,undefined)
+if(NOT BB_PROBE_SANITIZER STREQUAL "none")
+    if(NOT BB_PROBE_SANITIZER MATCHES "^(undefined|address,undefined)$")
+        message(FATAL_ERROR "Unsupported BB_PROBE_SANITIZER=${BB_PROBE_SANITIZER}")
+    endif()
+    # Vendor-wide UBSan currently reports Unicorn's null-pool pointer arithmetic.
+    # Keep its pinned source unchanged; scope this gate explicitly to our code.
+    foreach(target bb-cpu-probe cpu-probe-smoke cpu-probe-suite cpu-probe-hardened
+            cpu-jit-policy cpu-abi-suite cpu-abi-hardened bb-memory-probe
+            cpu-memory-suite cpu-memory-hardened)
+        target_compile_options(${target} PRIVATE "-fsanitize=${BB_PROBE_SANITIZER}" -fno-sanitize-recover=undefined)
+        target_link_options(${target} PRIVATE "-fsanitize=${BB_PROBE_SANITIZER}")
+    endforeach()
+endif()
