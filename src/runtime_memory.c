@@ -288,9 +288,13 @@ static void host_discard(uint64_t phys,uint64_t size) {
 }
 int runtime_memory_darwin_shutdown(void) {
     if(darwin_memory && bb_vm_status(darwin_memory)!=BB_VM_OK && bb_vm_status(darwin_memory)!=BB_VM_POISONED) return -1;
-    for(size_t i=0;i<darwin_low_count;++i) if(bb_vm_close(darwin_low[i])!=BB_VM_OK) return -1;
+    for(size_t i=0;i<darwin_low_count;++i) if(bb_vm_status(darwin_low[i])==BB_VM_WRONG_THREAD) return -1;
+    /* Close consumes each VM even when releasing a host resource reports an
+     * error. Finish teardown and clear ownership rather than retain stale pointers. */
+    int failed=0;
+    for(size_t i=0;i<darwin_low_count;++i) failed|=bb_vm_close(darwin_low[i])!=BB_VM_OK;
     darwin_low_count=0;
-    if(bb_vm_close(darwin_memory)!=BB_VM_OK) return -1;
+    failed|=bb_vm_close(darwin_memory)!=BB_VM_OK;
     darwin_memory=NULL; backing_base=NULL;
     free(vmas); vmas=NULL; vma_count=0; vma_capacity=0;
     free(pending); pending=NULL; pending_count=0; pending_capacity=0;
@@ -298,7 +302,7 @@ int runtime_memory_darwin_shutdown(void) {
     hook_map=NULL; hook_unmap=NULL; hook_invalidate=NULL; guest_gpu_fault=NULL;
     live_bytes=0; flexible_bytes=0;
     ++table_generation; ++table_generation;
-    return 0;
+    return failed ? -1 : 0;
 }
 #else
 /* Direct memory occupies [0,POOL_SIZE) of the memfd, flexible memory [POOL_SIZE,+FLEX_SPAN). */
