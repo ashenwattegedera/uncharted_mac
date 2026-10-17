@@ -32,3 +32,13 @@ void varargs(U64 fn,Output *out) {
     out->real=((double (*)(unsigned,...))fn)(1,(double)(int)out->integer);
 }
 void data_export(U64 fn,Output *out) { out->integer=*(U64 *)fn; }
+
+static void forward_list(U64 fn,Output *out,unsigned count,...) {
+    __builtin_va_list args;
+    __builtin_va_start(args,count);
+    out->real=((double (*)(void *))fn)(args);
+    __builtin_va_end(args);
+}
+void vararg_list(U64 fn,Output *out) {
+    forward_list(fn,out,2,17,(double)(int)out->integer,25ULL,26ULL,27ULL,28ULL,29ULL,30ULL,31ULL);
+}

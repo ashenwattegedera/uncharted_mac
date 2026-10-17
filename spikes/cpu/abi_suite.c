@@ -15,6 +15,13 @@ static BbProbeStatus enter(BbCpuProbe *p,unsigned entry,uint64_t fn,uint64_t dat
     BbGuestCall call={.kind=BB_CALL_VOID,.target=BB_PROBE_CODE+entry,.args={fn,data}};
     return bb_probe_invoke(p,&call,NULL);
 }
+static int va_check(void *p,uint64_t at,size_t n,int write) {
+    (void)p;
+    return !write && at>=BB_PROBE_STACK && at<BB_PROBE_STACK+8*65536 && n<=BB_PROBE_STACK+8*65536-at;
+}
+static int va_read(void *p,uint64_t at,void *out,size_t n) {
+    return va_check(p,at,n,0) && bb_probe_read(p,at,out,n)==BB_PROBE_OK;
+}
 static BbAbiStatus host_call(const BbAbiValue *a,size_t n,BbAbiValue *r,void *user) {
     Host *h=user;
     switch(h->kind) {
@@ -48,6 +55,19 @@ static BbAbiStatus host_call(const BbAbiValue *a,size_t n,BbAbiValue *r,void *us
     }
     case 9: { assert(n==2); unsigned tag; double v; memcpy(&tag,a[0].bytes,4); assert(tag==1);
         memcpy(&v,a[1].bytes,8); v+=1; memcpy(r->bytes,&v,8); break; }
+    case 10: {
+        assert(n==1); uint64_t at; memcpy(&at,a[0].bytes,8);
+        BbGuestVaList state; assert(va_read(h->probe,at,&state,sizeof(state)));
+        BbAbiMemory m={.check=va_check,.read=va_read,.user=h->probe};
+        BbAbiValue value; double sum=0,d; int32_t tag;
+        assert(bb_abi_va_read(&state,BB_ABI_I32,&value,&m)==BB_ABI_OK); memcpy(&tag,value.bytes,4); assert(tag==17); sum+=tag;
+        assert(bb_abi_va_read(&state,BB_ABI_DOUBLE,&value,&m)==BB_ABI_OK); memcpy(&d,value.bytes,8); sum+=d;
+        for(unsigned j=25;j<=31;++j) {
+            uint64_t v; assert(bb_abi_va_read(&state,BB_ABI_U64,&value,&m)==BB_ABI_OK);
+            memcpy(&v,value.bytes,8); assert(v==j); sum+=(double)v;
+        }
+        memcpy(r->bytes,&sum,8); break;
+    }
     default: return BB_ABI_HOST;
     }
     return BB_ABI_OK;
@@ -96,6 +116,13 @@ void bb_test_abi(BbCpuProbe *p) {
         case 9: assert(out.real==3); break;
         }
     }
+    Host list_host={10,p,0};
+    BbAbiImport list_import={.name="guest-va-list",.host=host_call,.user=&list_host,
+        .signature={.result=BB_ABI_DOUBLE,.args={BB_ABI_POINTER},.count=1,.fixed_count=1}};
+    uint64_t list_bridge; OK(bb_probe_bind_abi(p,&list_import,NULL,&list_bridge));
+    Output list_out={.integer=2}; OK(bb_probe_write(p,BB_PROBE_DATA,&list_out,sizeof(list_out)));
+    OK(enter(p,GUEST_VARARG_LIST,list_bridge,BB_PROBE_DATA));
+    OK(bb_probe_read(p,BB_PROBE_DATA,&list_out,sizeof(list_out))); assert(list_out.real==215);
     U64 exported=42; OK(bb_probe_write(p,BB_PROBE_DATA+8192,&exported,8));
     OK(enter(p,GUEST_DATA_EXPORT,BB_PROBE_DATA+8192,BB_PROBE_DATA));
     Output out; OK(bb_probe_read(p,BB_PROBE_DATA,&out,sizeof(out))); assert(out.integer==42);

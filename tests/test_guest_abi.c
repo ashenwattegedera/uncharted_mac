@@ -8,10 +8,12 @@ static int valid(void *u,uint64_t at,size_t n,int write) {
     (void)u; (void)write; return at<512 && n<=512-at;
 }
 static int read_mem(void *u,uint64_t at,void *out,size_t n) {
-    if(!valid(u,at,n,0)) return 0; memcpy(out,((Memory *)u)->bytes+at,n); return 1;
+    if(!valid(u,at,n,0)) return 0;
+    memcpy(out,((Memory *)u)->bytes+at,n); return 1;
 }
 static int write_mem(void *u,uint64_t at,const void *in,size_t n) {
-    if(!valid(u,at,n,1)) return 0; memcpy(((Memory *)u)->bytes+at,in,n); return 1;
+    if(!valid(u,at,n,1)) return 0;
+    memcpy(((Memory *)u)->bytes+at,in,n); return 1;
 }
 static uint64_t integer(const BbAbiValue *v) { uint64_t n; memcpy(&n,v->bytes,8); return n; }
 static double real(const BbAbiValue *v) { double n; memcpy(&n,v->bytes,8); return n; }
@@ -89,5 +91,16 @@ int main(void) {
     saved=f; calls=memory.calls;
     assert(bb_abi_dispatch(&b,&f,&m)==BB_ABI_MEMORY && !memcmp(&f,&saved,sizeof(f)) && calls==memory.calls);
     b.signature.result=(BbAbiType)99; assert(bb_abi_validate(&b.signature)==BB_ABI_INVALID);
+    BbGuestVaList va={.gp_offset=40,.fp_offset=160,.reg_save_area=0,.overflow_arg_area=256};
+    uint64_t last=17,overflow=25; d=2.5;
+    memcpy(memory.bytes+40,&last,8); memcpy(memory.bytes+160,&d,8); memcpy(memory.bytes+256,&overflow,8);
+    BbAbiValue value={{0}};
+    assert(bb_abi_va_read(&va,BB_ABI_U64,&value,&m)==BB_ABI_OK && integer(&value)==17 && va.gp_offset==48);
+    assert(bb_abi_va_read(&va,BB_ABI_DOUBLE,&value,&m)==BB_ABI_OK && real(&value)==2.5 && va.fp_offset==176);
+    assert(bb_abi_va_read(&va,BB_ABI_U64,&value,&m)==BB_ABI_OK && integer(&value)==25 && va.overflow_arg_area==264);
+    BbGuestVaList old=va; va.overflow_arg_area=UINT64_MAX;
+    BbGuestVaList invalid=va; BbAbiValue old_value=value;
+    assert(bb_abi_va_read(&va,BB_ABI_U64,&value,&m)==BB_ABI_MEMORY && !memcmp(&va,&invalid,sizeof(va)) && !memcmp(&value,&old_value,sizeof(value)));
+    va=old; va.fp_offset=49; assert(bb_abi_va_read(&va,BB_ABI_DOUBLE,&value,&m)==BB_ABI_INVALID);
     puts("PASS: SysV registers, stack, aggregate rollback/sret, declared varargs and failure contracts");
 }

@@ -84,3 +84,31 @@ BbAbiStatus bb_abi_dispatch(const BbAbiImport *b,BbAbiFrame *f,const BbAbiMemory
     *f=next;
     return BB_ABI_OK;
 }
+
+BbAbiStatus bb_abi_va_read(BbGuestVaList *state,BbAbiType type,BbAbiValue *value,const BbAbiMemory *m) {
+    if(!state || !value || !m || !m->read || !m->check || type<=BB_ABI_VOID ||
+       type>BB_ABI_MEMORY24 || type==BB_ABI_FLOAT || state->gp_offset>48 ||
+       state->gp_offset%8 || state->fp_offset<48 || state->fp_offset>176 ||
+       (state->fp_offset-48)%16) return BB_ABI_INVALID;
+    const Type *t=&types[type];
+    unsigned g=0,f=0;
+    for(unsigned i=0;i<t->count;++i) { g+=t->classes[i]==0; f+=t->classes[i]==1; }
+    BbGuestVaList next=*state; BbAbiValue out={{0}};
+    if(t->classes[0]!=2 && g<=(48-next.gp_offset)/8 && f<=(176-next.fp_offset)/16) {
+        for(unsigned i=0;i<t->count;++i) {
+            uint32_t offset=t->classes[i]==0 ? next.gp_offset : next.fp_offset;
+            unsigned part=t->size-8*i; if(part>8) part=8;
+            if(next.reg_save_area>UINT64_MAX-offset) return BB_ABI_MEMORY;
+            uint64_t at=next.reg_save_area+offset;
+            if(!m->check(m->user,at,part,0) || !m->read(m->user,at,out.bytes+8*i,part)) return BB_ABI_MEMORY;
+            if(t->classes[i]==0) next.gp_offset+=8; else next.fp_offset+=16;
+        }
+    } else {
+        unsigned align=t->alignment<8 ? 8 : t->alignment,slot=(t->size+7)&~7u;
+        if(next.overflow_arg_area>UINT64_MAX-(align-1)) return BB_ABI_MEMORY;
+        uint64_t at=(next.overflow_arg_area+align-1)&~(uint64_t)(align-1);
+        if(at>UINT64_MAX-slot || !m->check(m->user,at,t->size,0) || !m->read(m->user,at,out.bytes,t->size)) return BB_ABI_MEMORY;
+        next.overflow_arg_area=at+slot;
+    }
+    *state=next; *value=out; return BB_ABI_OK;
+}
