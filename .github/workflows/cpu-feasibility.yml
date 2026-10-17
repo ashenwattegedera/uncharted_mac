@@ -1,0 +1,42 @@
+name: Native ARM CPU feasibility (no game files)
+on:
+  push:
+    branches: [mac-port, 'codex/spike-mac-*']
+  pull_request:
+    branches: [mac-port]
+permissions:
+  contents: read
+jobs:
+  darwin-arm64:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify native Apple Silicon host
+        run: |
+          test "$(uname -m)" = arm64
+          sw_vers
+          clang --version
+      - name: Ensure pkg-config is available
+        run: command -v pkg-config || HOMEBREW_NO_AUTO_UPDATE=1 brew install pkgconf
+      - name: Configure pinned translation experiment
+        run: cmake -S spikes/cpu -B out/m1-cpu -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build out/m1-cpu --parallel 4
+      - name: Test translated execution and signed JIT policy
+        run: ctest --test-dir out/m1-cpu --output-on-failure
+      - name: Capture synthetic timing and binary evidence
+        run: |
+          out/m1-cpu/cpu-probe-suite benchmark > out/m1-cpu/benchmark.json
+          file out/m1-cpu/cpu-probe-hardened > out/m1-cpu/binary-evidence.txt
+          otool -L out/m1-cpu/cpu-probe-hardened >> out/m1-cpu/binary-evidence.txt
+          codesign --display --verbose=4 --entitlements :- out/m1-cpu/cpu-probe-hardened >> out/m1-cpu/binary-evidence.txt 2>&1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: m1-darwin-arm64-evidence
+          path: |
+            out/m1-cpu/benchmark.json
+            out/m1-cpu/binary-evidence.txt
+            out/m1-cpu/Testing/Temporary/LastTest.log
+          if-no-files-found: warn
