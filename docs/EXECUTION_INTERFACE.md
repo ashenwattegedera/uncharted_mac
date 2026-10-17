@@ -58,15 +58,25 @@ nested callback reentry, signed returns and (on POSIX) stack switching. ARM test
 cover refusal to invoke/bind/invalidate and preserve output sentinels on failure.
 See [M0 verification](M0_VERIFICATION.md) for the platforms actually executed.
 
-## M2 opt-in typed bridge
+## M2 opt-in typed runtime
 
-`src/guest_abi.h` now describes supported SysV values and validated memory
-providers. It handles independent register banks, stack overflow arguments,
-explicit aggregate classes, structure returns and guest variadic state.
-`bb_probe_bind_abi` adapts it to M1's reference engine; `memory_probe.h` adds
-owned Darwin mappings and a memory-aware binding entry point. These are opt-in
-fixtures and reusable modules, not a replacement for `bb_execution_bind_import`
-or an audited production registry. The production ARM binding refusal remains.
+The default ARM profile retains the unavailable backend. Native arm64 Darwin
+builds may explicitly enable `BB_BUILD_TRANSLATED_M2` and link
+`bb-translated-runtime`. `bb_translated_open` creates one owner-thread runtime;
+`bb_translated_attach_execution` explicitly attaches it to the current thread's
+actual `execution.h` entry points. Closing detaches it and consumes the context.
+No guest scheduling or cross-thread callback migration is implied.
 
-See [M2 verification](M2_VERIFICATION.md) for supported classes, fault restart,
-known sanitizer limits and remaining per-service/renderer integration.
+`guest_abi.h` provides declared SysV signatures and checked memory providers.
+`translated_runtime.h` exposes the supported import inventory and prevalidated
+function/data/image relocation requests. Bindings resolve scoped NIDs to guest
+bridges, never arm64 host addresses. Unknown signatures and platform hooks fail
+closed. Supported memory services operate through the actual runtime VM exports;
+formatter wrappers decode guest varargs/va_list with checked output memory.
+
+Guest mappings have separate host views, so native code must use VM/backing
+accessors rather than dereference guest pointer values. GPU faults leave emulation
+before normal-context synchronization; no ARM signal context is synthesized.
+Executable-alias writes stop before the next instruction and invalidate cached
+translations before resuming. See [M2 closeout](M2_CLOSEOUT.md) for precise support,
+reproduction, sanitizer scope and remaining module/renderer/game gates.

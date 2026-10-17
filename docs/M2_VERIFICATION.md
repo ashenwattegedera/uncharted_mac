@@ -1,5 +1,7 @@
 # M2 verification: Darwin memory, ABI and fault foundations
 
+**Historical foundation record.** The subsequent [M2 integration closeout](M2_CLOSEOUT.md) supersedes the implementation gaps and bounded-memory limits below. The original results and sanitizer findings are retained for traceability.
+
 Date: 2026-10-17. Integration base: `mac-port` at `7d0aae9` (merged M1).
 
 **Delivered:** reusable Darwin memory and SysV ABI modules plus an opt-in adapter
