@@ -63,6 +63,7 @@ static BbVmStatus update_aliases(BbGuestMemory *v) {
     }
     return BB_VM_OK;
 }
+static BbVmStatus destroy(BbGuestMemory *v);
 BbVmStatus bb_vm_create(BbGuestMemory **out,size_t n,size_t backing_size,uint64_t preferred) {
     if(!out) return BB_VM_INVALID;
     *out=NULL;
@@ -104,12 +105,15 @@ BbVmStatus bb_vm_create(BbGuestMemory **out,size_t n,size_t backing_size,uint64_
     if(v->backing==MAP_FAILED) goto fail;
     *out=v; return BB_VM_OK;
 fail:
-    bb_vm_close(v); return BB_VM_SYSTEM;
+    destroy(v); return BB_VM_SYSTEM;
 }
 BbVmStatus bb_vm_close(BbGuestMemory *v) {
     if(!v) return BB_VM_OK;
     if(!pthread_equal(v->owner,pthread_self())) return BB_VM_WRONG_THREAD;
     if(v->notifying) return BB_VM_BUSY;
+    return destroy(v);
+}
+static BbVmStatus destroy(BbGuestMemory *v) {
     int failed=0;
     if(v->base!=MAP_FAILED) failed|=munmap(v->base,v->size)!=0;
     if(v->backing!=MAP_FAILED) failed|=munmap(v->backing,v->backing_size)!=0;
@@ -236,12 +240,14 @@ static BbVmStatus transfer(BbGuestMemory *v,uint64_t at,void *data,size_t n,int 
     if(!data || !mapped(v,at,n)) return BB_VM_INVALID;
     /* Validate the entire range before copying any bytes. */
     for(size_t i=0;i<n;) {
-        BbVmView view; bb_vm_query(v,at+i,&view);
+        BbVmView view;
+        s=bb_vm_query(v,at+i,&view); if(s!=BB_VM_OK) return s;
         if(!(view.effective_permissions & (write ? BB_VM_WRITE : BB_VM_READ))) return BB_VM_ACCESS;
         size_t part=view.size<n-i ? view.size : n-i; i+=part;
     }
     for(size_t i=0;i<n;) {
-        BbVmView view; bb_vm_query(v,at+i,&view);
+        BbVmView view;
+        s=bb_vm_query(v,at+i,&view); if(s!=BB_VM_OK) return s;
         size_t part=view.size<n-i ? view.size : n-i;
         void *backing=(char *)v->backing+view.backing_offset;
         if(write) memcpy(backing,(char *)data+i,part); else memcpy((char *)data+i,backing,part);
