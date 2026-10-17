@@ -20,6 +20,9 @@
 #include <windows.h>
 #else
 #include <fcntl.h>
+#ifdef __APPLE__
+#include "guest_memory.h"
+#endif
 #include <sys/mman.h>
 #include <unistd.h>
 #endif
@@ -77,7 +80,7 @@ static void read_lock(void) { if (!exclusive_depth) pthread_rwlock_rdlock(&lock)
 static void read_unlock(void) { if (!exclusive_depth) pthread_rwlock_unlock(&lock); }
 static Block blocks[LIMIT];
 static Vma *vmas; static size_t vma_count, vma_capacity;
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__APPLE__)
 static int pool_fd=-1;
 #endif
 static unsigned char *backing_base; /* second view of the pool: host writes bypass guest/GPU page protection */
@@ -241,6 +244,63 @@ static int pool(void) {
     backing_base=MapViewOfFile3(section,GetCurrentProcess(),NULL,0,bytes,0,PAGE_READWRITE,NULL,0);
     return backing_base ? 0 : -1;
 }
+#elif defined(__APPLE__)
+/* The shared PS4 service table runs unchanged above an owned Darwin window.
+ * Every fixed replacement is checked by the VM owner, never plain MAP_FIXED. */
+static BbGuestMemory *darwin_memory;
+static BbGuestMemory *darwin_low[1024];
+static size_t darwin_low_count;
+static int pool(void) {
+    if(darwin_memory) return bb_vm_status(darwin_memory)==BB_VM_OK ? 0 : -1;
+    uint64_t mb=1024;
+    const char *env=getenv("BB_DARWIN_VM_MB");
+    if(env) { char *end; unsigned long long value=strtoull(env,&end,10);
+        if(!*env || *end || value<64 || value>65536) return -1;
+        mb=value;
+    }
+    if(bb_vm_create(&darwin_memory,(size_t)mb*1024*1024,POOL_SIZE+FLEX_SPAN,0)!=BB_VM_OK) return -1;
+    if(bb_vm_preserve_backing(darwin_memory)!=BB_VM_OK) { bb_vm_close(darwin_memory); darwin_memory=NULL; return -1; }
+    backing_base=bb_vm_backing_view(darwin_memory,0,POOL_SIZE+FLEX_SPAN);
+    return backing_base ? 0 : -1;
+}
+void runtime_memory_reserve(void) { if(pool()) { fputs("STOP: cannot reserve owned Darwin memory\n",stderr); exit(21); } }
+BbGuestMemory *runtime_memory_darwin_vm(void) { return pool() ? NULL : darwin_memory; }
+static int host_unmap(uintptr_t address,uint64_t size) {
+    if(pool() || !bb_vm_contains(darwin_memory,address,size)) return -1;
+    for(size_t i=0;i<size;i+=PAGE) {
+        BbVmView view;
+        if(bb_vm_query(darwin_memory,address+i,&view)==BB_VM_OK &&
+           bb_vm_unmap(darwin_memory,address+i,PAGE)!=BB_VM_OK) return -1;
+    }
+    return 0;
+}
+static int host_map(uintptr_t address,uint64_t size,int prot,int reserved,uint64_t phys) {
+    if(pool() || !bb_vm_contains(darwin_memory,address,size)) return -1;
+    if(host_unmap(address,size)) return -1;
+    return reserved ? 0 : bb_vm_map(darwin_memory,address,size,phys,(unsigned)prot)==BB_VM_OK ? 0 : -1;
+}
+static int host_protect(uintptr_t address,uint64_t size,int prot) {
+    return !pool() && bb_vm_protect(darwin_memory,address,size,(unsigned)prot)==BB_VM_OK ? 0 : -1;
+}
+static void host_discard(uint64_t phys,uint64_t size) {
+    if(bb_vm_discard_backing(darwin_memory,phys,size)!=BB_VM_OK) {
+        fputs("STOP: Darwin physical storage is still mapped or invalid\n",stderr); exit(21);
+    }
+}
+int runtime_memory_darwin_shutdown(void) {
+    if(darwin_memory && bb_vm_status(darwin_memory)!=BB_VM_OK) return -1;
+    for(size_t i=0;i<darwin_low_count;++i) if(bb_vm_close(darwin_low[i])!=BB_VM_OK) return -1;
+    darwin_low_count=0;
+    if(bb_vm_close(darwin_memory)!=BB_VM_OK) return -1;
+    darwin_memory=NULL; backing_base=NULL;
+    free(vmas); vmas=NULL; vma_count=0; vma_capacity=0;
+    free(pending); pending=NULL; pending_count=0; pending_capacity=0;
+    memset(blocks,0,sizeof(blocks)); memset(flex_bitmap,0,sizeof(flex_bitmap));
+    hook_map=NULL; hook_unmap=NULL; hook_invalidate=NULL;
+    live_bytes=0; flexible_bytes=0;
+    ++table_generation; ++table_generation;
+    return 0;
+}
 #else
 /* Direct memory occupies [0,POOL_SIZE) of the memfd, flexible memory [POOL_SIZE,+FLEX_SPAN). */
 static int pool(void) {
@@ -330,7 +390,7 @@ static int split_at(uintptr_t a) {
     if (i==vma_count || vmas[i].start>=a) return 0;
     Vma right=vmas[i];
     right.start=a;
-    if (right.kind==KIND_DIRECT) right.phys+=a-vmas[i].start;
+    if (right.kind==KIND_DIRECT || right.kind==KIND_FLEXIBLE) right.phys+=a-vmas[i].start;
     vmas[i].end=a;
     return vma_insert(i+1,right);
 }
@@ -354,8 +414,14 @@ static int overlaps(uintptr_t start, uintptr_t end, int ignore_reserved) {
 }
 /* First-fit search in the PS4 user range, starting from the hint. */
 static uintptr_t find_free(uintptr_t hint, uint64_t size, uint64_t alignment) {
-    uintptr_t at=align_up(hint<USER_MIN ? USER_MIN : hint, alignment);
-    for (size_t i=vma_index(at); at+size<=USER_MAX; ++i) {
+#ifdef __APPLE__
+    if(pool()) return 0;
+    uintptr_t minimum=bb_vm_base(darwin_memory),maximum=minimum+bb_vm_window_size(darwin_memory);
+#else
+    uintptr_t minimum=USER_MIN,maximum=USER_MAX;
+#endif
+    uintptr_t at=align_up(hint<minimum ? minimum : hint, alignment);
+    for (size_t i=vma_index(at); at<=maximum && size<=maximum-at; ++i) {
         if (i==vma_count || vmas[i].start>=at+size) return at;
         at=align_up(vmas[i].end,alignment);
     }
@@ -376,6 +442,7 @@ static void drop_range(uintptr_t start, uintptr_t end) {
 static int32_t place(void **inout, uint64_t size, int prot, int flags, uint64_t alignment,
                      int kind, int type, uint64_t phys) {
     uintptr_t address=(uintptr_t)*inout;
+    if(!size || address>UINTPTR_MAX-size) return INVALID;
     if (flags & MAP_FIXED_FLAG) {
         if (!address || address%PAGE) return INVALID;
         if ((flags & MAP_NO_OVERWRITE) && overlaps(address,address+size,1)) return NO_MEMORY;
@@ -442,7 +509,7 @@ static int32_t map_direct_locked(void **out, uint64_t size, int prot, int flags,
     if (!alignment) alignment=PAGE;
     if (!out || physical < 0 || (uint64_t)physical % PAGE || !size || size % PAGE || !valid_alignment(alignment) ||
         (prot & ~0x37)) return INVALID;
-    if (!direct_range_allocated((uint64_t)physical,size)) return INVALID;
+    if ((uint64_t)physical>=POOL_SIZE || size>POOL_SIZE-(uint64_t)physical || !direct_range_allocated((uint64_t)physical,size)) return INVALID;
     int32_t result=place(out,size,prot,flags,alignment,KIND_DIRECT,block_type((uint64_t)physical),(uint64_t)physical);
     if (!result) ++maps;
     return result;
@@ -470,7 +537,7 @@ static ABI int32_t direct_map_named(void **out, uint64_t size, int prot, int fla
     (void)name; return direct_map(out,size,prot,flags,physical,alignment);
 }
 static int32_t unmap_locked(uintptr_t start, uint64_t size) {
-    if (start%PAGE || !size) return INVALID;
+    if (start%PAGE || !size || size>UINT64_MAX-(PAGE-1) || start>UINTPTR_MAX-align_up(size,PAGE)) return INVALID;
     uint64_t end=start+align_up(size,PAGE);
     for (size_t i=vma_index(start); i<vma_count && vmas[i].start<end; ++i)
         if (vmas[i].kind!=KIND_RESERVED) {
@@ -496,7 +563,7 @@ static ABI int32_t direct_unmap(void *address, uint64_t size) {
     return result;
 }
 static ABI int32_t direct_release(uint64_t start, uint64_t size) {
-    if (start % PAGE || size % PAGE) return INVALID;
+    if (start % PAGE || size % PAGE || start>POOL_SIZE || size>POOL_SIZE-start) return INVALID;
     if (!size) return 0;
     write_lock();
     if (!direct_range_allocated(start,size)) { write_unlock(); return INVALID; }
@@ -567,6 +634,7 @@ static ABI int32_t reserve_range(void **inout, uint64_t size, int flags, uint64_
     return result;
 }
 static int32_t protect_locked(uintptr_t start, uint64_t size, int prot, int type) {
+    if(!size || size>UINT64_MAX-(PAGE-1) || start>UINTPTR_MAX-align_up(size,PAGE)) return INVALID;
     uintptr_t end=start+align_up(size,PAGE);
     start&=~(uintptr_t)(PAGE-1);
     if ((prot & ~0x37) || !covered(start,end,0)) return INVALID;
@@ -667,6 +735,12 @@ static const RuntimeExport exports[]={
     {"sceKernelVirtualQuery",virtual_query}, {"sceKernelGetDirectMemoryType",direct_memory_type},
     {"sceKernelBatchMap",batch_map}, {"sceKernelBatchMap2",batch_map2},
 };
+uintptr_t runtime_memory_resolve_symbol(const char *name) {
+    if(!name) return 0;
+    for(size_t i=0;i<sizeof(exports)/sizeof(*exports);++i)
+        if(!strcmp(name,exports[i].name)) return (uintptr_t)exports[i].function;
+    return 0;
+}
 uintptr_t runtime_memory_resolve(const char *name) {
     /* Direct-memory NIDs are exercised by test_runtime.c before names are loaded. */
     if (!strcmp(name, "pO96TwzOm5E#p#J")) return (uintptr_t)direct_size;
@@ -679,7 +753,9 @@ uintptr_t runtime_memory_resolve(const char *name) {
 /* Host-owned memory the guest can see (image, stacks, trampolines) lives in
  * [LOW_MIN, USER_MIN): PS4 code packs pointers into 40-bit fields. */
 #define LOW_MIN UINT64_C(0x0800000000)
+#ifndef __APPLE__
 static uintptr_t low_next=LOW_MIN;
+#endif
 void *runtime_low_map(size_t size, int prot) {
     size=align_up(size,PAGE);
     write_lock();
@@ -691,6 +767,14 @@ void *runtime_low_map(size_t size, int prot) {
     }
     write_unlock();
     return p;
+#elif defined(__APPLE__)
+    BbGuestMemory *vm=NULL; void *p=NULL;
+    if(darwin_low_count<1024 && bb_vm_create(&vm,size,size,0)==BB_VM_OK) {
+        if(bb_vm_map(vm,bb_vm_base(vm),size,0,(unsigned)prot)==BB_VM_OK) {
+            darwin_low[darwin_low_count++]=vm; p=(void *)(uintptr_t)bb_vm_base(vm);
+        } else bb_vm_close(vm);
+    }
+    write_unlock(); return p;
 #else
     void *p=MAP_FAILED;
     while (low_next+size<=USER_MIN) {
@@ -708,6 +792,11 @@ void *runtime_low_map(size_t size, int prot) {
 #define IMAGE_MIN UINT64_C(0x400000)
 #define IMAGE_LIMIT UINT64_C(0x80000000)
 void *runtime_image_map(size_t size, int prot) {
+#ifdef __APPLE__
+    /* A translated module must separate its guest base from host storage (M3).
+     * Never substitute a high identity pointer into a 32-bit image relocation. */
+    (void)size; (void)prot; errno=ENOTSUP; return NULL;
+#else
     size=align_up(size,UINT64_C(65536));
     write_lock();
     void *p=NULL;
@@ -721,6 +810,7 @@ void *runtime_image_map(size_t size, int prot) {
     }
     write_unlock();
     return p;
+#endif
 }
 /* ---- GPU library interface (gpu/shim/bbgpu.cpp) ---- */
 /* Optimizations switched off at run time (diagnostics): the number in the file named by
@@ -783,6 +873,9 @@ int runtime_memory_write_backing(uintptr_t address, const void *data, uint64_t s
         at+=n;
     }
     read_unlock();
+#ifdef __APPLE__
+    if(ok && darwin_memory && bb_vm_sync_code(darwin_memory)!=BB_VM_OK) return 0;
+#endif
     return ok;
 }
 /* Per-thread cache of recently found regions for the GPU's per-draw queries:

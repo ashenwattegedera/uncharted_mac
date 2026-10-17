@@ -14,7 +14,7 @@ typedef struct { size_t offset; unsigned permissions; int mapped; } Page;
 struct BbGuestMemory {
     void *base,*backing;
     size_t size,backing_size,page,granule;
-    int fd,poisoned,notifying;
+    int fd,poisoned,notifying,preserve_backing;
     pthread_t owner;
     Page *pages;
     unsigned *references,*watchers;
@@ -70,8 +70,8 @@ BbVmStatus bb_vm_create(BbGuestMemory **out,size_t n,size_t backing_size,uint64_
     long host_page=sysconf(_SC_PAGESIZE);
     if(host_page<=0) return BB_VM_SYSTEM;
     size_t granule=(size_t)host_page>BB_VM_GUEST_PAGE ? (size_t)host_page : BB_VM_GUEST_PAGE;
-    /* Bounded foundation, not a reservation of the complete retail PS4 range. */
-    if(!n || !backing_size || n>256u*1024*1024 || backing_size>256u*1024*1024 ||
+    /* Metadata is bounded; the multi-GiB backing remains sparse until touched. */
+    if(!n || !backing_size || n>UINT64_C(64)*1024*1024*1024 || backing_size>UINT64_C(32)*1024*1024*1024 ||
        n%granule || backing_size%granule || (preferred &&
        (preferred%granule || preferred<UINT64_C(0x100000000) || preferred>=UINT64_C(0x10000000000)-n)))
         return BB_VM_INVALID;
@@ -122,6 +122,24 @@ static BbVmStatus destroy(BbGuestMemory *v) {
     return failed ? BB_VM_SYSTEM : BB_VM_OK;
 }
 uint64_t bb_vm_base(const BbGuestMemory *v) { return v ? (uintptr_t)v->base : 0; }
+size_t bb_vm_window_size(const BbGuestMemory *v) { return v ? v->size : 0; }
+BbVmStatus bb_vm_preserve_backing(BbGuestMemory *v) {
+    BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
+    if(v->notifying) return BB_VM_BUSY;
+    for(size_t i=0;i<v->size/v->granule;++i) if(v->pages[i].mapped) return BB_VM_BUSY;
+    v->preserve_backing=1; return BB_VM_OK;
+}
+void *bb_vm_backing_view(BbGuestMemory *v,size_t off,size_t size) {
+    if(check(v)!=BB_VM_OK || !size || off>=v->backing_size || size>v->backing_size-off) return NULL;
+    return (char *)v->backing+off;
+}
+BbVmStatus bb_vm_discard_backing(BbGuestMemory *v,size_t off,size_t size) {
+    BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
+    if(v->notifying) return BB_VM_BUSY;
+    if(!size || off%v->granule || size%v->granule || off>=v->backing_size || size>v->backing_size-off) return BB_VM_INVALID;
+    for(size_t i=off/v->granule;i<(off+size)/v->granule;++i) if(v->references[i]) return BB_VM_BUSY;
+    memset((char *)v->backing+off,0,size); return BB_VM_OK;
+}
 size_t bb_vm_host_page(const BbGuestMemory *v) { return v ? v->page : 0; }
 BbVmStatus bb_vm_observe(BbGuestMemory *v,BbVmObserver observer,void *user) {
     BbVmStatus s=check(v); if(s!=BB_VM_OK) return s;
@@ -138,7 +156,7 @@ BbVmStatus bb_vm_map(BbGuestMemory *v,uint64_t at,size_t n,size_t off,unsigned p
     size_t first=(at-(uintptr_t)v->base)/v->granule;
     for(size_t i=0;i<n/v->granule;++i) if(v->pages[first+i].mapped) return BB_VM_BUSY;
     /* Clear storage only when it has no live aliases. */
-    for(size_t i=0;i<n/v->granule;++i) if(!v->references[off/v->granule+i])
+    for(size_t i=0;i<n/v->granule;++i) if(!v->preserve_backing && !v->references[off/v->granule+i])
         memset((char *)v->backing+off+i*v->granule,0,v->granule);
     void *p=mmap((void *)(uintptr_t)at,n,PROT_READ|PROT_WRITE,MAP_SHARED|MAP_FIXED,v->fd,(off_t)off);
     if(p==MAP_FAILED) { v->poisoned=1; return BB_VM_POISONED; }

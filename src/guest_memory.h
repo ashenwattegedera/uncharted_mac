@@ -25,6 +25,11 @@ typedef int (*BbVmObserver)(BbGuestMemory *,BbVmEvent,uint64_t,size_t,void *);
 BbVmStatus bb_vm_create(BbGuestMemory **out,size_t window_size,size_t backing_size,uint64_t preferred);
 BbVmStatus bb_vm_close(BbGuestMemory *vm);
 uint64_t bb_vm_base(const BbGuestMemory *vm);
+/* Service-owned physical allocations can outlive their last virtual alias. */
+BbVmStatus bb_vm_preserve_backing(BbGuestMemory *vm);
+void *bb_vm_backing_view(BbGuestMemory *vm,size_t offset,size_t size);
+BbVmStatus bb_vm_discard_backing(BbGuestMemory *vm,size_t offset,size_t size);
+size_t bb_vm_window_size(const BbGuestMemory *vm);
 size_t bb_vm_host_page(const BbGuestMemory *vm);
 BbVmStatus bb_vm_observe(BbGuestMemory *vm,BbVmObserver observer,void *user);
 BbVmStatus bb_vm_map(BbGuestMemory *vm,uint64_t address,size_t size,size_t backing_offset,unsigned permissions);
