@@ -109,6 +109,18 @@ if(BUILD_TESTING)
         "CMAKE_GENERATOR=${CMAKE_GENERATOR};CC=${CMAKE_C_COMPILER}")
 endif()
 
+if(APPLE)
+    add_library(bb-guest-memory STATIC src/platform/guest_memory_darwin.c)
+    bb_runtime_target(bb-guest-memory)
+    if(BUILD_TESTING)
+        add_executable(guest-memory-test tests/test_guest_memory.c)
+        bb_runtime_target(guest-memory-test)
+        target_compile_options(guest-memory-test PRIVATE -UNDEBUG)
+        target_link_libraries(guest-memory-test PRIVATE bb-guest-memory)
+        add_test(NAME darwin-guest-memory COMMAND guest-memory-test)
+    endif()
+endif()
+
 if(BB_BUILD_NATIVE_LOADER)
     set(BB_NATIVE_SOURCES ${BB_CORE_SOURCES} src/runtime_mutex.c src/runtime_rwlock.c src/runtime_sema.c
         src/runtime_memory.c src/runtime_kernel.c src/runtime_thread.c src/runtime_file.c
