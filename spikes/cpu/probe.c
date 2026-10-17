@@ -9,7 +9,8 @@ struct BbCpuProbe {
     uc_engine *engine;
     pthread_mutex_t lock;
     uc_hook bridge_hook,fault_hook,syscall_hook;
-    struct { BbProbeHostCall call; void *user; } bindings[MAX_BINDINGS];
+    struct { BbProbeHostCall call; void *user;
+        BbAbiImport abi; BbAbiMemory memory; } bindings[MAX_BINDINGS];
     unsigned count,depth;
     int pending;
     int unsupported;
@@ -116,6 +117,67 @@ BbProbeStatus bb_probe_bind(BbCpuProbe *p,BbProbeHostCall call,void *user,uint64
     }
     pthread_mutex_unlock(&p->lock);
     return status;
+}
+static int abi_check(void *user,uint64_t at,size_t size,int write) {
+    BbCpuProbe *p=user;
+    if(!range_valid(at,size)) return 0;
+    uc_mem_region *regions=NULL; uint32_t count=0;
+    if(uc_mem_regions(p->engine,&regions,&count)!=UC_ERR_OK) return 0;
+    uint64_t cursor=at,end=at+size;
+    while(cursor<end) {
+        uint64_t next=cursor;
+        for(uint32_t i=0;i<count;++i) if(regions[i].begin<=cursor && cursor<=regions[i].end &&
+            (regions[i].perms & (write ? UC_PROT_WRITE : UC_PROT_READ))) {
+            next=regions[i].end>=end-1 ? end : regions[i].end+1; break;
+        }
+        if(next==cursor) break;
+        cursor=next;
+    }
+    uc_free(regions); return cursor==end;
+}
+static int abi_read(void *p,uint64_t at,void *out,size_t size) {
+    return abi_check(p,at,size,0) && bb_probe_read(p,at,out,size)==BB_PROBE_OK;
+}
+static int abi_write(void *p,uint64_t at,const void *in,size_t size) {
+    return abi_check(p,at,size,1) && bb_probe_write(p,at,in,size)==BB_PROBE_OK;
+}
+static BbProbeStatus abi_host(BbCpuProbe *p,const uint64_t args[6],uint64_t *result,void *user) {
+    (void)args;
+    unsigned i=(unsigned)(uintptr_t)user;
+    BbAbiFrame frame={0};
+    const int regs[]={UC_X86_REG_RDI,UC_X86_REG_RSI,UC_X86_REG_RDX,UC_X86_REG_RCX,UC_X86_REG_R8,UC_X86_REG_R9};
+    uc_err e=UC_ERR_OK;
+    for(unsigned j=0;j<6 && e==UC_ERR_OK;++j) e=uc_reg_read(p->engine,regs[j],&frame.gp[j]);
+    for(unsigned j=0;j<8 && e==UC_ERR_OK;++j) e=uc_reg_read(p->engine,UC_X86_REG_XMM0+j,frame.xmm[j]);
+    if(e==UC_ERR_OK) e=uc_reg_read(p->engine,UC_X86_REG_RSP,&frame.rsp);
+    if(e==UC_ERR_OK) e=uc_reg_read(p->engine,UC_X86_REG_RAX,&frame.rax);
+    frame.rdx=frame.gp[2];
+    if(e!=UC_ERR_OK) return BB_PROBE_ENGINE;
+    BbAbiStatus status=bb_abi_dispatch(&p->bindings[i].abi,&frame,&p->bindings[i].memory);
+    if(status!=BB_ABI_OK) return status==BB_ABI_INVALID ? BB_PROBE_INVALID : BB_PROBE_FAULT;
+    e=uc_reg_write(p->engine,UC_X86_REG_RDX,&frame.rdx);
+    for(unsigned j=0;j<2 && e==UC_ERR_OK;++j) e=uc_reg_write(p->engine,UC_X86_REG_XMM0+j,frame.xmm[j]);
+    *result=frame.rax;
+    return engine_status(e);
+}
+BbProbeStatus bb_probe_bind_abi(BbCpuProbe *p,const BbAbiImport *binding,
+                               const BbAbiMemory *memory,uint64_t *address) {
+    if(!p || !binding || !binding->name || !binding->host || !address ||
+       bb_abi_validate(&binding->signature)!=BB_ABI_OK ||
+       (memory && (!memory->check || !memory->read || !memory->write))) return BB_PROBE_INVALID;
+    pthread_mutex_lock(&p->lock);
+    /* Guest names are unique across signature-aware bindings. */
+    for(unsigned j=0;j<p->count;++j) if(p->bindings[j].abi.name &&
+        !strcmp(binding->name,p->bindings[j].abi.name)) {
+        pthread_mutex_unlock(&p->lock); return BB_PROBE_INVALID;
+    }
+    unsigned i=p->count;
+    BbProbeStatus status=bb_probe_bind(p,abi_host,(void *)(uintptr_t)i,address);
+    if(status==BB_PROBE_OK) {
+        p->bindings[i].abi=*binding;
+        p->bindings[i].memory=memory ? *memory : (BbAbiMemory){abi_check,abi_read,abi_write,p};
+    }
+    pthread_mutex_unlock(&p->lock); return status;
 }
 void bb_probe_set_fault_handler(BbCpuProbe *p,BbProbeFaultHandler handler,void *user) {
     if(!p) return;

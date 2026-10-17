@@ -1,6 +1,7 @@
 #ifndef BB_CPU_PROBE_H
 #define BB_CPU_PROBE_H
 #include "execution.h"
+#include "guest_abi.h"
 #include <unicorn/unicorn.h>
 
 /* Experimental, software-mapped x86 address space. Not the PS4 runtime backend.
@@ -30,6 +31,10 @@ BbProbeStatus bb_probe_write(BbCpuProbe *probe,uint64_t address,const void *data
 BbProbeStatus bb_probe_read(BbCpuProbe *probe,uint64_t address,void *data,size_t size);
 BbProbeStatus bb_probe_protect(BbCpuProbe *probe,uint64_t address,size_t size,unsigned permissions);
 BbProbeStatus bb_probe_bind(BbCpuProbe *probe,BbProbeHostCall call,void *user,uint64_t *guest_address);
+/* Copies metadata; binding names, host user state and optional memory user state
+ * must outlive the probe. NULL memory uses checked Unicorn guest mappings. */
+BbProbeStatus bb_probe_bind_abi(BbCpuProbe *probe,const BbAbiImport *binding,
+                               const BbAbiMemory *memory,uint64_t *guest_address);
 BbProbeStatus bb_probe_invoke(BbCpuProbe *probe,BbGuestCall *call,BbProbeFault *fault);
 void bb_probe_set_fault_handler(BbCpuProbe *probe,BbProbeFaultHandler handler,void *user);
 const char *bb_probe_status_name(BbProbeStatus status);
