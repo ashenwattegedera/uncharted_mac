@@ -1,6 +1,7 @@
 #include "probe.h"
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 enum { MAX_BINDINGS=BB_PROBE_MAX_BINDINGS, MAX_DEPTH=8, STACK_SLICE=65536, MAX_RESUMES=64 };
@@ -307,7 +308,11 @@ static BbProbeStatus execute(BbCpuProbe *p,uint64_t pc,uint64_t *result) {
         for(unsigned a=0;a<6 && e==UC_ERR_OK;++a) e=uc_reg_read(p->engine,abi_regs[a],&args[a]);
         if(e!=UC_ERR_OK) break;
         status=p->bindings[i].call(p,args,result,p->bindings[i].user);
-        if(status!=BB_PROBE_OK) break;
+        if(status!=BB_PROBE_OK) {
+            p->fault.pc=pc;
+            snprintf(p->fault.import_name,sizeof(p->fault.import_name),"%s",p->bindings[i].abi.name ? p->bindings[i].abi.name : "untyped-host-bridge");
+            break;
+        }
         status=BB_PROBE_LIMIT;
         e=uc_reg_write(p->engine,UC_X86_REG_RAX,result);
         if(e==UC_ERR_OK) e=uc_reg_read(p->engine,UC_X86_REG_RSP,&sp);
@@ -396,6 +401,17 @@ BbProbeStatus bb_probe_context_create(BbCpuProbe *p,uint64_t entry,uint64_t top,
     if(e!=UC_ERR_OK) { bb_probe_context_free(c); return BB_PROBE_ENGINE; }
     c->owner=p; *out=c; return BB_PROBE_OK;
 }
+BbProbeStatus bb_probe_context_restart(BbCpuProbe *p,BbProbeContext *c,uint64_t entry,uint64_t top,const uint64_t args[3]) {
+    if(!p || !c || c->owner!=p || !entry || top<16 || top%16 || !args || p->depth) return BB_PROBE_INVALID;
+    uint64_t sp=top-8,stop=BB_PROBE_RETURN,zero=0;
+    const int regs[]={UC_X86_REG_RIP,UC_X86_REG_RSP,UC_X86_REG_RDI,UC_X86_REG_RSI,UC_X86_REG_RDX,UC_X86_REG_RAX};
+    const void *values[]={&entry,&sp,args,args+1,args+2,&zero};
+    pthread_mutex_lock(&p->lock);
+    uc_err e=uc_mem_write(p->engine,sp,&stop,8);
+    for(unsigned i=0;i<sizeof(regs)/sizeof(*regs) && e==UC_ERR_OK;++i) e=uc_context_reg_write(c->registers,regs[i],values[i]);
+    if(e==UC_ERR_OK) c->done=0;
+    pthread_mutex_unlock(&p->lock); return engine_status(e);
+}
 void bb_probe_context_free(BbProbeContext *c) { if(c) { if(c->registers) uc_context_free(c->registers); free(c); } }
 BbProbeStatus bb_probe_context_invoke(BbCpuProbe *p,BbProbeContext *c,BbGuestCall *call) {
     if(!p || !c || c->owner!=p || !call) return BB_PROBE_INVALID;
@@ -412,6 +428,10 @@ BbProbeStatus bb_probe_context_read(BbProbeContext *c,int reg,void *value) {
 }
 BbProbeStatus bb_probe_context_write(BbProbeContext *c,int reg,const void *value) {
     return c && value && !c->done ? engine_status(uc_context_reg_write(c->registers,reg,value)) : BB_PROBE_INVALID;
+}
+int bb_probe_idle(BbCpuProbe *p) {
+    if(!p) return 0;
+    pthread_mutex_lock(&p->lock); int idle=!p->depth; pthread_mutex_unlock(&p->lock); return idle;
 }
 BbProbeStatus bb_probe_pause(BbCpuProbe *p) {
     if(!p || !p->resumable || p->depth!=1) return BB_PROBE_INVALID;

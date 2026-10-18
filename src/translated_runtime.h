@@ -16,6 +16,7 @@ int bb_translated_import_info(size_t index,BbTranslatedImport *out);
 /* One explicitly leased runtime. M3 workers hand off exclusive ownership. */
 BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out);
 BbTranslatedStatus bb_translated_release(BbTranslatedRuntime *runtime);
+/* MEMORY means a poisoned VM was acquired for teardown only: release/close it. */
 BbTranslatedStatus bb_translated_acquire(BbTranslatedRuntime *runtime);
 /* Internal reference scheduler/loader access; still requires the VM lease. */
 struct BbCpuProbe;
@@ -30,6 +31,7 @@ BbTranslatedStatus bb_translated_relocate(BbTranslatedRuntime *runtime,uint64_t 
 BbTranslatedStatus bb_translated_invoke(BbTranslatedRuntime *runtime,BbGuestCall *call);
 BbGuestMemory *bb_translated_memory(BbTranslatedRuntime *runtime);
 BbAbiMemory bb_translated_memory_access(BbTranslatedRuntime *runtime);
+void bb_translated_clear_diagnostic(BbTranslatedRuntime *runtime);
 const char *bb_translated_diagnostic(BbTranslatedRuntime *runtime);
 /* Actual execution.h entry points can be attached to the reference runtime. */
 BbTranslatedStatus bb_translated_attach_execution(BbTranslatedRuntime *runtime);

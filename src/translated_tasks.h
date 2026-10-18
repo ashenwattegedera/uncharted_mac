@@ -31,6 +31,7 @@ BbTranslatedStatus bb_tasks_result(BbTasks *,uint64_t id,uint64_t *result);
 /* Repeated module calls reuse the process main thread's TLS and keys. */
 BbTranslatedStatus bb_tasks_call(BbTasks *,uint64_t entry,const uint64_t args[3],unsigned workers,uint64_t *result);
 BbTranslatedStatus bb_tasks_finalize(BbTasks *);
+BbTranslatedStatus bb_tasks_retire(BbTasks *);
 uint64_t bb_tasks_fiber_worker_mask(BbTasks *,uint64_t address);
 uint64_t bb_tasks_worker_mask(BbTasks *,uint64_t id);
 const char *bb_tasks_diagnostic(BbTasks *);

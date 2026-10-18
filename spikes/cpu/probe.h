@@ -16,13 +16,14 @@ typedef struct {
     size_t size;
     int access;
     uc_err engine_error;
+    char import_name[128];
 } BbProbeFault;
 typedef BbProbeStatus (*BbProbeHostCall)(BbCpuProbe *,const uint64_t args[6],uint64_t *result,void *user);
 typedef int (*BbProbeFaultHandler)(BbCpuProbe *,const BbProbeFault *,void *user);
 
 #define BB_PROBE_CODE UINT64_C(0x100000)
 #define BB_PROBE_DATA UINT64_C(0x400000)
-#define BB_PROBE_STACK UINT64_C(0x800000)
+#define BB_PROBE_STACK UINT64_C(0xff00000000)
 #define BB_PROBE_RETURN UINT64_C(0x20fff0)
 
 typedef struct BbProbeContext BbProbeContext;
@@ -30,11 +31,13 @@ typedef struct BbProbeContext BbProbeContext;
  * The same serialized engine must outlive them. Yield is legal at outer HLE only. */
 BbProbeStatus bb_probe_context_create(BbCpuProbe *,uint64_t entry,uint64_t stack_top,
     const uint64_t args[3],uint64_t fs_base,BbProbeContext **out);
+BbProbeStatus bb_probe_context_restart(BbCpuProbe *,BbProbeContext *,uint64_t entry,uint64_t stack_top,const uint64_t args[3]);
 void bb_probe_context_free(BbProbeContext *);
 BbProbeStatus bb_probe_context_resume(BbCpuProbe *,BbProbeContext *,uint64_t *result,BbProbeFault *);
 BbProbeStatus bb_probe_context_invoke(BbCpuProbe *,BbProbeContext *,BbGuestCall *);
 BbProbeStatus bb_probe_context_read(BbProbeContext *,int reg,void *value);
 BbProbeStatus bb_probe_context_write(BbProbeContext *,int reg,const void *value);
+int bb_probe_idle(BbCpuProbe *);
 BbProbeStatus bb_probe_pause(BbCpuProbe *);
 BbProbeStatus bb_probe_virtual_clock(BbCpuProbe *,uint64_t initial,uint64_t step);
 uint64_t bb_probe_clock_value(BbCpuProbe *);

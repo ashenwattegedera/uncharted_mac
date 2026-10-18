@@ -30,10 +30,10 @@ int main(int argc,char **argv) {
     assert(bb_vm_protect(vm,base,G,5)==BB_VM_OK);
     U args[3]={base+G,0,0},result=999;
     if(argc==2) {
-        U target=!strcmp(argv[1],"deadlock") ? GUEST_THREAD_DEADLOCK : !strcmp(argv[1],"budget") ? GUEST_THREAD_BUDGET : GUEST_THREAD_FAULT;
+        U target=!strcmp(argv[1],"deadlock") ? GUEST_THREAD_DEADLOCK : !strcmp(argv[1],"budget") ? GUEST_THREAD_BUDGET : !strcmp(argv[1],"bad-import") ? GUEST_THREAD_BAD_IMPORT : GUEST_THREAD_FAULT;
         U id=0; OK(bb_tasks_spawn(tasks,base+target,args,&id));
         assert(bb_tasks_run(tasks,2,10)==BB_TRANSLATED_EXECUTION);
-        assert(strstr(bb_tasks_diagnostic(tasks),!strcmp(argv[1],"deadlock") ? "deadlock" : !strcmp(argv[1],"budget") ? "budget" : "guest fault"));
+        assert(strstr(bb_tasks_diagnostic(tasks),!strcmp(argv[1],"deadlock") ? "deadlock" : !strcmp(argv[1],"budget") ? "budget" : !strcmp(argv[1],"bad-import") ? "__tls_get_addr" : "guest fault"));
         OK(bb_translated_close(r)); puts("PASS: scheduler failure is bounded and diagnostic"); return 0;
     }
     BbTranslatedStatus s=bb_tasks_call(tasks,base+GUEST_THREAD_MAIN,args,3,&result);

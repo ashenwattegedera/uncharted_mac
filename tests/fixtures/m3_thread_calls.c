@@ -61,3 +61,5 @@ U thread_deadlock(ThreadShared *s) {
 }
 U thread_budget(void *ignored) { (void)ignored; for(;;) __asm__ volatile(""); }
 U thread_fault(void *ignored) { (void)ignored; *(volatile U *)1=42; return 1; }
+
+U thread_bad_import(ThreadShared *s) { s->imports.tls((U *)1); return 1; }

@@ -56,7 +56,7 @@ struct BbTasks {
     pthread_cond_t changed;
     unsigned workers,turn;
     size_t slices,budget;
-    int running,stop,failed;
+    int running,stop,failed,finalized;
     char diagnostic[256];
 };
 static uint64_t value(const BbAbiValue *v) { uint64_t n; memcpy(&n,v->bytes,8); return n; }
@@ -99,7 +99,7 @@ void bb_tasks_destroy(BbTasks *t) {
     pthread_cond_destroy(&t->changed); pthread_mutex_destroy(&t->schedule); free(t);
 }
 BbTranslatedStatus bb_tasks_set_tls(BbTasks *t,unsigned module,const void *data,size_t filesz,size_t memsz,size_t alignment) {
-    if(!t || t->thread_count || !module || module>=MODULES || filesz>memsz || memsz>1024*1024 ||
+    if(!t || t->finalized || t->thread_count || !module || module>=MODULES || filesz>memsz || memsz>1024*1024 ||
        (filesz && !data) || !alignment || alignment>BB_VM_GUEST_PAGE || (alignment&(alignment-1))) return BB_TRANSLATED_INVALID;
     unsigned char *copy=calloc(memsz ? memsz : 1,1); if(!copy) return BB_TRANSLATED_MEMORY;
     if(filesz) memcpy(copy,data,filesz);
@@ -131,13 +131,17 @@ static int make_tls(BbTasks *t,Thread *thread) {
 }
 static int seed(BbTasks *t,Thread *thread,uint64_t entry,const uint64_t args[3]) {
     if(!executable(t,entry)) return 0;
-    bb_probe_context_free(thread->cpu); thread->cpu=NULL;
     uint64_t top=thread->stack+thread->stack_size-BB_VM_GUEST_PAGE;
-    if(bb_probe_context_create(bb_translated_cpu(t->runtime),entry,top,args,thread->tcb,&thread->cpu)!=BB_PROBE_OK) return 0;
+    if(thread->persistent && thread->cpu) {
+        if(bb_probe_context_restart(bb_translated_cpu(t->runtime),thread->cpu,entry,top,args)!=BB_PROBE_OK) return 0;
+    } else {
+        bb_probe_context_free(thread->cpu); thread->cpu=NULL;
+        if(bb_probe_context_create(bb_translated_cpu(t->runtime),entry,top,args,thread->tcb,&thread->cpu)!=BB_PROBE_OK) return 0;
+    }
     thread->state=READY; thread->event=NONE; thread->result=0; return 1;
 }
 static BbTranslatedStatus spawn(BbTasks *t,uint64_t entry,const uint64_t args[3],size_t stack,int detached,uint64_t *id) {
-    if(!t || !args || !id || t->thread_count==THREADS || !executable(t,entry)) return BB_TRANSLATED_INVALID;
+    if(!t || t->finalized || !args || !id || t->thread_count==THREADS || !executable(t,entry)) return BB_TRANSLATED_INVALID;
     Thread next={.id=t->thread_count+1,.detached=detached};
     next.stack_size=align_up(stack,BB_VM_GUEST_PAGE)+2*BB_VM_GUEST_PAGE;
     if(!alloc(t,next.stack_size,&next.stack) || !make_tls(t,&next)) goto failed;
@@ -352,7 +356,10 @@ static void *worker(void *opaque) {
     while(!t->stop) {
         while(!t->stop && t->turn!=w->index) pthread_cond_wait(&t->changed,&t->schedule);
         if(t->stop) break;
-        if(bb_translated_acquire(t->runtime)!=BB_TRANSLATED_OK) { t->failed=1; t->stop=1; fail(t,"worker could not acquire the exclusive VM lease"); }
+        BbTranslatedStatus acquired=bb_translated_acquire(t->runtime);
+        if(acquired!=BB_TRANSLATED_OK) {
+            if(acquired==BB_TRANSLATED_MEMORY) bb_translated_release(t->runtime);
+            t->failed=1; t->stop=1; fail(t,"worker could not acquire the exclusive VM lease"); }
         else {
             int more=tick(t);
             if(bb_translated_release(t->runtime)!=BB_TRANSLATED_OK) { t->failed=1; fail(t,"worker could not release the exclusive VM lease"); }
@@ -363,7 +370,8 @@ static void *worker(void *opaque) {
     pthread_mutex_unlock(&t->schedule); return NULL;
 }
 BbTranslatedStatus bb_tasks_run(BbTasks *t,unsigned workers,size_t budget) {
-    if(!t || t->running || !workers || workers>8 || !budget || !bb_translated_cpu(t->runtime)) return BB_TRANSLATED_INVALID;
+    if(!t || t->finalized || t->running || !workers || workers>8 || !budget || !bb_translated_cpu(t->runtime)) return BB_TRANSLATED_INVALID;
+    bb_translated_clear_diagnostic(t->runtime);
     t->running=1; t->stop=t->failed=0; t->turn=0; t->workers=workers; t->slices=0; t->budget=budget; t->diagnostic[0]=0;
     pthread_t hosts[8]; Worker work[8]; unsigned created=0;
     pthread_mutex_lock(&t->schedule);
@@ -382,7 +390,7 @@ BbTranslatedStatus bb_tasks_result(BbTasks *t,uint64_t id,uint64_t *result) {
     *result=thread->result; return BB_TRANSLATED_OK;
 }
 BbTranslatedStatus bb_tasks_call(BbTasks *t,uint64_t entry,const uint64_t args[3],unsigned workers,uint64_t *result) {
-    if(!t || !args || !result || t->running) return BB_TRANSLATED_INVALID;
+    if(!t || t->finalized || !args || !result || t->running) return BB_TRANSLATED_INVALID;
     Thread *main=NULL;
     for(size_t i=0;i<t->thread_count;++i) if(t->threads[i].persistent) main=t->threads+i;
     if(!main) {
@@ -393,12 +401,26 @@ BbTranslatedStatus bb_tasks_call(BbTasks *t,uint64_t entry,const uint64_t args[3
 }
 BbTranslatedStatus bb_tasks_finalize(BbTasks *t) {
     if(!t || t->running || !bb_translated_cpu(t->runtime)) return BB_TRANSLATED_INVALID;
+    if(t->finalized) return BB_TRANSLATED_OK;
     for(size_t i=0;i<t->thread_count;++i) if(t->threads[i].persistent && t->threads[i].state==IDLE) {
         t->current=t->threads+i;
         int ok=finalize(t,0) && cleanup(t,t->current); t->current=NULL;
+        if(ok) t->finalized=1;
         return ok ? BB_TRANSLATED_OK : fail(t,"process finalizer or main TLS destructor failed");
     }
     return t->handler_count ? BB_TRANSLATED_INVALID : BB_TRANSLATED_OK;
+}
+BbTranslatedStatus bb_tasks_retire(BbTasks *t) {
+    if(!t || t->running || !bb_translated_cpu(t->runtime)) return BB_TRANSLATED_INVALID;
+    BbTranslatedStatus status=bb_tasks_finalize(t);
+    for(size_t i=0;i<t->thread_count;++i) {
+        Thread *thread=t->threads+i;
+        bb_probe_context_free(thread->cpu); thread->cpu=NULL;
+        unmap(thread->stack,thread->stack_size); unmap(thread->tls,thread->tls_size);
+        thread->stack=thread->tls=0; thread->state=DONE;
+    }
+    for(size_t i=0;i<t->fiber_count;++i) { bb_probe_context_free(t->fibers[i].cpu); t->fibers[i].cpu=NULL; t->fibers[i].alive=0; t->fibers[i].owner=0; }
+    t->finalized=1; return status;
 }
 uint64_t bb_tasks_worker_mask(BbTasks *t,uint64_t id) { Thread *thread=t && !t->running ? find(t,id) : NULL; return thread ? thread->worker_mask : 0; }
 const char *bb_tasks_diagnostic(BbTasks *t) { return t ? t->diagnostic : "no task runtime"; }
@@ -523,7 +545,7 @@ static int tick(BbTasks *t) {
         if(thread->event==EXIT_EVENT) result=thread->event_args[0];
         if(!finish(t,thread,result)) { t->failed=1; fail(t,"guest thread cleanup or join output failed"); }
     } else if(s!=BB_PROBE_YIELD) {
-        t->failed=1; snprintf(t->diagnostic,sizeof(t->diagnostic),"thread %llu: %s pc=0x%llx address=0x%llx; %.100s",(unsigned long long)thread->id,bb_probe_status_name(s),(unsigned long long)fault.pc,(unsigned long long)fault.address,bb_translated_diagnostic(t->runtime));
+        t->failed=1; snprintf(t->diagnostic,sizeof(t->diagnostic),"thread %llu: %s pc=0x%llx address=0x%llx import=%.64s; %.80s",(unsigned long long)thread->id,bb_probe_status_name(s),(unsigned long long)fault.pc,(unsigned long long)fault.address,fault.import_name,bb_translated_diagnostic(t->runtime));
     }
     t->current=NULL; return !t->failed;
 }

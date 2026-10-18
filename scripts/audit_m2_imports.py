@@ -16,7 +16,7 @@ def inventory(binary=None):
     names = [item['name'] for item in contracts]
     if not contracts or len(names) != len(set(names)):
         raise ValueError('compiled registry is empty or contains duplicate names')
-    paths = sorted((ROOT / 'src').glob('runtime*.c')) + [ROOT / 'src/import_names.inc', ROOT / 'src/translated_runtime.c', ROOT / 'src/guest_abi.h', ROOT / 'src/guest_layout.h', ROOT / 'src/guest_format.c', ROOT / 'src/translated_tasks.c', ROOT / 'src/translated_tasks.h', ROOT / 'spikes/cpu/probe.c', ROOT / 'spikes/cpu/probe.h']
+    paths = sorted((ROOT / 'src').glob('runtime*.c')) + [ROOT / 'src/import_names.inc', ROOT / 'src/translated_runtime.c', ROOT / 'src/guest_abi.h', ROOT / 'src/guest_layout.h', ROOT / 'src/guest_format.c', ROOT / 'src/translated_tasks.c', ROOT / 'src/translated_tasks.h', ROOT / 'src/translated_modules.c', ROOT / 'src/translated_modules.h', ROOT / 'spikes/cpu/probe.c', ROOT / 'spikes/cpu/probe.h']
     hashes = {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes().replace(b'\r\n', b'\n')).hexdigest() for p in paths}
     imports = re.findall(r'\{"([^"]+)","([^"]+)"\}', (ROOT / 'src/import_names.inc').read_text())
     if len({nid for nid, _ in imports}) != len(imports):

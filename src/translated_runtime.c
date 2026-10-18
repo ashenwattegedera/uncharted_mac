@@ -329,16 +329,26 @@ BbCpuProbe *bb_translated_cpu(BbTranslatedRuntime *r) {
     return r && r==process_runtime && bb_vm_status(bb_memory_probe_vm(r->session))==BB_VM_OK ? bb_memory_probe_cpu(r->session) : NULL;
 }
 BbTranslatedStatus bb_translated_release(BbTranslatedRuntime *r) {
-    if(!r || r!=process_runtime || r->active || bb_vm_release_owner(bb_memory_probe_vm(r->session))!=BB_VM_OK) return BB_TRANSLATED_INVALID;
+    if(!r || r!=process_runtime) return BB_TRANSLATED_INVALID;
+    BbVmStatus status=bb_vm_status(bb_memory_probe_vm(r->session));
+    if((status!=BB_VM_OK && status!=BB_VM_POISONED) || r->active || !bb_probe_idle(bb_memory_probe_cpu(r->session)) ||
+       bb_vm_release_owner(bb_memory_probe_vm(r->session))!=BB_VM_OK) return BB_TRANSLATED_INVALID;
     bb_translated_attach_execution(NULL); return BB_TRANSLATED_OK;
 }
 BbTranslatedStatus bb_translated_acquire(BbTranslatedRuntime *r) {
-    if(!r || r!=process_runtime || bb_vm_acquire_owner(bb_memory_probe_vm(r->session))!=BB_VM_OK) return BB_TRANSLATED_INVALID;
+    if(!r || r!=process_runtime) return BB_TRANSLATED_INVALID;
+    BbVmStatus status=bb_vm_acquire_owner(bb_memory_probe_vm(r->session));
+    /* A poisoned claim still grants exclusive ownership so its caller can
+     * release it or close the runtime; executing guest code remains forbidden. */
+    if(status==BB_VM_POISONED) return BB_TRANSLATED_MEMORY;
+    if(status!=BB_VM_OK) return BB_TRANSLATED_INVALID;
     return bb_translated_attach_execution(r);
 }
 BbTranslatedStatus bb_translated_close(BbTranslatedRuntime *r) {
-    if(!r || r!=process_runtime || r->active || bb_tasks_busy(r->tasks)) return BB_TRANSLATED_INVALID;
-    if(bb_vm_status(bb_memory_probe_vm(r->session))==BB_VM_WRONG_THREAD) return BB_TRANSLATED_INVALID;
+    if(!r || r!=process_runtime) return BB_TRANSLATED_INVALID;
+    BbVmStatus status=bb_vm_status(bb_memory_probe_vm(r->session));
+    if((status!=BB_VM_OK && status!=BB_VM_POISONED) || r->active || bb_tasks_busy(r->tasks) ||
+       !bb_probe_idle(bb_memory_probe_cpu(r->session))) return BB_TRANSLATED_INVALID;
     bb_tasks_destroy(r->tasks);
     BbProbeStatus session=bb_memory_probe_close(r->session);
     int memory=runtime_memory_darwin_shutdown();
@@ -348,6 +358,7 @@ BbTranslatedStatus bb_translated_close(BbTranslatedRuntime *r) {
 }
 BbGuestMemory *bb_translated_memory(BbTranslatedRuntime *r) { return r && r==process_runtime ? runtime_memory_darwin_vm() : NULL; }
 BbAbiMemory bb_translated_memory_access(BbTranslatedRuntime *r) { return bb_memory_probe_memory(r->session); }
+void bb_translated_clear_diagnostic(BbTranslatedRuntime *r) { if(bb_translated_cpu(r)) r->diagnostic[0]=0; }
 const char *bb_translated_diagnostic(BbTranslatedRuntime *r) { return r ? r->diagnostic : "no translated runtime"; }
 BbTranslatedStatus bb_translated_bind(BbTranslatedRuntime *r,const char *name,BbImportKind kind,uint64_t *address) {
     if(!r || r!=process_runtime || !name || !address || bb_vm_status(bb_translated_memory(r))!=BB_VM_OK) return BB_TRANSLATED_INVALID;

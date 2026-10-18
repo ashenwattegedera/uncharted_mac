@@ -138,6 +138,11 @@ class LoaderTests(unittest.TestCase):
         self.assertEqual(r.returncode,20,r.stderr)
         self.assertIn('_init_env=0',r.stdout)
 
+    def test_translated_profile_rejected_by_native_loader(self):
+        r = self.run_image(package(b'\xc3',capabilities=0x8100000000000001))
+        self.assertNotEqual(r.returncode,0)
+        self.assertIn('unknown runtime capabilities',r.stderr)
+
     def test_unknown_capabilities_rejected(self):
         r = self.run_image(package(b'\xc3',capabilities=2))
         self.assertEqual(r.returncode,1)

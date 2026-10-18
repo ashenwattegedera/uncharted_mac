@@ -10,7 +10,7 @@
     "src/runtime_fiber.c": "f823f4a227a1d0f4ff6909ab3fb2490cb58fe3a7422862f9587f1606f5aaad3f",
     "src/runtime_file.c": "f4ff11be9fa83534eb75a8dc3547f1ebc9bfb2fe4e26b860864dc4464540d01d",
     "src/runtime_kernel.c": "4003d5407344e3b966f5f7583e9c7acacfe13cfc4444d994611db1f2c46a70b1",
-    "src/runtime_memory.c": "37ecffb05a52cf63db22c73cb4d4c05a737a789b3e36b645535063333b3c3481",
+    "src/runtime_memory.c": "76925e8b225a6a897b2f53980c490916f96ca5f34842993083fb8f254dcc0c1e",
     "src/runtime_mutex.c": "b1d46a0a7c5e051bdea089d0d61d2af1b829ebab16178a3f6825fe3fb8446bfa",
     "src/runtime_pad.c": "cbb538753d945d233b735cadcc766af0ce4dba0db214219bd8cce69115d7179c",
     "src/runtime_rtc.c": "178f63fa1fabb3d7520301901414edfc4442c383c8f52e16cbfd201209f38922",
@@ -22,14 +22,16 @@
     "src/runtime_thread.c": "7a38b1475d62fa8303ab65234e14a8875a57c1625d8da7b602b9d465e33dc0db",
     "src/runtime_time.c": "66c10a43c9259b475f255dfcb4434de635a78feb026ffee3ecd45495373b60e0",
     "src/import_names.inc": "7d8b5832fae9f9cdb4108223c8cf8a2ca55dc5708c93201fda5767a39085880b",
-    "src/translated_runtime.c": "cc1f152de6b20e14979ceb017872f387eeeae94adc0c4c7efe4ddf5d6dd6ab96",
+    "src/translated_runtime.c": "d167c1b20c66bca80660471f9d9e2964e63010d204ea2f297ffb5361612a4431",
     "src/guest_abi.h": "dbb9099e8fec869f169ec8025b203bb28a9ba9987d7ef62e527ce0ccfc69ab45",
     "src/guest_layout.h": "31521e9778bb8b64e4a402b788b762d16d6d0f2f7e275949d1b1e0259ef2916f",
     "src/guest_format.c": "b38347fc74b0e2a4b00daad4b2ef1aa469cce9298a1b79e6aecc99e6d6ec5140",
-    "src/translated_tasks.c": "baf0af1dfbb000f2f7f635d3f7c6ddeaf5146e4cbdfa74e01e894a785bbd2592",
-    "src/translated_tasks.h": "d362dc4f590b5b3ac087ab825609eaf6504b5268c570a5c3e17cdeae8cd6612f",
-    "spikes/cpu/probe.c": "e776bd081b933a6709e961ee2837bea9fb4538d209d40a820afb1602b88a9a05",
-    "spikes/cpu/probe.h": "6f5ae6d49e38aacee80c95d86f17d048a1e185c0712b81070da94d4236e51865"
+    "src/translated_tasks.c": "1fdb233283cfbca4b6e06a1204ca38273f54a282a2433ef281472b26dc22d5a8",
+    "src/translated_tasks.h": "5ec1b8f86b17bfc4e35b2be4412d12a281b483bd56326b51c32fe3b561c8c98f",
+    "src/translated_modules.c": "0106e5dd6d936de1a7842d0d1a7b3d768646ba9678c7c92034e0f5151d05ccfa",
+    "src/translated_modules.h": "71220be3884c2944be47d9f65d24bf707d943d8fbc690234df6409078a5e250b",
+    "spikes/cpu/probe.c": "f9e11545045f01eade6816f84e22745ed4a61334fea1b859321b7c09f8ea0e8e",
+    "spikes/cpu/probe.h": "f74c2f6ce07bd5bfd230c1d0ee510e95d4b93cfe9455aa4ef6c8e5187549ee10"
   },
   "contracts": [
     {
