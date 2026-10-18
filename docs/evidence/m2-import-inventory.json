@@ -22,13 +22,13 @@
     "src/runtime_thread.c": "7a38b1475d62fa8303ab65234e14a8875a57c1625d8da7b602b9d465e33dc0db",
     "src/runtime_time.c": "66c10a43c9259b475f255dfcb4434de635a78feb026ffee3ecd45495373b60e0",
     "src/import_names.inc": "7d8b5832fae9f9cdb4108223c8cf8a2ca55dc5708c93201fda5767a39085880b",
-    "src/translated_runtime.c": "7c0149f3dc31701e8d5ef1cdf9c42aae7233e7d86e5886e0f4fe591e9c7c3390",
+    "src/translated_runtime.c": "cc1f152de6b20e14979ceb017872f387eeeae94adc0c4c7efe4ddf5d6dd6ab96",
     "src/guest_abi.h": "dbb9099e8fec869f169ec8025b203bb28a9ba9987d7ef62e527ce0ccfc69ab45",
     "src/guest_layout.h": "31521e9778bb8b64e4a402b788b762d16d6d0f2f7e275949d1b1e0259ef2916f",
     "src/guest_format.c": "b38347fc74b0e2a4b00daad4b2ef1aa469cce9298a1b79e6aecc99e6d6ec5140",
-    "src/translated_tasks.c": "7e484cf502ff4a8de5d059fcdecabb4b5c9ba1df09a20006d6dc6069c5f6ee4b",
-    "src/translated_tasks.h": "b88d388f1cbc3eff7714dcd0852989df10f5baf7eedcd88f43a7daa03b5cb9d7",
-    "spikes/cpu/probe.c": "a2c6e49a8a78036e245311965d5182593b84ccd28266bb1c48e01c3263aba3ae",
+    "src/translated_tasks.c": "baf0af1dfbb000f2f7f635d3f7c6ddeaf5146e4cbdfa74e01e894a785bbd2592",
+    "src/translated_tasks.h": "d362dc4f590b5b3ac087ab825609eaf6504b5268c570a5c3e17cdeae8cd6612f",
+    "spikes/cpu/probe.c": "e776bd081b933a6709e961ee2837bea9fb4538d209d40a820afb1602b88a9a05",
     "spikes/cpu/probe.h": "6f5ae6d49e38aacee80c95d86f17d048a1e185c0712b81070da94d4236e51865"
   },
   "contracts": [
@@ -838,6 +838,169 @@
       "name": "sceKernelGetProcessTime",
       "kind": 0,
       "result": 3,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
+    },
+    {
+      "name": "_sceFiberInitializeImpl",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        4,
+        3,
+        4,
+        3,
+        4,
+        1
+      ]
+    },
+    {
+      "name": "sceFiberFinalize",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "sceFiberRun",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "sceFiberSwitch",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "sceFiberReturnToThread",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        3,
+        4
+      ]
+    },
+    {
+      "name": "sceFiberGetSelf",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "_sceFiberAttachContextAndRun",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        3,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "_sceFiberAttachContextAndSwitch",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        3,
+        3,
+        4
+      ]
+    },
+    {
+      "name": "sceFiberGetInfo",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "sceFiberRename",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "sceFiberOptParamInitialize",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "sceFiberStartContextSizeCheck",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        1
+      ]
+    },
+    {
+      "name": "sceFiberStopContextSizeCheck",
+      "kind": 0,
+      "result": 2,
       "variadic": 0,
       "data_size": 0,
       "milestone": 3,
@@ -6358,7 +6521,7 @@
     {
       "nid": "B0ZX2hx9DMw#libSceFiber",
       "name": "sceFiberReturnToThread",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -6564,7 +6727,7 @@
     {
       "nid": "JeNX5F-NzQU#libSceFiber",
       "name": "sceFiberFinalize",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -6586,7 +6749,7 @@
     {
       "nid": "JzyT91ucGDc#libSceFiber",
       "name": "sceFiberRename",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -6718,7 +6881,7 @@
     {
       "nid": "PFT2S-tJ7Uk#libSceFiber",
       "name": "sceFiberSwitch",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -6872,7 +7035,7 @@
     {
       "nid": "a0LLrZWac0M#libSceFiber",
       "name": "sceFiberRun",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -6886,7 +7049,7 @@
     {
       "nid": "asjUJJ+aa8s#libSceFiber",
       "name": "sceFiberOptParamInitialize",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -6992,7 +7155,7 @@
     {
       "nid": "hVYD7Ou2pCQ#libSceFiber",
       "name": "_sceFiberInitializeImpl",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -7134,7 +7297,7 @@
     {
       "nid": "p+zLIOg27zU#libSceFiber",
       "name": "sceFiberGetSelf",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]
@@ -7206,7 +7369,7 @@
     {
       "nid": "uq2Y5BFz0PE#libSceFiber",
       "name": "sceFiberGetInfo",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_fiber.c"
       ]

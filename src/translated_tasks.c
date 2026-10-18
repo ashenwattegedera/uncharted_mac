@@ -14,7 +14,7 @@ typedef struct {
     enum State state;
     uint64_t id,stack,tls,tcb,module[MODULES],values[KEYS],result,joiner,wait,out,mutex;
     size_t stack_size,tls_size;
-    uint64_t worker_mask;
+    uint64_t worker_mask,active_fiber,run_output;
     int detached,joined,persistent,cleaned;
     enum Event event;
     uint64_t event_args[3];
@@ -24,6 +24,22 @@ typedef struct { int alive; } Cond;
 typedef struct { int alive,detached; size_t stack; } Attr;
 typedef struct { unsigned char *data; size_t filesz,memsz,alignment; } Tls;
 typedef struct { uint64_t function,arg,dso; int cxa,called; } Finalizer;
+typedef struct {
+    BbProbeContext *cpu;
+    uint64_t address,entry,argument,stack,size,owner,wait_output,worker_mask;
+    int alive,inherit_fp,size_check;
+    char name[32];
+} Fiber;
+typedef struct {
+    uint64_t size,entry,argument,stack,stack_size;
+    char name[32];
+    uint64_t margin;
+    unsigned char reserved[48];
+} FiberInfo;
+_Static_assert(sizeof(FiberInfo)==128,"guest fiber info size");
+_Static_assert(offsetof(FiberInfo,name)==40 && offsetof(FiberInfo,margin)==72,"guest fiber info offsets");
+#define FIBER_STACK_MAGIC UINT64_C(0x7149f2ca7149f2ca)
+#define FIBER_FILL UINT64_C(0xdeadbeefdeadbeef)
 struct BbTasks {
     BbTranslatedRuntime *runtime;
     Thread threads[THREADS],*current;
@@ -34,6 +50,8 @@ struct BbTasks {
     size_t mutex_count,cond_count,attr_count;
     Tls templates[MODULES];
     Finalizer handlers[HANDLERS]; size_t handler_count;
+    Fiber fibers[32]; size_t fiber_count;
+    int fiber_size_check,in_import;
     pthread_mutex_t schedule;
     pthread_cond_t changed;
     unsigned workers,turn;
@@ -76,6 +94,7 @@ int bb_tasks_busy(BbTasks *t) { return t && t->running; }
 void bb_tasks_destroy(BbTasks *t) {
     if(!t || t->running) return;
     for(size_t i=0;i<t->thread_count;++i) { bb_probe_context_free(t->threads[i].cpu); unmap(t->threads[i].stack,t->threads[i].stack_size); unmap(t->threads[i].tls,t->threads[i].tls_size); }
+    for(size_t i=0;i<t->fiber_count;++i) bb_probe_context_free(t->fibers[i].cpu);
     for(unsigned i=0;i<MODULES;++i) free(t->templates[i].data);
     pthread_cond_destroy(&t->changed); pthread_mutex_destroy(&t->schedule); free(t);
 }
@@ -132,7 +151,8 @@ failed:
 BbTranslatedStatus bb_tasks_spawn(BbTasks *t,uint64_t entry,const uint64_t args[3],uint64_t *id) { return spawn(t,entry,args,STACK,0,id); }
 static int callback(BbTasks *t,Thread *thread,uint64_t function,uint64_t argument) {
     BbGuestCall call={.kind=BB_CALL_VOID_PTR,.target=function,.args={argument}};
-    return bb_probe_context_invoke(bb_translated_cpu(t->runtime),thread->cpu,&call)==BB_PROBE_OK;
+    return t->in_import ? bb_translated_invoke(t->runtime,&call)==BB_TRANSLATED_OK :
+        bb_probe_context_invoke(bb_translated_cpu(t->runtime),thread->cpu,&call)==BB_PROBE_OK;
 }
 static int cleanup(BbTasks *t,Thread *thread) {
     if(thread->cleaned) return 1;
@@ -186,6 +206,142 @@ static int finalize(BbTasks *t,uint64_t dso) {
             i=t->handler_count; /* recursive registration/finalization is safe */
         }
     }
+    return 1;
+}
+static Fiber *fiber_at(BbTasks *t,uint64_t address) {
+    uint64_t wire[2];
+    if(!address || (address&7) || !get(t,address,wire,sizeof(wire)) || wire[0]!=UINT64_C(0x334d464942455201)) return NULL;
+    if(!wire[1] || wire[1]>t->fiber_count) return NULL;
+    Fiber *f=t->fibers+wire[1]-1;
+    return f->address==address ? f : NULL;
+}
+static BbProbeContext *active_context(BbTasks *t,Thread *thread) {
+    return thread->active_fiber ? t->fibers[thread->active_fiber-1].cpu : thread->cpu;
+}
+static int fiber_name(BbTasks *t,uint64_t address,char out[32]) {
+    if(!address) return 0;
+    memset(out,0,32);
+    for(unsigned i=0;i<31;++i) { if(!get(t,address+i,out+i,1)) return 0; if(!out[i]) break; }
+    return 1;
+}
+static unsigned attach_fiber(BbTasks *t,Fiber *f,uint64_t address,uint64_t size) {
+    if((address&15) || (size&15)) return 2;
+    if(!address || size<512 || size>16*1024*1024 || size>UINT64_MAX-address) return 3;
+    if(!readable(t,address,(size_t)size) || !writable(t,address,(size_t)size)) return 4;
+    if(f->stack) return 4;
+    for(size_t i=0;i<t->fiber_count;++i) if(t->fibers[i].alive && t->fibers[i].stack &&
+        address<t->fibers[i].stack+t->fibers[i].size && t->fibers[i].stack<address+size) return 4;
+    /* A supplied fiber context must not overwrite a live thread's owned stack. */
+    for(size_t i=0;i<t->thread_count;++i) if(address<t->threads[i].stack+t->threads[i].stack_size && t->threads[i].stack<address+size) return 4;
+    uint64_t fill[128]; for(unsigned i=0;i<128;++i) fill[i]=FIBER_FILL;
+    if(f->size_check) for(uint64_t off=0;off<size;) {
+        size_t n=size-off<sizeof(fill) ? (size_t)(size-off) : sizeof(fill);
+        if(!put(t,address+off,fill,n)) return 4; off+=n;
+    }
+    uint64_t magic=FIBER_STACK_MAGIC; if(!put(t,address,&magic,8)) return 4;
+    f->stack=address; f->size=size; return 0;
+}
+static unsigned fiber_import(BbTasks *t,unsigned operation,const uint64_t *a) {
+    Thread *thread=t->current;
+    if(operation==BB_TASK_FIBER_OPT) {
+        if(!a[0]) return 1; if(a[0]&7) return 2;
+        uint32_t opt=0xbb40e64d; return put(t,a[0],&opt,4) ? 0 : 4;
+    }
+    if(operation==BB_TASK_FIBER_SIZE_START || operation==BB_TASK_FIBER_SIZE_STOP) {
+        if(operation==BB_TASK_FIBER_SIZE_START && a[0]) return 4;
+        int next=operation==BB_TASK_FIBER_SIZE_START;
+        if(t->fiber_size_check==next) return 6;
+        t->fiber_size_check=next; return 0;
+    }
+    if(operation==BB_TASK_FIBER_SELF) {
+        if(!a[0]) return 1;
+        if(!thread->active_fiber) return 5;
+        uint64_t address=t->fibers[thread->active_fiber-1].address; return put(t,a[0],&address,8) ? 0 : 4;
+    }
+    if(operation==BB_TASK_FIBER_RETURN) {
+        if(!thread->active_fiber) return 5;
+        if(a[1] && !writable(t,a[1],8)) return 4;
+        if(!pause_task(t)) return 5;
+        thread->event=FIBER_RETURN_EVENT; thread->event_args[0]=a[0]; thread->event_args[1]=a[1]; return 0;
+    }
+    if(!a[0]) return 1;
+    if(a[0]&7) return 2;
+    if(operation==BB_TASK_FIBER_INIT) {
+        if(!a[1] || !a[2]) return 1;
+        if(!writable(t,a[0],256) || !executable(t,a[2]) || t->fiber_count==32) return 4;
+        if(fiber_at(t,a[0]) && fiber_at(t,a[0])->alive) return 6;
+        if(a[6]) { uint32_t opt=0; if(a[6]&7) return 2; if(!get(t,a[6],&opt,4) || opt!=0xbb40e64d) return 4; }
+        Fiber f={.address=a[0],.entry=a[2],.argument=a[3],.alive=1,.inherit_fp=a[7]<0x03500000,.size_check=t->fiber_size_check};
+        if(!fiber_name(t,a[1],f.name)) return 4;
+        if(a[4] || a[5]) { unsigned error=attach_fiber(t,&f,a[4],a[5]); if(error) return error; }
+        uint64_t wire[32]={UINT64_C(0x334d464942455201),t->fiber_count+1};
+        if(!put(t,a[0],wire,sizeof(wire))) return 4;
+        t->fibers[t->fiber_count++]=f; return 0;
+    }
+    Fiber *f=fiber_at(t,a[0]); if(!f) return 4;
+    if(!f->alive) return 6;
+    if(operation==BB_TASK_FIBER_FINALIZE) {
+        if(f->owner) return 6;
+        f->alive=0; bb_probe_context_free(f->cpu); f->cpu=NULL; return 0;
+    }
+    if(operation==BB_TASK_FIBER_RENAME) return fiber_name(t,a[1],f->name) ? 0 : 4;
+    if(operation==BB_TASK_FIBER_INFO) {
+        uint64_t info_size=0;
+        if(!a[1]) return 1; if(a[1]&7) return 2;
+        if(!get(t,a[1],&info_size,8) || info_size!=sizeof(FiberInfo)) return 4;
+        FiberInfo info={.size=sizeof(info),.entry=f->entry,.argument=f->argument,.stack=f->stack,.stack_size=f->size,.margin=UINT64_MAX};
+        memcpy(info.name,f->name,32);
+        if(f->size_check && f->stack) {
+            info.margin=0;
+            for(uint64_t off=8;off<f->size;off+=8) { uint64_t word=0; if(!get(t,f->stack+off,&word,8)) return 4; if(word!=FIBER_FILL) break; info.margin+=8; }
+        }
+        return put(t,a[1],&info,sizeof(info)) ? 0 : 4;
+    }
+    int attach=operation==BB_TASK_FIBER_ATTACH_RUN || operation==BB_TASK_FIBER_ATTACH_SWITCH;
+    int switching=operation==BB_TASK_FIBER_SWITCH || operation==BB_TASK_FIBER_ATTACH_SWITCH;
+    if(operation!=BB_TASK_FIBER_RUN && operation!=BB_TASK_FIBER_SWITCH && !attach) return 4;
+    if(!!thread->active_fiber!=switching) return 5;
+    if(f->owner) return 6;
+    uint64_t output=attach ? a[4] : a[2],arg=attach ? a[3] : a[1];
+    if(output && !writable(t,output,8)) return 4;
+    if(attach && (a[1] || a[2])) { unsigned error=attach_fiber(t,f,a[1],a[2]); if(error) return error; }
+    /* A context-less fiber may be initialized and attached later. Running one
+     * without storage is deliberately unsupported; never borrow a host stack. */
+    if(!f->stack) return 4;
+    uint64_t magic=0; if(!get(t,f->stack,&magic,8) || magic!=FIBER_STACK_MAGIC) return 6;
+    if(!pause_task(t)) return 5;
+    thread->event=switching ? FIBER_SWITCH_EVENT : FIBER_RUN_EVENT;
+    thread->event_args[0]=(uint64_t)(f-t->fibers)+1; thread->event_args[1]=arg; thread->event_args[2]=output; return 0;
+}
+static int fiber_transition(BbTasks *t,Thread *thread) {
+    enum Event event=thread->event; thread->event=NONE;
+    uint64_t *a=thread->event_args;
+    Fiber *previous=thread->active_fiber ? t->fibers+thread->active_fiber-1 : NULL;
+    BbProbeContext *source=active_context(t,thread);
+    if(previous) {
+        uint64_t magic=0; if(!get(t,previous->stack,&magic,8) || magic!=FIBER_STACK_MAGIC) return 0;
+        previous->wait_output=event==FIBER_RETURN_EVENT ? a[1] : a[2];
+        previous->owner=0; /* Publish idle only after context_resume saved CPU state. */
+    }
+    if(event==FIBER_RETURN_EVENT) {
+        thread->active_fiber=0;
+        return !thread->run_output || put(t,thread->run_output,a,8);
+    }
+    Fiber *next=t->fibers+a[0]-1;
+    if(next->owner) return 0;
+    if(!next->cpu) {
+        uint64_t args[3]={next->argument,a[1],0};
+        if(bb_probe_context_create(bb_translated_cpu(t->runtime),next->entry,next->stack+next->size,args,thread->tcb,&next->cpu)!=BB_PROBE_OK) return 0;
+        if(next->inherit_fp) {
+            uint32_t mxcsr=0; uint16_t fpcw=0;
+            if(bb_probe_context_read(source,UC_X86_REG_MXCSR,&mxcsr)!=BB_PROBE_OK || bb_probe_context_read(source,UC_X86_REG_FPCW,&fpcw)!=BB_PROBE_OK ||
+               bb_probe_context_write(next->cpu,UC_X86_REG_MXCSR,&mxcsr)!=BB_PROBE_OK || bb_probe_context_write(next->cpu,UC_X86_REG_FPCW,&fpcw)!=BB_PROBE_OK) return 0;
+        }
+    } else if(next->wait_output && !put(t,next->wait_output,a+1,8)) return 0;
+    next->wait_output=0;
+    if(bb_probe_context_write(next->cpu,UC_X86_REG_FS_BASE,&thread->tcb)!=BB_PROBE_OK) return 0;
+    next->owner=thread->id; thread->active_fiber=a[0];
+    if(event==FIBER_RUN_EVENT) thread->run_output=a[2];
     return 1;
 }
 static int tick(BbTasks *t);
@@ -246,12 +402,16 @@ BbTranslatedStatus bb_tasks_finalize(BbTasks *t) {
 }
 uint64_t bb_tasks_worker_mask(BbTasks *t,uint64_t id) { Thread *thread=t && !t->running ? find(t,id) : NULL; return thread ? thread->worker_mask : 0; }
 const char *bb_tasks_diagnostic(BbTasks *t) { return t ? t->diagnostic : "no task runtime"; }
-BbAbiStatus bb_tasks_import(BbTasks *t,unsigned operation,const BbAbiValue *v,size_t count,BbAbiValue *result) {
+static BbAbiStatus dispatch(BbTasks *t,unsigned operation,const BbAbiValue *v,size_t count,BbAbiValue *result) {
     if(!t || !t->current) return BB_ABI_HOST;
-    Thread *current=t->current; uint64_t a[7]={0};
-    for(unsigned i=0;i<count && i<7;++i) a[i]=value(v+i);
+    Thread *current=t->current; uint64_t a[8]={0};
+    for(unsigned i=0;i<count && i<8;++i) a[i]=value(v+i);
     int posix=operation>=BB_TASK_POSIX; if(posix) operation-=BB_TASK_POSIX;
     unsigned err=0; uint64_t returned=0,id=0;
+    if(operation>=BB_TASK_FIBER_INIT) {
+        err=fiber_import(t,operation,a);
+        int32_t rc=err ? (int32_t)(UINT32_C(0x80590000)|err) : 0; memcpy(result->bytes,&rc,4); return BB_ABI_OK;
+    }
     switch(operation) {
     case BB_TASK_SELF: returned=current->id; goto wide;
     case BB_TASK_ERRNO: returned=current->tcb+24; goto wide;
@@ -353,12 +513,27 @@ static int tick(BbTasks *t) {
     thread->worker_mask|=UINT64_C(1)<<t->turn;
     t->current=thread; bb_probe_clock_aux(bb_translated_cpu(t->runtime),(uint32_t)thread->id);
     uint64_t result=0; BbProbeFault fault={0};
-    BbProbeStatus s=bb_probe_context_resume(bb_translated_cpu(t->runtime),thread->cpu,&result,&fault);
-    if(s==BB_PROBE_OK || (s==BB_PROBE_YIELD && thread->event==EXIT_EVENT)) {
+    BbProbeStatus s=bb_probe_context_resume(bb_translated_cpu(t->runtime),active_context(t,thread),&result,&fault);
+    if(thread->active_fiber) t->fibers[thread->active_fiber-1].worker_mask|=UINT64_C(1)<<t->turn;
+    if(s==BB_PROBE_YIELD && thread->event>=FIBER_RUN_EVENT) {
+        if(!fiber_transition(t,thread)) { t->failed=1; fail(t,"fiber context transition or stack validation failed"); }
+    } else if(thread->active_fiber && (s==BB_PROBE_OK || thread->event==EXIT_EVENT)) {
+        t->failed=1; fail(t,"fiber entry returned or exited its owning thread unexpectedly");
+    } else if(s==BB_PROBE_OK || (s==BB_PROBE_YIELD && thread->event==EXIT_EVENT)) {
         if(thread->event==EXIT_EVENT) result=thread->event_args[0];
         if(!finish(t,thread,result)) { t->failed=1; fail(t,"guest thread cleanup or join output failed"); }
     } else if(s!=BB_PROBE_YIELD) {
         t->failed=1; snprintf(t->diagnostic,sizeof(t->diagnostic),"thread %llu: %s pc=0x%llx address=0x%llx; %.100s",(unsigned long long)thread->id,bb_probe_status_name(s),(unsigned long long)fault.pc,(unsigned long long)fault.address,bb_translated_diagnostic(t->runtime));
     }
     t->current=NULL; return !t->failed;
+}
+
+BbAbiStatus bb_tasks_import(BbTasks *t,unsigned operation,const BbAbiValue *values,size_t count,BbAbiValue *result) {
+    if(!t) return BB_ABI_HOST;
+    ++t->in_import;
+    BbAbiStatus status=dispatch(t,operation,values,count,result);
+    --t->in_import; return status;
+}
+uint64_t bb_tasks_fiber_worker_mask(BbTasks *t,uint64_t address) {
+    Fiber *f=t && !t->running ? fiber_at(t,address) : NULL; return f ? f->worker_mask : 0;
 }

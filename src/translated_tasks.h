@@ -15,7 +15,8 @@ enum {
     BB_TASK_CXA_ATEXIT,BB_TASK_FINALIZE,BB_TASK_CLOCK,BB_TASK_ATTR_INIT,BB_TASK_ATTR_DESTROY,
     BB_TASK_ATTR_STACK,BB_TASK_ATTR_DETACH,
     BB_TASK_FIBER_INIT=80,BB_TASK_FIBER_FINALIZE,BB_TASK_FIBER_RUN,BB_TASK_FIBER_SWITCH,
-    BB_TASK_FIBER_RETURN,BB_TASK_FIBER_SELF,
+    BB_TASK_FIBER_RETURN,BB_TASK_FIBER_SELF,BB_TASK_FIBER_ATTACH_RUN,BB_TASK_FIBER_ATTACH_SWITCH,
+    BB_TASK_FIBER_INFO,BB_TASK_FIBER_RENAME,BB_TASK_FIBER_OPT,BB_TASK_FIBER_SIZE_START,BB_TASK_FIBER_SIZE_STOP,
     BB_TASK_POSIX=1000
 };
 BbTranslatedStatus bb_tasks_create(BbTranslatedRuntime *,BbTasks **);
@@ -30,6 +31,7 @@ BbTranslatedStatus bb_tasks_result(BbTasks *,uint64_t id,uint64_t *result);
 /* Repeated module calls reuse the process main thread's TLS and keys. */
 BbTranslatedStatus bb_tasks_call(BbTasks *,uint64_t entry,const uint64_t args[3],unsigned workers,uint64_t *result);
 BbTranslatedStatus bb_tasks_finalize(BbTasks *);
+uint64_t bb_tasks_fiber_worker_mask(BbTasks *,uint64_t address);
 uint64_t bb_tasks_worker_mask(BbTasks *,uint64_t id);
 const char *bb_tasks_diagnostic(BbTasks *);
 BbAbiStatus bb_tasks_import(BbTasks *,unsigned operation,const BbAbiValue *,size_t count,BbAbiValue *);

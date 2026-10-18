@@ -261,7 +261,8 @@ static BbProbeStatus execute(BbCpuProbe *p,uint64_t pc,uint64_t *result) {
     BbProbeStatus status=BB_PROBE_LIMIT;
     uc_err e=UC_ERR_OK; uint64_t sp=0;
     memset(&p->fault,0,sizeof(p->fault));
-    for(unsigned resume=0;e==UC_ERR_OK && resume<MAX_RESUMES;++resume) {
+    unsigned resume=0;
+    for(;e==UC_ERR_OK && resume<MAX_RESUMES;++resume) {
         p->pending=-1;
         p->unsupported=0;
         p->external_error=0;
@@ -317,6 +318,7 @@ static BbProbeStatus execute(BbCpuProbe *p,uint64_t pc,uint64_t *result) {
         if(e==UC_ERR_OK && p->pause_requested) { status=BB_PROBE_YIELD; break; }
         if(e==UC_ERR_OK && pc==BB_PROBE_RETURN) { status=BB_PROBE_OK; break; }
     }
+    if(status==BB_PROBE_LIMIT && p->resumable && e==UC_ERR_OK && resume==MAX_RESUMES) status=BB_PROBE_YIELD;
     if(status==BB_PROBE_OK) {
         e=uc_reg_read(p->engine,UC_X86_REG_RAX,result);
         if(e!=UC_ERR_OK) status=BB_PROBE_ENGINE;

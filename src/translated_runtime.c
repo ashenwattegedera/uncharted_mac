@@ -92,6 +92,19 @@ static const Import imports[]={
     TASK("__cxa_atexit",BB_TASK_CXA_ATEXIT,BB_ABI_I32,3,P,P,P),
     TASK("__cxa_finalize",BB_TASK_FINALIZE,BB_ABI_VOID,1,P),
     TASK("sceKernelGetProcessTime",BB_TASK_CLOCK,U,0,0),
+    TASK("_sceFiberInitializeImpl",BB_TASK_FIBER_INIT,BB_ABI_I32,8,P,P,P,U,P,U,P,I),
+    TASK("sceFiberFinalize",BB_TASK_FIBER_FINALIZE,BB_ABI_I32,1,P),
+    TASK("sceFiberRun",BB_TASK_FIBER_RUN,BB_ABI_I32,3,P,U,P),
+    TASK("sceFiberSwitch",BB_TASK_FIBER_SWITCH,BB_ABI_I32,3,P,U,P),
+    TASK("sceFiberReturnToThread",BB_TASK_FIBER_RETURN,BB_ABI_I32,2,U,P),
+    TASK("sceFiberGetSelf",BB_TASK_FIBER_SELF,BB_ABI_I32,1,P),
+    TASK("_sceFiberAttachContextAndRun",BB_TASK_FIBER_ATTACH_RUN,BB_ABI_I32,5,P,P,U,U,P),
+    TASK("_sceFiberAttachContextAndSwitch",BB_TASK_FIBER_ATTACH_SWITCH,BB_ABI_I32,5,P,P,U,U,P),
+    TASK("sceFiberGetInfo",BB_TASK_FIBER_INFO,BB_ABI_I32,2,P,P),
+    TASK("sceFiberRename",BB_TASK_FIBER_RENAME,BB_ABI_I32,2,P,P),
+    TASK("sceFiberOptParamInitialize",BB_TASK_FIBER_OPT,BB_ABI_I32,1,P),
+    TASK("sceFiberStartContextSizeCheck",BB_TASK_FIBER_SIZE_START,BB_ABI_I32,1,I),
+    TASK("sceFiberStopContextSizeCheck",BB_TASK_FIBER_SIZE_STOP,BB_ABI_I32,0,0),
 };
 #undef TASK
 #undef SIG

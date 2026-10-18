@@ -239,6 +239,33 @@ if(BB_BUILD_TRANSLATED_M2)
         foreach(case deadlock budget fault)
             add_test(NAME translated-threads-${case} COMMAND translated-threads-test ${case})
         endforeach()
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/m3_fibers_text.h"
+            COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding -fno-stack-protector
+                -fno-pic -mno-red-zone -fno-unwind-tables -fno-asynchronous-unwind-tables -O1
+                -c "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/m3_fiber_calls.c" -o "${CMAKE_CURRENT_BINARY_DIR}/m3_fiber_calls.o"
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/extract_guest_text.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/m3_fiber_calls.o" "${CMAKE_CURRENT_BINARY_DIR}/m3_fibers_text.h"
+            DEPENDS tests/fixtures/m3_fiber_calls.c tests/fixtures/m3_fiber_types.h tests/fixtures/m3_thread_types.h tests/fixtures/extract_guest_text.py VERBATIM)
+        add_executable(translated-fibers-test tests/test_translated_fibers.c "${CMAKE_CURRENT_BINARY_DIR}/m3_fibers_text.h")
+        bb_runtime_target(translated-fibers-test)
+        target_include_directories(translated-fibers-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+        target_compile_options(translated-fibers-test PRIVATE -UNDEBUG)
+        target_link_libraries(translated-fibers-test PRIVATE bb-translated-runtime)
+        add_test(NAME translated-fibers COMMAND translated-fibers-test)
+        add_test(NAME translated-fiber-switch COMMAND translated-fibers-test switch)
+        add_test(NAME translated-fiber-stackguard COMMAND translated-fibers-test guard)
+        foreach(suite threads fibers)
+            set(target translated-${suite}-hardened)
+            add_executable(${target} tests/test_translated_${suite}.c "${CMAKE_CURRENT_BINARY_DIR}/m3_${suite}_text.h")
+            bb_runtime_target(${target})
+            target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+            target_compile_options(${target} PRIVATE -UNDEBUG)
+            target_link_libraries(${target} PRIVATE bb-translated-runtime)
+            add_test(NAME ${target} COMMAND ${target})
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND codesign --force --sign - --options runtime --entitlements
+                    "${CMAKE_CURRENT_SOURCE_DIR}/spikes/cpu/jit.entitlements.plist" "$<TARGET_FILE:${target}>" VERBATIM)
+        endforeach()
         add_test(NAME m2-import-compiled-inventory COMMAND "${Python3_EXECUTABLE}"
             "${PROJECT_SOURCE_DIR}/scripts/audit_m2_imports.py" --binary "$<TARGET_FILE:translated-runtime-test>")
         add_executable(translated-gpu-test tests/test_translated_gpu.c)
