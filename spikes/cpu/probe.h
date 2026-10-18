@@ -10,7 +10,7 @@
 typedef struct BbCpuProbe BbCpuProbe;
 enum { BB_PROBE_MAX_BINDINGS=512 };
 typedef enum { BB_PROBE_OK, BB_PROBE_INVALID, BB_PROBE_ENGINE, BB_PROBE_FAULT, BB_PROBE_LIMIT,
-               BB_PROBE_UNSUPPORTED } BbProbeStatus;
+               BB_PROBE_UNSUPPORTED, BB_PROBE_YIELD } BbProbeStatus;
 typedef struct {
     uint64_t pc,address;
     size_t size;
@@ -25,6 +25,20 @@ typedef int (*BbProbeFaultHandler)(BbCpuProbe *,const BbProbeFault *,void *user)
 #define BB_PROBE_STACK UINT64_C(0x800000)
 #define BB_PROBE_RETURN UINT64_C(0x20fff0)
 
+typedef struct BbProbeContext BbProbeContext;
+/* Continuations own complete vendor CPU state, not guest memory or host stacks.
+ * The same serialized engine must outlive them. Yield is legal at outer HLE only. */
+BbProbeStatus bb_probe_context_create(BbCpuProbe *,uint64_t entry,uint64_t stack_top,
+    const uint64_t args[3],uint64_t fs_base,BbProbeContext **out);
+void bb_probe_context_free(BbProbeContext *);
+BbProbeStatus bb_probe_context_resume(BbCpuProbe *,BbProbeContext *,uint64_t *result,BbProbeFault *);
+BbProbeStatus bb_probe_context_invoke(BbCpuProbe *,BbProbeContext *,BbGuestCall *);
+BbProbeStatus bb_probe_context_read(BbProbeContext *,int reg,void *value);
+BbProbeStatus bb_probe_context_write(BbProbeContext *,int reg,const void *value);
+BbProbeStatus bb_probe_pause(BbCpuProbe *);
+BbProbeStatus bb_probe_virtual_clock(BbCpuProbe *,uint64_t initial,uint64_t step);
+uint64_t bb_probe_clock_value(BbCpuProbe *);
+void bb_probe_clock_aux(BbCpuProbe *,uint32_t aux);
 BbProbeStatus bb_probe_open(BbCpuProbe **out);
 void bb_probe_close(BbCpuProbe *probe);
 BbProbeStatus bb_probe_map(BbCpuProbe *probe,uint64_t address,size_t size,unsigned permissions);

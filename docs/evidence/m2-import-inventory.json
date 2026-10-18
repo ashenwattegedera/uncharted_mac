@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "scope": "Explicit M2 reference contracts; diagnostic names do not establish ABI signatures or game coverage.",
+  "scope": "Explicit M2/M3 reference contracts; diagnostic names do not establish ABI signatures or game coverage.",
   "source_sha256": {
     "src/runtime.c": "f7d985e115f690d1c07da1f984b48686b22c4836e27d035594c39ccde94093e5",
     "src/runtime_ajm.c": "92f62ce7dfffa2bc8a6c13874c40e1a6ca9dc18b0052a99ddd210cd9de207cad",
@@ -22,10 +22,14 @@
     "src/runtime_thread.c": "7a38b1475d62fa8303ab65234e14a8875a57c1625d8da7b602b9d465e33dc0db",
     "src/runtime_time.c": "66c10a43c9259b475f255dfcb4434de635a78feb026ffee3ecd45495373b60e0",
     "src/import_names.inc": "7d8b5832fae9f9cdb4108223c8cf8a2ca55dc5708c93201fda5767a39085880b",
-    "src/translated_runtime.c": "f6b162233a5de2836699b734666672a2eb74a81a956cf1aeeb1ba56af1dfaaa5",
+    "src/translated_runtime.c": "7c0149f3dc31701e8d5ef1cdf9c42aae7233e7d86e5886e0f4fe591e9c7c3390",
     "src/guest_abi.h": "dbb9099e8fec869f169ec8025b203bb28a9ba9987d7ef62e527ce0ccfc69ab45",
     "src/guest_layout.h": "31521e9778bb8b64e4a402b788b762d16d6d0f2f7e275949d1b1e0259ef2916f",
-    "src/guest_format.c": "b38347fc74b0e2a4b00daad4b2ef1aa469cce9298a1b79e6aecc99e6d6ec5140"
+    "src/guest_format.c": "b38347fc74b0e2a4b00daad4b2ef1aa469cce9298a1b79e6aecc99e6d6ec5140",
+    "src/translated_tasks.c": "7e484cf502ff4a8de5d059fcdecabb4b5c9ba1df09a20006d6dc6069c5f6ee4b",
+    "src/translated_tasks.h": "b88d388f1cbc3eff7714dcd0852989df10f5baf7eedcd88f43a7daa03b5cb9d7",
+    "spikes/cpu/probe.c": "a2c6e49a8a78036e245311965d5182593b84ccd28266bb1c48e01c3263aba3ae",
+    "spikes/cpu/probe.h": "6f5ae6d49e38aacee80c95d86f17d048a1e185c0712b81070da94d4236e51865"
   },
   "contracts": [
     {
@@ -34,6 +38,7 @@
       "result": 3,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": []
     },
     {
@@ -42,6 +47,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         3,
         3,
@@ -57,6 +63,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -72,6 +79,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -88,6 +96,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         3,
         3
@@ -99,6 +108,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3
@@ -110,6 +120,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3
@@ -121,6 +132,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -134,6 +146,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -148,6 +161,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3
@@ -159,6 +173,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -172,6 +187,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -184,6 +200,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4,
@@ -197,6 +214,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         1,
@@ -210,6 +228,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         3,
         4,
@@ -223,6 +242,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         1,
@@ -235,6 +255,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         1,
@@ -248,6 +269,7 @@
       "result": 4,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4,
@@ -260,6 +282,7 @@
       "result": 4,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4,
@@ -272,6 +295,7 @@
       "result": 4,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         1,
@@ -284,6 +308,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4,
@@ -296,6 +321,7 @@
       "result": 3,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4
       ]
@@ -306,6 +332,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4
@@ -317,6 +344,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4,
@@ -329,6 +357,7 @@
       "result": 4,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4
@@ -340,6 +369,7 @@
       "result": 4,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4,
@@ -352,6 +382,7 @@
       "result": 2,
       "variadic": 1,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -364,6 +395,7 @@
       "result": 2,
       "variadic": 0,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         3,
@@ -377,10 +409,439 @@
       "result": 2,
       "variadic": 1,
       "data_size": 0,
+      "milestone": 2,
       "args": [
         4,
         4
       ]
+    },
+    {
+      "name": "scePthreadSelf",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
+    },
+    {
+      "name": "scePthreadGetthreadid",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
+    },
+    {
+      "name": "scePthreadCreate",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "scePthreadJoin",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "scePthreadDetach",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadExit",
+      "kind": 0,
+      "result": 0,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadYield",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
+    },
+    {
+      "name": "scePthreadKeyCreate",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "scePthreadKeyDelete",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        1
+      ]
+    },
+    {
+      "name": "scePthreadGetspecific",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        1
+      ]
+    },
+    {
+      "name": "scePthreadSetspecific",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        1,
+        4
+      ]
+    },
+    {
+      "name": "__tls_get_addr",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "__error",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
+    },
+    {
+      "name": "scePthreadMutexInit",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "scePthreadMutexDestroy",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadMutexLock",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadMutexTrylock",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadMutexUnlock",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadCondInit",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "scePthreadCondDestroy",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadCondWait",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "scePthreadCondSignal",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadCondBroadcast",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadAttrInit",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadAttrDestroy",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "scePthreadAttrSetstacksize",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        3
+      ]
+    },
+    {
+      "name": "scePthreadAttrSetdetachstate",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        1
+      ]
+    },
+    {
+      "name": "pthread_create",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "pthread_join",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "pthread_exit",
+      "kind": 0,
+      "result": 0,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "pthread_self",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
+    },
+    {
+      "name": "pthread_key_create",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4
+      ]
+    },
+    {
+      "name": "pthread_getspecific",
+      "kind": 0,
+      "result": 4,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        1
+      ]
+    },
+    {
+      "name": "pthread_setspecific",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        1,
+        4
+      ]
+    },
+    {
+      "name": "atexit",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "__cxa_atexit",
+      "kind": 0,
+      "result": 2,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4,
+        4,
+        4
+      ]
+    },
+    {
+      "name": "__cxa_finalize",
+      "kind": 0,
+      "result": 0,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": [
+        4
+      ]
+    },
+    {
+      "name": "sceKernelGetProcessTime",
+      "kind": 0,
+      "result": 3,
+      "variadic": 0,
+      "data_size": 0,
+      "milestone": 3,
+      "args": []
     },
     {
       "name": "__stack_chk_guard",
@@ -388,6 +849,7 @@
       "result": 0,
       "variadic": 0,
       "data_size": 8,
+      "milestone": 2,
       "args": []
     },
     {
@@ -396,6 +858,7 @@
       "result": 0,
       "variadic": 0,
       "data_size": 4,
+      "milestone": 2,
       "args": []
     }
   ],
@@ -409,7 +872,7 @@
     {
       "nid": "8G2LB+A3rzg#q#q",
       "name": "atexit",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -457,7 +920,7 @@
     {
       "nid": "tsvEmnenz48#q#q",
       "name": "__cxa_atexit",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -657,7 +1120,7 @@
     {
       "nid": "9BcDykPmo1I#p#J",
       "name": "__error",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -709,7 +1172,7 @@
     {
       "nid": "EotR8a3ASf4#I#J",
       "name": "pthread_self",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -791,7 +1254,7 @@
     {
       "nid": "OxhIB8LB-PQ#I#J",
       "name": "pthread_create",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -807,7 +1270,7 @@
     {
       "nid": "FJrT5LuUBAU#I#J",
       "name": "pthread_exit",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -995,7 +1458,7 @@
     {
       "nid": "4J2sUJmuHZQ#p#J",
       "name": "sceKernelGetProcessTime",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_kernel.c"
       ]
@@ -1103,7 +1566,7 @@
     {
       "nid": "vNe1w4diLCs#p#J",
       "name": "__tls_get_addr",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -1133,7 +1596,7 @@
     {
       "nid": "h9CcP3J0oVM#I#J",
       "name": "pthread_join",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1837,7 +2300,7 @@
     {
       "nid": "nsYoNRywwNg#p#J",
       "name": "scePthreadAttrInit",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1845,7 +2308,7 @@
     {
       "nid": "UTXzJbWhhTE#p#J",
       "name": "scePthreadAttrSetstacksize",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1853,7 +2316,7 @@
     {
       "nid": "-Wreprtu0Qs#p#J",
       "name": "scePthreadAttrSetdetachstate",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1869,7 +2332,7 @@
     {
       "nid": "6UgtwV+0zb4#p#J",
       "name": "scePthreadCreate",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1877,7 +2340,7 @@
     {
       "nid": "62KCwEMmzcM#p#J",
       "name": "scePthreadAttrDestroy",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1893,7 +2356,7 @@
     {
       "nid": "4qGrR6eoP9Y#p#J",
       "name": "scePthreadDetach",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -1917,7 +2380,7 @@
     {
       "nid": "onNY9Byn-W8#p#J",
       "name": "scePthreadJoin",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -3297,7 +3760,7 @@
     {
       "nid": "aI+OeCz8xrQ#p#J",
       "name": "scePthreadSelf",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -3333,7 +3796,7 @@
     {
       "nid": "cmo1RIYva9o#p#J",
       "name": "scePthreadMutexInit",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -3345,19 +3808,19 @@
     {
       "nid": "2Of0f+3mhhE#p#J",
       "name": "scePthreadMutexDestroy",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
       "nid": "9UK1vLZQft4#p#J",
       "name": "scePthreadMutexLock",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
       "nid": "tn3VlD0hG60#p#J",
       "name": "scePthreadMutexUnlock",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -4323,7 +4786,7 @@
     {
       "nid": "T72hz6ffq08#p#J",
       "name": "scePthreadYield",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -4915,7 +5378,7 @@
     {
       "nid": "upoVrzMHFeE#p#J",
       "name": "scePthreadMutexTrylock",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -4963,7 +5426,7 @@
     {
       "nid": "3kg7rT0NQIs#p#J",
       "name": "scePthreadExit",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -4993,7 +5456,7 @@
     {
       "nid": "WKAXJ4XBPQ4#p#J",
       "name": "scePthreadCondWait",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -5231,25 +5694,25 @@
     {
       "nid": "2Tb92quprl0#p#J",
       "name": "scePthreadCondInit",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
       "nid": "g+PZd2hiacg#p#J",
       "name": "scePthreadCondDestroy",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
       "nid": "kDh-NfxgMtE#p#J",
       "name": "scePthreadCondSignal",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
       "nid": "JGgj7Uvrl+A#p#J",
       "name": "scePthreadCondBroadcast",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {
@@ -5279,7 +5742,7 @@
     {
       "nid": "geDaqgH9lTg#p#J",
       "name": "scePthreadKeyCreate",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_kernel.c"
       ]
@@ -5287,7 +5750,7 @@
     {
       "nid": "PrdHuuDekhY#p#J",
       "name": "scePthreadKeyDelete",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_kernel.c"
       ]
@@ -5295,7 +5758,7 @@
     {
       "nid": "+BzXYkqYeLE#p#J",
       "name": "scePthreadSetspecific",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_kernel.c"
       ]
@@ -5303,7 +5766,7 @@
     {
       "nid": "eoht7mQOCmo#p#J",
       "name": "scePthreadGetspecific",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_kernel.c"
       ]
@@ -5979,7 +6442,7 @@
     {
       "nid": "EI-5-jlq2dE#p#J",
       "name": "scePthreadGetthreadid",
-      "status": "deferred-m3-thread-fiber-lifecycle",
+      "status": "implemented-m3",
       "source_export_tables": [
         "src/runtime_thread.c"
       ]
@@ -6061,7 +6524,7 @@
     {
       "nid": "H2e8t5ScQGc#libSceLibcInternal",
       "name": "__cxa_finalize",
-      "status": "unsupported-needs-contract-review-before-use",
+      "status": "implemented-m3",
       "source_export_tables": []
     },
     {

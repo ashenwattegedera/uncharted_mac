@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 /* Owned Darwin address window. All operations, observers and teardown belong to
- * the creating host thread. No API here is async-signal-safe. */
+ * one exclusive host thread, initially the creating thread. No API here is async-signal-safe. */
 typedef struct BbGuestMemory BbGuestMemory;
 typedef enum { BB_VM_OK, BB_VM_INVALID, BB_VM_BUSY, BB_VM_ACCESS, BB_VM_SYSTEM,
                BB_VM_WRONG_THREAD, BB_VM_POISONED } BbVmStatus;
@@ -26,6 +26,10 @@ typedef int (*BbVmObserver)(BbGuestMemory *,BbVmEvent,uint64_t,size_t,void *);
 BbVmStatus bb_vm_create(BbGuestMemory **out,size_t window_size,size_t backing_size,uint64_t preferred);
 /* Logical guest addresses need not equal the private host reservation. */
 BbVmStatus bb_vm_create_address_space(BbGuestMemory **out,size_t window_size,size_t backing_size,uint64_t guest_base);
+/* Explicit exclusive handoff: release only while CPU/observers are stopped.
+ * Acquire never steals a live owner. External synchronization protects lifetime. */
+BbVmStatus bb_vm_release_owner(BbGuestMemory *vm);
+BbVmStatus bb_vm_acquire_owner(BbGuestMemory *vm);
 BbVmStatus bb_vm_close(BbGuestMemory *vm);
 uint64_t bb_vm_base(const BbGuestMemory *vm);
 /* Service-owned physical allocations can outlive their last virtual alias. */

@@ -2,6 +2,7 @@
 #include "guest_format.h"
 #include "runtime.h"
 #include "memory_probe.h"
+#include "translated_tasks.h"
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +12,7 @@ typedef struct { const char *name; BbAbiSignature signature; unsigned operation;
 typedef struct { BbTranslatedRuntime *runtime; const Import *entry; } Handler;
 struct BbTranslatedRuntime {
     BbMemoryProbe *session;
+    BbTasks *tasks;
     Handler handlers[MAX_IMPORTS];
     uint64_t addresses[MAX_IMPORTS],canary,libc_marker;
     char diagnostic[256];
@@ -21,6 +23,7 @@ struct BbTranslatedRuntime {
 #define I BB_ABI_U32
 #define P BB_ABI_POINTER
 #define SIG(ret,...) {.result=ret,.args={__VA_ARGS__}}
+#define TASK(name,op,ret,n,...) {name,{.result=ret,.args={__VA_ARGS__},.count=n,.fixed_count=n},op}
 static const Import imports[]={
     {"sceKernelGetDirectMemorySize",{.result=U},0},
     {"sceKernelAllocateDirectMemory",{.result=BB_ABI_I32,.args={U,U,U,U,I,P},.count=6,.fixed_count=6},1},
@@ -51,7 +54,46 @@ static const Import imports[]={
     {"snprintf",{.result=BB_ABI_I32,.args={P,U,P},.count=3,.fixed_count=3,.variadic=1},30},
     {"vsnprintf",{.result=BB_ABI_I32,.args={P,U,P,P},.count=4,.fixed_count=4},31},
     {"sprintf",{.result=BB_ABI_I32,.args={P,P},.count=2,.fixed_count=2,.variadic=1},32},
+    TASK("scePthreadSelf",BB_TASK_SELF,P,0,0),
+    TASK("scePthreadGetthreadid",BB_TASK_SELF,BB_ABI_I32,0,0),
+    TASK("scePthreadCreate",BB_TASK_CREATE,BB_ABI_I32,5,P,P,P,P,P),
+    TASK("scePthreadJoin",BB_TASK_JOIN,BB_ABI_I32,2,P,P),
+    TASK("scePthreadDetach",BB_TASK_DETACH,BB_ABI_I32,1,P),
+    TASK("scePthreadExit",BB_TASK_EXIT,BB_ABI_VOID,1,P),
+    TASK("scePthreadYield",BB_TASK_YIELD,BB_ABI_I32,0,0),
+    TASK("scePthreadKeyCreate",BB_TASK_KEY_CREATE,BB_ABI_I32,2,P,P),
+    TASK("scePthreadKeyDelete",BB_TASK_KEY_DELETE,BB_ABI_I32,1,I),
+    TASK("scePthreadGetspecific",BB_TASK_GETSPECIFIC,P,1,I),
+    TASK("scePthreadSetspecific",BB_TASK_SETSPECIFIC,BB_ABI_I32,2,I,P),
+    TASK("__tls_get_addr",BB_TASK_TLS,P,1,P),
+    TASK("__error",BB_TASK_ERRNO,P,0,0),
+    TASK("scePthreadMutexInit",BB_TASK_MUTEX_INIT,BB_ABI_I32,3,P,P,P),
+    TASK("scePthreadMutexDestroy",BB_TASK_MUTEX_DESTROY,BB_ABI_I32,1,P),
+    TASK("scePthreadMutexLock",BB_TASK_MUTEX_LOCK,BB_ABI_I32,1,P),
+    TASK("scePthreadMutexTrylock",BB_TASK_MUTEX_TRYLOCK,BB_ABI_I32,1,P),
+    TASK("scePthreadMutexUnlock",BB_TASK_MUTEX_UNLOCK,BB_ABI_I32,1,P),
+    TASK("scePthreadCondInit",BB_TASK_COND_INIT,BB_ABI_I32,3,P,P,P),
+    TASK("scePthreadCondDestroy",BB_TASK_COND_DESTROY,BB_ABI_I32,1,P),
+    TASK("scePthreadCondWait",BB_TASK_COND_WAIT,BB_ABI_I32,2,P,P),
+    TASK("scePthreadCondSignal",BB_TASK_COND_SIGNAL,BB_ABI_I32,1,P),
+    TASK("scePthreadCondBroadcast",BB_TASK_COND_BROADCAST,BB_ABI_I32,1,P),
+    TASK("scePthreadAttrInit",BB_TASK_ATTR_INIT,BB_ABI_I32,1,P),
+    TASK("scePthreadAttrDestroy",BB_TASK_ATTR_DESTROY,BB_ABI_I32,1,P),
+    TASK("scePthreadAttrSetstacksize",BB_TASK_ATTR_STACK,BB_ABI_I32,2,P,U),
+    TASK("scePthreadAttrSetdetachstate",BB_TASK_ATTR_DETACH,BB_ABI_I32,2,P,I),
+    TASK("pthread_create",BB_TASK_CREATE+BB_TASK_POSIX,BB_ABI_I32,4,P,P,P,P),
+    TASK("pthread_join",BB_TASK_JOIN+BB_TASK_POSIX,BB_ABI_I32,2,P,P),
+    TASK("pthread_exit",BB_TASK_EXIT+BB_TASK_POSIX,BB_ABI_VOID,1,P),
+    TASK("pthread_self",BB_TASK_SELF+BB_TASK_POSIX,P,0,0),
+    TASK("pthread_key_create",BB_TASK_KEY_CREATE+BB_TASK_POSIX,BB_ABI_I32,2,P,P),
+    TASK("pthread_getspecific",BB_TASK_GETSPECIFIC+BB_TASK_POSIX,P,1,I),
+    TASK("pthread_setspecific",BB_TASK_SETSPECIFIC+BB_TASK_POSIX,BB_ABI_I32,2,I,P),
+    TASK("atexit",BB_TASK_ATEXIT,BB_ABI_I32,1,P),
+    TASK("__cxa_atexit",BB_TASK_CXA_ATEXIT,BB_ABI_I32,3,P,P,P),
+    TASK("__cxa_finalize",BB_TASK_FINALIZE,BB_ABI_VOID,1,P),
+    TASK("sceKernelGetProcessTime",BB_TASK_CLOCK,U,0,0),
 };
+#undef TASK
 #undef SIG
 #undef P
 #undef I
@@ -60,8 +102,8 @@ size_t bb_translated_import_count(void) { return sizeof(imports)/sizeof(*imports
 int bb_translated_import_info(size_t index,BbTranslatedImport *out) {
     if(!out || index>=bb_translated_import_count()) return 0;
     size_t functions=sizeof(imports)/sizeof(*imports);
-    *out=(BbTranslatedImport){0};
-    if(index<functions) { out->name=imports[index].name; out->kind=BB_IMPORT_FUNCTION; out->signature=imports[index].signature; }
+    *out=(BbTranslatedImport){.milestone=2};
+    if(index<functions) { out->name=imports[index].name; out->kind=BB_IMPORT_FUNCTION; out->signature=imports[index].signature; out->milestone=imports[index].operation>=40 ? 3 : 2; }
     else { out->name=index==functions ? "__stack_chk_guard" : "Need_sceLibcInternal"; out->kind=BB_IMPORT_DATA; out->data_size=index==functions ? 8 : 4; }
     return 1;
 }
@@ -224,7 +266,8 @@ static BbAbiStatus formatted_call(BbTranslatedRuntime *r,const Import *entry,con
 static BbAbiStatus host_call(const BbAbiValue *values,size_t count,BbAbiValue *result,void *user) {
     /* The handler object is owned by its runtime for the entire binding lifetime. */
     Handler *h=user; BbAbiStatus status;
-    if(h->entry->operation<20) status=memory_call(h->runtime,h->entry,values,result);
+    if(h->entry->operation>=40) status=bb_tasks_import(h->runtime->tasks,h->entry->operation,values,count,result);
+    else if(h->entry->operation<20) status=memory_call(h->runtime,h->entry,values,result);
     else if(h->entry->operation<30) status=libc_call(h->runtime,h->entry,values,result);
     else status=formatted_call(h->runtime,h->entry,values,count,result);
     if(status==BB_ABI_OK && bb_vm_sync_code(runtime_memory_darwin_vm())!=BB_VM_OK) return BB_ABI_HOST;
@@ -265,11 +308,25 @@ BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out) {
     if(!canary || bb_vm_write(vm,r->canary,(const void *)canary,8)!=BB_VM_OK || bb_vm_write(vm,r->libc_marker,&marker,4)!=BB_VM_OK) {
         bb_translated_close(r); return BB_TRANSLATED_MEMORY;
     }
+    if(bb_tasks_create(r,&r->tasks)!=BB_TRANSLATED_OK) { bb_translated_close(r); return BB_TRANSLATED_MEMORY; }
     *out=r; return BB_TRANSLATED_OK;
 }
+BbTasks *bb_translated_tasks(BbTranslatedRuntime *r) { return r && r==process_runtime ? r->tasks : NULL; }
+BbCpuProbe *bb_translated_cpu(BbTranslatedRuntime *r) {
+    return r && r==process_runtime && bb_vm_status(bb_memory_probe_vm(r->session))==BB_VM_OK ? bb_memory_probe_cpu(r->session) : NULL;
+}
+BbTranslatedStatus bb_translated_release(BbTranslatedRuntime *r) {
+    if(!r || r!=process_runtime || r->active || bb_vm_release_owner(bb_memory_probe_vm(r->session))!=BB_VM_OK) return BB_TRANSLATED_INVALID;
+    bb_translated_attach_execution(NULL); return BB_TRANSLATED_OK;
+}
+BbTranslatedStatus bb_translated_acquire(BbTranslatedRuntime *r) {
+    if(!r || r!=process_runtime || bb_vm_acquire_owner(bb_memory_probe_vm(r->session))!=BB_VM_OK) return BB_TRANSLATED_INVALID;
+    return bb_translated_attach_execution(r);
+}
 BbTranslatedStatus bb_translated_close(BbTranslatedRuntime *r) {
-    if(!r || r!=process_runtime || r->active) return BB_TRANSLATED_INVALID;
+    if(!r || r!=process_runtime || r->active || bb_tasks_busy(r->tasks)) return BB_TRANSLATED_INVALID;
     if(bb_vm_status(bb_memory_probe_vm(r->session))==BB_VM_WRONG_THREAD) return BB_TRANSLATED_INVALID;
+    bb_tasks_destroy(r->tasks);
     BbProbeStatus session=bb_memory_probe_close(r->session);
     int memory=runtime_memory_darwin_shutdown();
     bb_translated_attach_execution(NULL);
