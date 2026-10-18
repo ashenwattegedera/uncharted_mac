@@ -17,6 +17,8 @@ struct BbGuestMemory {
     uint64_t guest_base;
     int fd,poisoned,notifying,preserve_backing;
     pthread_t owner;
+    pthread_mutex_t owner_lock;
+    int owned,owner_lock_ready;
     Page *pages;
     unsigned *references,*watchers,*executable,*read_watchers;
     unsigned char *gpu_denied;
@@ -25,7 +27,10 @@ struct BbGuestMemory {
 };
 static BbVmStatus check(BbGuestMemory *v) {
     if(!v) return BB_VM_INVALID;
-    if(!pthread_equal(v->owner,pthread_self())) return BB_VM_WRONG_THREAD;
+    pthread_mutex_lock(&v->owner_lock);
+    int owner=v->owned && pthread_equal(v->owner,pthread_self());
+    pthread_mutex_unlock(&v->owner_lock);
+    if(!owner) return BB_VM_WRONG_THREAD;
     return v->poisoned ? BB_VM_POISONED : BB_VM_OK;
 }
 static int range(BbGuestMemory *v,uint64_t at,size_t n,size_t align) {
@@ -99,6 +104,8 @@ static BbVmStatus create(BbGuestMemory **out,size_t n,size_t backing_size,uint64
     BbGuestMemory *v=calloc(1,sizeof(*v));
     if(!v) return BB_VM_SYSTEM;
     v->fd=-1; v->base=MAP_FAILED; v->backing=MAP_FAILED;
+    if(pthread_mutex_init(&v->owner_lock,NULL)) { free(v); return BB_VM_SYSTEM; }
+    v->owner_lock_ready=1; v->owned=1;
     v->owner=pthread_self(); v->size=n; v->backing_size=backing_size;
     v->page=(size_t)host_page; v->granule=granule;
     v->references=calloc(backing_size/granule,sizeof(unsigned));
@@ -137,9 +144,25 @@ BbVmStatus bb_vm_create(BbGuestMemory **out,size_t n,size_t backing,uint64_t pre
 BbVmStatus bb_vm_create_address_space(BbGuestMemory **out,size_t n,size_t backing,uint64_t guest_base) {
     return create(out,n,backing,guest_base,1);
 }
+BbVmStatus bb_vm_release_owner(BbGuestMemory *v) {
+    BbVmStatus status=check(v);
+    if(status!=BB_VM_OK && status!=BB_VM_POISONED) return status;
+    if(v->notifying) return BB_VM_BUSY;
+    pthread_mutex_lock(&v->owner_lock); v->owned=0; pthread_mutex_unlock(&v->owner_lock);
+    return BB_VM_OK;
+}
+BbVmStatus bb_vm_acquire_owner(BbGuestMemory *v) {
+    if(!v) return BB_VM_INVALID;
+    pthread_mutex_lock(&v->owner_lock);
+    if(v->owned) { pthread_mutex_unlock(&v->owner_lock); return BB_VM_BUSY; }
+    v->owner=pthread_self(); v->owned=1;
+    pthread_mutex_unlock(&v->owner_lock);
+    return v->poisoned ? BB_VM_POISONED : BB_VM_OK;
+}
 BbVmStatus bb_vm_close(BbGuestMemory *v) {
     if(!v) return BB_VM_OK;
-    if(!pthread_equal(v->owner,pthread_self())) return BB_VM_WRONG_THREAD;
+    BbVmStatus status=check(v);
+    if(status!=BB_VM_OK && status!=BB_VM_POISONED) return status;
     if(v->notifying) return BB_VM_BUSY;
     return destroy(v);
 }
@@ -148,7 +171,7 @@ static BbVmStatus destroy(BbGuestMemory *v) {
     if(v->base!=MAP_FAILED) failed|=munmap(v->base,v->size)!=0;
     if(v->backing!=MAP_FAILED) failed|=munmap(v->backing,v->backing_size)!=0;
     if(v->fd>=0) failed|=close(v->fd)!=0;
-    free(v->pages); free(v->references); free(v->watchers); free(v->executable); free(v->read_watchers); free(v->gpu_denied); free(v);
+    free(v->pages); free(v->references); free(v->watchers); free(v->executable); free(v->read_watchers); free(v->gpu_denied); if(v->owner_lock_ready) pthread_mutex_destroy(&v->owner_lock); free(v);
     return failed ? BB_VM_SYSTEM : BB_VM_OK;
 }
 uint64_t bb_vm_base(const BbGuestMemory *v) { return v ? v->guest_base : 0; }

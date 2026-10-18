@@ -257,11 +257,12 @@ static int pool(void) {
         if(!*env || *end || value<64 || value>65536) return -1;
         bytes=value*1024*1024;
     }
-    if(bb_vm_create_address_space(&darwin_memory,(size_t)bytes,POOL_SIZE+FLEX_SPAN,USER_MIN)!=BB_VM_OK) return -1;
+    if(bb_vm_create_address_space(&darwin_memory,(size_t)(USER_MIN+bytes-BB_DARWIN_IMAGE_BASE),POOL_SIZE+FLEX_SPAN+BB_DARWIN_IMAGE_SIZE,BB_DARWIN_IMAGE_BASE)!=BB_VM_OK) return -1;
     if(bb_vm_preserve_backing(darwin_memory)!=BB_VM_OK) { bb_vm_close(darwin_memory); darwin_memory=NULL; return -1; }
     backing_base=bb_vm_backing_view(darwin_memory,0,POOL_SIZE+FLEX_SPAN);
     return backing_base ? 0 : -1;
 }
+uint64_t runtime_memory_darwin_image_offset(void) { return POOL_SIZE+FLEX_SPAN; }
 void runtime_memory_reserve(void) { if(pool()) { fputs("STOP: cannot reserve owned Darwin memory\n",stderr); exit(21); } }
 BbGuestMemory *runtime_memory_darwin_vm(void) { return pool() ? NULL : darwin_memory; }
 static int host_unmap(uintptr_t address,uint64_t size) {
@@ -275,6 +276,7 @@ static int host_unmap(uintptr_t address,uint64_t size) {
 }
 static int host_map(uintptr_t address,uint64_t size,int prot,int reserved,uint64_t phys) {
     if(pool() || !bb_vm_contains(darwin_memory,address,size)) return -1;
+    if(address<USER_MIN) return -1;
     if(host_unmap(address,size)) return -1;
     return reserved ? 0 : bb_vm_map(darwin_memory,address,size,phys,(unsigned)prot)==BB_VM_OK ? 0 : -1;
 }
@@ -429,7 +431,7 @@ static int overlaps(uintptr_t start, uintptr_t end, int ignore_reserved) {
 static uintptr_t find_free(uintptr_t hint, uint64_t size, uint64_t alignment) {
 #ifdef __APPLE__
     if(pool()) return 0;
-    uintptr_t minimum=bb_vm_base(darwin_memory),maximum=minimum+bb_vm_window_size(darwin_memory);
+    uintptr_t minimum=USER_MIN,maximum=bb_vm_base(darwin_memory)+bb_vm_window_size(darwin_memory);
 #else
     uintptr_t minimum=USER_MIN,maximum=USER_MAX;
 #endif

@@ -97,7 +97,7 @@ if(BUILD_TESTING)
         -s "${PROJECT_SOURCE_DIR}/tests" -p test_content.py -v)
     set_tests_properties(content-contracts PROPERTIES ENVIRONMENT
         "BB_TEST_BIN_DIR=$<TARGET_FILE_DIR:content-test>;BB_REQUIRED_NATIVE_TESTS=content-test")
-    set(BB_PYTHON_SUITES prepare link_libc patches build_harness)
+    set(BB_PYTHON_SUITES execution_profile prepare link_libc patches build_harness)
     if(NOT WIN32)
         list(APPEND BB_PYTHON_SUITES mods)
     endif()
@@ -204,10 +204,14 @@ if(BB_BUILD_TRANSLATED_M2)
         message(FATAL_ERROR "BB_BUILD_TRANSLATED_M2 requires native arm64 Darwin")
     endif()
     add_subdirectory(spikes/cpu)
-    add_library(bb-translated-runtime STATIC src/translated_runtime.c src/translated_execution.c)
+    add_library(bb-translated-runtime STATIC src/translated_runtime.c src/translated_execution.c src/translated_tasks.c src/translated_modules.c)
     bb_runtime_target(bb-translated-runtime)
     target_link_libraries(bb-translated-runtime PUBLIC bb-memory-probe bb-runtime-darwin-memory bb-guest-abi)
+    add_executable(bb-reference-boot src/reference_boot.c)
+    bb_runtime_target(bb-reference-boot)
+    target_link_libraries(bb-reference-boot PRIVATE bb-translated-runtime)
     if(BUILD_TESTING)
+        set_tests_properties(python-execution_profile PROPERTIES ENVIRONMENT "BB_REFERENCE_BOOT=$<TARGET_FILE:bb-reference-boot>")
         add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/m2_runtime_text.h"
             COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding -fno-stack-protector
                 -fno-pic -mno-red-zone -fno-unwind-tables -fno-asynchronous-unwind-tables -O1
@@ -223,6 +227,78 @@ if(BB_BUILD_TRANSLATED_M2)
             target_link_libraries(${target} PRIVATE bb-translated-runtime)
             add_test(NAME ${target} COMMAND ${target})
         endforeach()
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/m3_threads_text.h"
+            COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding -fno-stack-protector
+                -fno-pic -mno-red-zone -fno-unwind-tables -fno-asynchronous-unwind-tables -O1
+                -c "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/m3_thread_calls.c" -o "${CMAKE_CURRENT_BINARY_DIR}/m3_thread_calls.o"
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/extract_guest_text.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/m3_thread_calls.o" "${CMAKE_CURRENT_BINARY_DIR}/m3_threads_text.h"
+            DEPENDS tests/fixtures/m3_thread_calls.c tests/fixtures/m3_thread_types.h tests/fixtures/extract_guest_text.py VERBATIM)
+        add_executable(translated-threads-test tests/test_translated_threads.c "${CMAKE_CURRENT_BINARY_DIR}/m3_threads_text.h")
+        bb_runtime_target(translated-threads-test)
+        target_include_directories(translated-threads-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+        target_compile_options(translated-threads-test PRIVATE -UNDEBUG)
+        target_link_libraries(translated-threads-test PRIVATE bb-translated-runtime)
+        add_test(NAME translated-threads COMMAND translated-threads-test)
+        foreach(case deadlock budget fault bad-import)
+            add_test(NAME translated-threads-${case} COMMAND translated-threads-test ${case})
+        endforeach()
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/m3_fibers_text.h"
+            COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding -fno-stack-protector
+                -fno-pic -mno-red-zone -fno-unwind-tables -fno-asynchronous-unwind-tables -O1
+                -c "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/m3_fiber_calls.c" -o "${CMAKE_CURRENT_BINARY_DIR}/m3_fiber_calls.o"
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/extract_guest_text.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/m3_fiber_calls.o" "${CMAKE_CURRENT_BINARY_DIR}/m3_fibers_text.h"
+            DEPENDS tests/fixtures/m3_fiber_calls.c tests/fixtures/m3_fiber_types.h tests/fixtures/m3_thread_types.h tests/fixtures/extract_guest_text.py VERBATIM)
+        add_executable(translated-fibers-test tests/test_translated_fibers.c "${CMAKE_CURRENT_BINARY_DIR}/m3_fibers_text.h")
+        bb_runtime_target(translated-fibers-test)
+        target_include_directories(translated-fibers-test PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+        target_compile_options(translated-fibers-test PRIVATE -UNDEBUG)
+        target_link_libraries(translated-fibers-test PRIVATE bb-translated-runtime)
+        add_test(NAME translated-fibers COMMAND translated-fibers-test)
+        add_test(NAME translated-fiber-switch COMMAND translated-fibers-test switch)
+        add_test(NAME translated-fiber-stackguard COMMAND translated-fibers-test guard)
+        foreach(suite threads fibers)
+            set(target translated-${suite}-hardened)
+            add_executable(${target} tests/test_translated_${suite}.c "${CMAKE_CURRENT_BINARY_DIR}/m3_${suite}_text.h")
+            bb_runtime_target(${target})
+            target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+            target_compile_options(${target} PRIVATE -UNDEBUG)
+            target_link_libraries(${target} PRIVATE bb-translated-runtime)
+            add_test(NAME ${target} COMMAND ${target})
+            add_custom_command(TARGET ${target} POST_BUILD
+                COMMAND codesign --force --sign - --options runtime --entitlements
+                    "${CMAKE_CURRENT_SOURCE_DIR}/spikes/cpu/jit.entitlements.plist" "$<TARGET_FILE:${target}>" VERBATIM)
+        endforeach()
+        add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/m3_modules_text.h"
+            COMMAND "${CMAKE_C_COMPILER}" -target x86_64-unknown-linux-gnu -ffreestanding -fno-stack-protector
+                -fno-pic -mno-red-zone -fno-unwind-tables -fno-asynchronous-unwind-tables -O1
+                -c "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/m3_module_calls.c" -o "${CMAKE_CURRENT_BINARY_DIR}/m3_module_calls.o"
+            COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/extract_guest_text.py"
+                "${CMAKE_CURRENT_BINARY_DIR}/m3_module_calls.o" "${CMAKE_CURRENT_BINARY_DIR}/m3_modules_text.h"
+            DEPENDS tests/fixtures/m3_module_calls.c tests/fixtures/m3_module_types.h tests/fixtures/extract_guest_text.py VERBATIM)
+        foreach(target translated-modules-test translated-modules-hardened)
+            add_executable(${target} tests/test_translated_modules.c "${CMAKE_CURRENT_BINARY_DIR}/m3_modules_text.h")
+            bb_runtime_target(${target})
+            target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+            target_compile_options(${target} PRIVATE -UNDEBUG)
+            target_link_libraries(${target} PRIVATE bb-translated-runtime)
+            add_test(NAME ${target} COMMAND ${target})
+        endforeach()
+        add_test(NAME translated-module-init-failure COMMAND translated-modules-test init-failure)
+        add_test(NAME translated-synthetic-image COMMAND translated-modules-test --write-image "${CMAKE_CURRENT_BINARY_DIR}/m3-synthetic-linked.bin")
+        set_tests_properties(translated-synthetic-image PROPERTIES FIXTURES_SETUP m3_image)
+        add_test(NAME translated-reference-boot COMMAND bb-reference-boot "${CMAKE_CURRENT_BINARY_DIR}/m3-synthetic-linked.bin")
+        set_tests_properties(translated-reference-boot PROPERTIES FIXTURES_REQUIRED m3_image
+            PASS_REGULAR_EXPRESSION "Reference entry completed: result=0x2a")
+        add_custom_command(TARGET translated-modules-hardened POST_BUILD
+            COMMAND codesign --force --sign - --options runtime --entitlements
+                "${CMAKE_CURRENT_SOURCE_DIR}/spikes/cpu/jit.entitlements.plist" "$<TARGET_FILE:translated-modules-hardened>" VERBATIM)
+        add_executable(translated-ownership-test tests/test_translated_ownership.c)
+        bb_runtime_target(translated-ownership-test)
+        target_compile_options(translated-ownership-test PRIVATE -UNDEBUG)
+        target_link_libraries(translated-ownership-test PRIVATE bb-translated-runtime)
+        add_test(NAME translated-poisoned-ownership COMMAND translated-ownership-test)
         add_test(NAME m2-import-compiled-inventory COMMAND "${Python3_EXECUTABLE}"
             "${PROJECT_SOURCE_DIR}/scripts/audit_m2_imports.py" --binary "$<TARGET_FILE:translated-runtime-test>")
         add_executable(translated-gpu-test tests/test_translated_gpu.c)

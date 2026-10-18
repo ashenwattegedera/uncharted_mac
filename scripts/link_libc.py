@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import struct
 from prepare import parse_self, span, unpack
+from execution_profile import MODES, artifact, flags as execution_flags, metadata as profile_metadata, validate
 
 
 def encode_id(value):
@@ -71,11 +72,13 @@ def module(path):
                 sha256=hashlib.sha256(source).hexdigest(), missing=missing)
 
 
-def link(game, out):
+def link(game, out, execution_mode='native-x86'):
+    execution_flags(execution_mode)
     main = module(game/'eboot.bin')
     libc = module(game/'sce_module/libc.prx')
-    raw = (out/'boot.bin').read_bytes()
+    raw = (out/artifact('boot.bin', execution_mode)).read_bytes()
     magic, size, entry, ns, nr, ni, flags = unpack('<8s6Q', raw, 0)
+    validate(flags, execution_mode)
     if magic != b'BBPROBE2':
         raise ValueError('linker expects freshly prepared BBPROBE2')
     pos = 56
@@ -163,7 +166,7 @@ def link(game, out):
     # segments are scanned, and only this exact 9-byte instruction.
     fs_load = bytes.fromhex('64488b042500000000')
     patched = 0
-    for p in main['ph']:
+    for p in (main['ph'] if execution_mode == 'native-x86' else []):
         if p['type'] != 1 or not p['flags'] & 1:
             continue
         start, end = p['vaddr'], p['vaddr'] + p['filesz']
@@ -182,7 +185,7 @@ def link(game, out):
         raise ValueError('unsupported TLS layout')
     procparam = next(p for p in main['ph'] if p['type']==0x61000001)
     metadata = (base,libsize,base+libc['tags'][12],base+tls['vaddr'],tls['memsz'],tls['filesz'],len(bindings),procparam['vaddr'])
-    with (out/'boot-libc.bin').open('wb') as f:
+    with (out/artifact('boot-libc.bin', execution_mode)).open('wb') as f:
         f.write(struct.pack('<8s6Q',b'BBPROBE4',len(image),entry,len(segments),len(relocs),len(names),flags))
         f.write(struct.pack('<8Q',*metadata))
         f.write(struct.pack('<4Q',*main_tls_values))
@@ -199,7 +202,8 @@ def link(game, out):
                   tls_template_bytes=tls['filesz'],tls_memory_bytes=tls['memsz'],
                   imports=names,relocation_counts=dict(collections.Counter(r[1] for r in libc['relocs'])),
                   symbol_bindings=[dict(import_name=names[i],address=hex(a),kind=k) for i,a,k in bindings])
-    (out/'libc-link.json').write_text(json.dumps(report,indent=2)+'\n')
+    report['execution_profile'] = profile_metadata(execution_mode, {'prepared_sha256': hashlib.sha256(raw).hexdigest(), 'libc_sha256': libc['sha256'], 'tool_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()})
+    (out/artifact('libc-link.json', execution_mode)).write_text(json.dumps(report,indent=2)+'\n')
     print(f'Linked native libc: base={base:#x}, {len(bindings)} fallback exports, TLS={tls["memsz"]} bytes; '
           f'eboot TLS={main_tls_values[2]} bytes, fs->gs patched={patched}')
 
@@ -208,5 +212,6 @@ if __name__=='__main__':
     import argparse
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('game',type=Path);p.add_argument('--out',type=Path,default=Path(__file__).resolve().parent.parent/'out')
+    p.add_argument('--execution-mode', choices=MODES, default='native-x86')
     a=p.parse_args()
-    link(a.game,a.out)
+    link(a.game,a.out,a.execution_mode)

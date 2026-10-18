@@ -1,4 +1,4 @@
-name: Native ARM CPU feasibility (no game files)
+name: Native ARM reference runtime (no game files)
 on:
   push:
     branches: [mac-port, 'codex/spike-mac-*', 'codex/mac-port-*']
@@ -23,42 +23,44 @@ jobs:
           clang --version
       - name: Ensure pkg-config is available
         run: command -v pkg-config || HOMEBREW_NO_AUTO_UPDATE=1 brew install pkgconf
-      - name: Configure integrated M2 reference runtime
+      - name: Configure integrated M3 reference runtime
         run: |
           if [ "${{ matrix.profile }}" = ubsan ]; then
-            cmake -S . -B out/m2-reference -DCMAKE_BUILD_TYPE=Debug -DBB_BUILD_TRANSLATED_M2=ON -DBB_PROBE_SANITIZER=undefined
+            cmake -S . -B out/m3-reference -DCMAKE_BUILD_TYPE=Debug -DBB_BUILD_TRANSLATED_M2=ON -DBB_PROBE_SANITIZER=undefined
           else
-            cmake -S . -B out/m2-reference -DCMAKE_BUILD_TYPE=Release -DBB_BUILD_TRANSLATED_M2=ON
+            cmake -S . -B out/m3-reference -DCMAKE_BUILD_TYPE=Release -DBB_BUILD_TRANSLATED_M2=ON
           fi
       - name: Build
-        run: cmake --build out/m2-reference --parallel 4
+        run: cmake --build out/m3-reference --parallel 4
       - name: Test translated execution and signed JIT policy
-        run: ctest --test-dir out/m2-reference --output-on-failure
+        run: ctest --test-dir out/m3-reference --output-on-failure
       - name: Audit compiled import contracts and sanitizer output
         run: |
-          python3 scripts/audit_m2_imports.py --binary out/m2-reference/translated-runtime-test
-          out/m2-reference/translated-runtime-test inventory > out/m2-reference/import-contracts.json
-          if grep -E 'runtime error:|UndefinedBehaviorSanitizer|ERROR: AddressSanitizer' out/m2-reference/Testing/Temporary/LastTest.log; then
+          python3 scripts/audit_m2_imports.py --binary out/m3-reference/translated-runtime-test
+          out/m3-reference/translated-runtime-test inventory > out/m3-reference/import-contracts.json
+          if grep -E 'runtime error:|UndefinedBehaviorSanitizer|ERROR: AddressSanitizer' out/m3-reference/Testing/Temporary/LastTest.log; then
             exit 1
           fi
       - name: Capture synthetic timing and binary evidence
         run: |
-          out/m2-reference/spikes/cpu/cpu-probe-suite benchmark > out/m2-reference/spikes/cpu/benchmark.json
-          file out/m2-reference/spikes/cpu/cpu-probe-hardened > out/m2-reference/spikes/cpu/binary-evidence.txt
-          otool -L out/m2-reference/spikes/cpu/cpu-probe-hardened >> out/m2-reference/spikes/cpu/binary-evidence.txt
-          for binary in spikes/cpu/cpu-probe-hardened spikes/cpu/cpu-abi-hardened spikes/cpu/cpu-memory-hardened translated-runtime-hardened; do
-            codesign --verify --strict "out/m2-reference/$binary"
-            codesign --display --verbose=4 --entitlements :- "out/m2-reference/$binary" >> out/m2-reference/spikes/cpu/binary-evidence.txt 2>&1
+          out/m3-reference/spikes/cpu/cpu-probe-suite benchmark > out/m3-reference/spikes/cpu/benchmark.json
+          file out/m3-reference/spikes/cpu/cpu-probe-hardened > out/m3-reference/spikes/cpu/binary-evidence.txt
+          otool -L out/m3-reference/spikes/cpu/cpu-probe-hardened >> out/m3-reference/spikes/cpu/binary-evidence.txt
+          for binary in spikes/cpu/cpu-probe-hardened spikes/cpu/cpu-abi-hardened spikes/cpu/cpu-memory-hardened translated-runtime-hardened translated-threads-hardened translated-fibers-hardened translated-modules-hardened; do
+            codesign --verify --strict "out/m3-reference/$binary"
+            codesign --display --verbose=4 --entitlements :- "out/m3-reference/$binary" >> out/m3-reference/spikes/cpu/binary-evidence.txt 2>&1
           done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: m2-darwin-arm64-${{ matrix.profile }}-evidence
+          name: m3-darwin-arm64-${{ matrix.profile }}-evidence
           path: |
-            out/m2-reference/spikes/cpu/benchmark.json
-            out/m2-reference/spikes/cpu/binary-evidence.txt
-            out/m2-reference/spikes/cpu/Testing/Temporary/LastTest.log
-            out/m2-reference/Testing/Temporary/LastTest.log
-            out/m2-reference/import-contracts.json
-            out/m2-reference/spikes/cpu/guest_abi_text.h
+            out/m3-reference/spikes/cpu/benchmark.json
+            out/m3-reference/spikes/cpu/binary-evidence.txt
+            out/m3-reference/spikes/cpu/Testing/Temporary/LastTest.log
+            out/m3-reference/Testing/Temporary/LastTest.log
+            out/m3-reference/import-contracts.json
+            out/m3-reference/spikes/cpu/guest_abi_text.h
+            out/m3-reference/m3_*_text.h
+            out/m3-reference/m3-synthetic-linked.bin
           if-no-files-found: warn

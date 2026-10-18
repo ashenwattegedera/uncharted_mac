@@ -4,7 +4,7 @@ Date: 2026-10-16. Baseline: `68c8cf9` (current local `main` and `origin/main` at
 
 **Decision:** build a native arm64 macOS host with an integrated x86-64 execution backend. Retain the PS4 service layer and shadPS4-derived graphics pipeline, initially using MoltenVK for Metal access. Rosetta is not a product dependency or the implementation strategy.
 
-Status: **M0 CPU harness verified across macOS/Linux/Windows; M1 game-free feasibility verified with a provisional CPU reference; M2 game-free reference integration verified; M3 scheduling/modules, M4 renderer validation, unsupported import contracts, production translator selection and game validation pending**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
+Status: **M0 CPU harness verified across macOS/Linux/Windows; M1 game-free feasibility verified with a provisional CPU reference; M2 game-free reference integration verified; M3 serialized game-free thread/fiber/module reference implemented; broader M3 contracts, M4 renderer validation, production translator selection and game validation pending**. The [M0 verification record](M0_VERIFICATION.md) lists executed tests and remaining gates. The [source assessment](APPLE_SILICON_PORT_ASSESSMENT.md) records the evidence, compatibility risks and external references behind this plan. A compilable harness, a successful game boot and playable performance are separate milestones.
 
 ## 1. Scope and initial acceptance target
 
@@ -117,6 +117,8 @@ Define an import signature registry from the actual exported functions, includin
 
 ### M3 — Threads, TLS, fibers and guest modules
 
+**Implementation status:** the game-free reference increment implements isolated guest TLS/FP state, exclusive native-worker handoff, declared thread/synchronization imports, virtual fiber migration, backend-versioned preparation, synthetic linked-image boot/cleanup and checked guest patches. See [M3 verification](M3_VERIFICATION.md) for executed tests and explicit remaining implementation work. Scheduling is serialized; broad production M3 acceptance, unsupported APIs, arbitrary module loading, real process entry and game validation remain open. The default ARM application loader remains unavailable.
+
 **Branches:** `codex/mac-port-guest-threads`, `codex/mac-port-guest-fibers`, `codex/mac-port-module-boot`. Depends on M1–M2.
 
 - Represent guest TLS and FP control state in the execution backend. Make preparation's FS-to-GS rewriting conditional on execution mode and version its cached outputs.
@@ -199,9 +201,10 @@ The critical path is M0 → M1/M2 → M3 → M5; M4 is a separate prerequisite f
 
 Reserve the first one to two weeks as a feasibility timebox, not a promise that M0–M4 will finish. At its end, report what executes on Darwin, measured GPU incompatibilities, candidate-core suitability, and revised scope. Do not promise a playable date until CPU/ABI, VM/fault and representative-renderer gates have passed. A custom translator or major shader-semantic gaps can turn this into a much longer systems project.
 
-The M2 game-free reference integration now passes the acceptance fixtures recorded
-in [the closeout](M2_CLOSEOUT.md). After review and merge, M3 may address scheduling,
-TLS/fibers, memory ordering and guest modules. Preserve the unsupported import/ABI
-contract gates before enabling their services, and complete actual renderer
-validation in M4. Review the provisional CPU decision before production adoption;
-synthetic correctness does not establish game compatibility or performance.
+The M2 closeout is merged. The M3 game-free reference increment now exercises the
+thread, TLS, fiber and linked-module contracts described in [M3 verification](M3_VERIFICATION.md).
+Review and merge that dependent branch stack before further work. Preserve the
+remaining M3 implementation gates, unsupported import/ABI contracts, actual M4
+renderer validation and game/distribution acceptance. The serialized reference
+is a correctness baseline; it does not select the production translator or prove
+parallel x86-on-ARM ordering or playable performance.

@@ -14,7 +14,7 @@ int main(int argc,char **argv) {
         puts("[");
         for(size_t i=0;i<bb_translated_import_count();++i) {
             BbTranslatedImport entry; assert(bb_translated_import_info(i,&entry));
-            printf("%s{\"name\":\"%s\",\"kind\":%d,\"result\":%d,\"variadic\":%d,\"data_size\":%zu,\"args\":[",i ? "," : "",entry.name,entry.kind,entry.signature.result,entry.signature.variadic,entry.data_size);
+            printf("%s{\"name\":\"%s\",\"kind\":%d,\"result\":%d,\"variadic\":%d,\"data_size\":%zu,\"milestone\":%u,\"args\":[",i ? "," : "",entry.name,entry.kind,entry.signature.result,entry.signature.variadic,entry.data_size,entry.milestone);
             for(size_t j=0;j<entry.signature.count;++j) printf("%s%d",j ? "," : "",entry.signature.args[j]);
             puts("]}");
         }

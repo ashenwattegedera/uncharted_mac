@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import link_libc
+from execution_profile import TRANSLATED, artifact
 from test_probe import package
 
 
@@ -24,13 +25,13 @@ class LinkTests(unittest.TestCase):
                   tags={12:0},symbols=symbols,relocs=list(relocs),sha256='fixture')
         return main,libc
 
-    def run_link(self,main,libc,code=b'\xc3'):
+    def run_link(self,main,libc,code=b'\xc3',mode='native-x86'):
         with tempfile.TemporaryDirectory() as tmp:
             out=Path(tmp)
-            (out/'boot.bin').write_bytes(package(code,names=['fixture#q#q'],capabilities=1))
+            (out/artifact('boot.bin',mode)).write_bytes(package(code,names=['fixture#q#q'],capabilities=1 | (TRANSLATED if mode=='unicorn-reference' else 0)))
             with patch.object(link_libc,'module',side_effect=[main,libc]):
-                link_libc.link(Path('fixture-game'),out)
-            return (out/'boot-libc.bin').read_bytes(),json.loads((out/'libc-link.json').read_text())
+                link_libc.link(Path('fixture-game'),out,mode)
+            return (out/artifact('boot-libc.bin',mode)).read_bytes(),json.loads((out/artifact('libc-link.json',mode)).read_text())
 
     def test_different_local_ids_bind_same_identity(self):
         data,report=self.run_link(*self.fixture())
@@ -80,3 +81,13 @@ class LinkTests(unittest.TestCase):
         image=data[-struct.unpack_from('<Q',data,8)[0]:]
         self.assertEqual(image[0],0x64)
         self.assertEqual(report['fs_loads_patched'],0)
+
+    def test_translated_profile_keeps_fs_and_is_cache_distinct(self):
+        main,libc=self.fixture()
+        load=bytes.fromhex('64488b042500000000')
+        main['ph'].append(dict(type=1,vaddr=0,memsz=4096,filesz=len(load),flags=5))
+        data,report=self.run_link(main,libc,load,mode='unicorn-reference')
+        self.assertEqual(struct.unpack_from('<Q',data,48)[0],1|TRANSLATED)
+        self.assertEqual(report['fs_loads_patched'],0)
+        self.assertEqual(data[-struct.unpack_from('<Q',data,8)[0]:][:len(load)],load)
+        self.assertFalse(report['execution_profile']['fs_to_gs'])

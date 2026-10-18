@@ -97,6 +97,9 @@ void *runtime_image_map(size_t size, int prot);
 void runtime_memory_reserve(void);
 #ifdef __APPLE__
 #include "guest_memory.h"
+#define BB_DARWIN_IMAGE_BASE UINT64_C(0x400000)
+#define BB_DARWIN_IMAGE_SIZE (UINT64_C(512)*1024*1024)
+uint64_t runtime_memory_darwin_image_offset(void);
 BbGuestMemory *runtime_memory_darwin_vm(void);
 int runtime_memory_darwin_shutdown(void);
 #endif

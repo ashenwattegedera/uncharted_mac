@@ -10,11 +10,17 @@ typedef struct BbTranslatedRuntime BbTranslatedRuntime;
 typedef enum { BB_TRANSLATED_OK, BB_TRANSLATED_INVALID, BB_TRANSLATED_UNSUPPORTED,
     BB_TRANSLATED_MEMORY, BB_TRANSLATED_EXECUTION } BbTranslatedStatus;
 /* Registry metadata contains guest contracts only; no host function addresses. */
-typedef struct { const char *name; BbImportKind kind; BbAbiSignature signature; size_t data_size; } BbTranslatedImport;
+typedef struct { const char *name; BbImportKind kind; BbAbiSignature signature; size_t data_size; unsigned milestone; } BbTranslatedImport;
 size_t bb_translated_import_count(void);
 int bb_translated_import_info(size_t index,BbTranslatedImport *out);
-/* One explicitly attached, owner-thread runtime; no M3 scheduling/TLS is implied. */
+/* One explicitly leased runtime. M3 workers hand off exclusive ownership. */
 BbTranslatedStatus bb_translated_open(BbTranslatedRuntime **out);
+BbTranslatedStatus bb_translated_release(BbTranslatedRuntime *runtime);
+/* MEMORY means a poisoned VM was acquired for teardown only: release/close it. */
+BbTranslatedStatus bb_translated_acquire(BbTranslatedRuntime *runtime);
+/* Internal reference scheduler/loader access; still requires the VM lease. */
+struct BbCpuProbe;
+struct BbCpuProbe *bb_translated_cpu(BbTranslatedRuntime *runtime);
 BbTranslatedStatus bb_translated_close(BbTranslatedRuntime *runtime);
 BbTranslatedStatus bb_translated_bind(BbTranslatedRuntime *runtime,const char *name,
     BbImportKind kind,uint64_t *guest_address);
@@ -25,6 +31,7 @@ BbTranslatedStatus bb_translated_relocate(BbTranslatedRuntime *runtime,uint64_t 
 BbTranslatedStatus bb_translated_invoke(BbTranslatedRuntime *runtime,BbGuestCall *call);
 BbGuestMemory *bb_translated_memory(BbTranslatedRuntime *runtime);
 BbAbiMemory bb_translated_memory_access(BbTranslatedRuntime *runtime);
+void bb_translated_clear_diagnostic(BbTranslatedRuntime *runtime);
 const char *bb_translated_diagnostic(BbTranslatedRuntime *runtime);
 /* Actual execution.h entry points can be attached to the reference runtime. */
 BbTranslatedStatus bb_translated_attach_execution(BbTranslatedRuntime *runtime);
