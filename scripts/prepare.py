@@ -240,7 +240,7 @@ def prepare(game, out, exe='eboot.bin', execution_mode='native-x86'):
                   bundled_modules=sorted(p.name for p in (game / 'sce_module').iterdir()),
                   resources=dict(resources), resource_bytes=total_bytes,
                   status='Prepared only; execution and Vulkan are tested separately.')
-    report['execution_profile'] = profile_metadata(execution_mode, {'executable_sha256': hashlib.sha256(source).hexdigest(), 'tool_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()})
+    report['execution_profile'] = profile_metadata(execution_mode, {'executable_sha256': hashlib.sha256(source).hexdigest(), 'libc_sha256': libc_evidence['sha256'], 'tool_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()})
     (out / artifact('analysis.json', execution_mode)).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n',
                                        encoding='utf-8')
     print(f"{report['sfo'].get('TITLE')} | entry={header[4]:#x} | image={size:,} bytes")

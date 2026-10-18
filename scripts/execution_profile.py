@@ -27,6 +27,8 @@ def artifact(name, mode):
 
 def metadata(mode, inputs):
     flags(mode)
-    profile = dict(schema=SCHEMA, backend=mode, fs_to_gs=mode == 'native-x86', inputs=inputs)
+    tools = {name: hashlib.sha256(Path(__file__).with_name(name).read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+             for name in ('execution_profile.py', 'prepare.py', 'link_libc.py', 'link_modules.py')}
+    profile = dict(schema=SCHEMA, backend=mode, fs_to_gs=mode == 'native-x86', inputs=inputs, tools_sha256=tools)
     profile['cache_key'] = hashlib.sha256(json.dumps(profile, sort_keys=True).encode()).hexdigest()
     return profile
