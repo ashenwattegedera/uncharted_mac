@@ -17,6 +17,7 @@ from pathlib import Path
 import struct
 from prepare import parse_self, span, unpack
 from link_libc import encode_id
+from execution_profile import MODES, artifact, flags as execution_flags, metadata as profile_metadata, validate
 
 DEFAULT_MODULES = ('libc.prx', 'libSceFios2.prx')
 FS_LOAD = bytes.fromhex('64488b042500000000')  # mov rax, fs:[0]
@@ -104,8 +105,11 @@ def module(path):
                 sha256=hashlib.sha256(source).hexdigest(), missing=missing)
 
 
-def patch_fs_loads(image, ph, base):
+def patch_fs_loads(image, ph, base, execution_mode='native-x86'):
     """Rewrite initial-exec `mov rax, fs:[0]` to GS: glibc owns FS on Linux."""
+    execution_flags(execution_mode)
+    if execution_mode != 'native-x86':
+        return 0
     patched = 0
     for p in ph:
         if p['type'] != 1 or not p['flags'] & 1:
@@ -119,10 +123,12 @@ def patch_fs_loads(image, ph, base):
     return patched
 
 
-def link(game, out, module_names=DEFAULT_MODULES, exe='eboot.bin'):
+def link(game, out, module_names=DEFAULT_MODULES, exe='eboot.bin', execution_mode='native-x86'):
+    execution_flags(execution_mode)
     main = module(game / exe)
-    raw = (out / 'boot.bin').read_bytes()
+    raw = (out / artifact('boot.bin', execution_mode)).read_bytes()
     magic, size, entry, ns, nr, ni, flags = unpack('<8s6Q', raw, 0)
+    validate(flags, execution_mode)
     if magic != b'BBPROBE2':
         raise ValueError('linker expects freshly prepared BBPROBE2')
     pos = 56
@@ -149,7 +155,7 @@ def link(game, out, module_names=DEFAULT_MODULES, exe='eboot.bin'):
     exports, by_nid = {}, collections.defaultdict(list)
     table = []
     base = (size + 65535) & ~65535
-    fs_patched = patch_fs_loads(image, main['ph'], 0)
+    fs_patched = patch_fs_loads(image, main['ph'], 0, execution_mode)
     tls_module = 2
     for filename in module_names:
         m = module(game / 'sce_module' / filename)
@@ -213,7 +219,7 @@ def link(game, out, module_names=DEFAULT_MODULES, exe='eboot.bin'):
                 exports[s['identity']] = entry_value
                 by_nid[(s['identity'][0], s['identity'][1][0])].append(entry_value)
                 count += 1
-        fs_patched += patch_fs_loads(image, m['ph'], base)
+        fs_patched += patch_fs_loads(image, m['ph'], base, execution_mode)
         table.append(dict(file=filename, base=base, size=modsize, init=base + m['tags'].get(12, 0),
                           tls_address=base + tls['vaddr'] if tls else 0, tls_memsz=tls['memsz'] if tls else 0,
                           tls_filesz=tls['filesz'] if tls else 0, tls_module=module_id,
@@ -237,7 +243,7 @@ def link(game, out, module_names=DEFAULT_MODULES, exe='eboot.bin'):
                      or main_tls['vaddr'] + main_tls['filesz'] > size):
         raise ValueError('unsupported eboot TLS layout')
     procparam = next(p for p in main['ph'] if p['type'] == 0x61000001)
-    with (out / 'boot-linked.bin').open('wb') as f:
+    with (out / artifact('boot-linked.bin', execution_mode)).open('wb') as f:
         f.write(struct.pack('<8s6Q', b'BBPROBE5', len(image), entry, len(segments), len(relocs), len(names), flags))
         f.write(struct.pack('<Q', procparam['vaddr']))
         f.write(struct.pack('<4Q', *main_tls_values))
@@ -261,7 +267,8 @@ def link(game, out, module_names=DEFAULT_MODULES, exe='eboot.bin'):
                   bindings=len(bindings), imports=len(names), fs_loads_patched=fs_patched,
                   main_tls=dict(zip(('vaddr', 'filesz', 'memsz', 'align'), main_tls_values)),
                   unresolved_imports=unresolved)
-    (out / 'link.json').write_text(json.dumps(report, indent=2) + '\n')
+    report['execution_profile'] = profile_metadata(execution_mode, {'prepared_sha256': hashlib.sha256(raw).hexdigest(), 'module_sha256': [m['sha256'] for m in table], 'tool_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()})
+    (out / artifact('link.json', execution_mode)).write_text(json.dumps(report, indent=2) + '\n')
     summary = ', '.join(f"{t['file']}@{t['base']:#x}" for t in table)
     print(f'Linked modules: {summary}; {len(bindings)} native bindings, {len(unresolved)} imports left to the host runtime, '
           f'fs->gs patched={fs_patched}')
@@ -274,5 +281,6 @@ if __name__ == '__main__':
     p.add_argument('--out', type=Path, default=Path(__file__).resolve().parent.parent / 'out')
     p.add_argument('--modules', nargs='*', default=list(DEFAULT_MODULES))
     p.add_argument('--exe', default='eboot.bin', help='executable in the game folder')
+    p.add_argument('--execution-mode', choices=MODES, default='native-x86')
     a = p.parse_args()
-    link(a.game, a.out, a.modules, a.exe)
+    link(a.game, a.out, a.modules, a.exe, a.execution_mode)

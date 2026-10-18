@@ -120,7 +120,10 @@ def inspect_libc(path):
     return evidence
 
 
-def prepare(game, out, exe='eboot.bin'):
+from execution_profile import MODES, artifact, flags as execution_flags, metadata as profile_metadata
+
+def prepare(game, out, exe='eboot.bin', execution_mode='native-x86'):
+    execution_flags(execution_mode)
     source = (game / exe).read_bytes()
     elf, header, ph, segments, missing = parse_self(source)
     loads = [p for p in ph if p['type'] in (1, 0x61000010)]
@@ -206,9 +209,9 @@ def prepare(game, out, exe='eboot.bin'):
     libc_evidence = inspect_libc(game / 'sce_module/libc.prx')
     out.mkdir(parents=True, exist_ok=True)
     # A deliberately small format, consumed by probe.c; no host struct packing.
-    with (out / 'boot.bin').open('wb') as f:
+    with (out / artifact('boot.bin', execution_mode)).open('wb') as f:
         f.write(struct.pack('<8sQQQQQQ', b'BBPROBE2', size, header[4], len(loads), len(relocs), len(names),
-                            int(libc_evidence['init_env_is_ret'])))
+                            int(libc_evidence['init_env_is_ret']) | execution_flags(execution_mode)))
         for p in loads:
             f.write(struct.pack('<QQQ', p['vaddr'], p['memsz'], p['flags']))
         for name in names:
@@ -220,7 +223,7 @@ def prepare(game, out, exe='eboot.bin'):
             f.write(struct.pack('<QQqq', *relocation))
         f.write(image)
     (out / 'eboot.elf').write_bytes(elf)
-    (out / 'entry.bin').write_bytes(image[:1024])
+    (out / artifact('entry.bin', execution_mode)).write_bytes(image[:1024])
     resources = collections.Counter()
     total_bytes = 0
     for path in (game / 'dvdroot_ps4').rglob('*'):
@@ -237,7 +240,8 @@ def prepare(game, out, exe='eboot.bin'):
                   bundled_modules=sorted(p.name for p in (game / 'sce_module').iterdir()),
                   resources=dict(resources), resource_bytes=total_bytes,
                   status='Prepared only; execution and Vulkan are tested separately.')
-    (out / 'analysis.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n',
+    report['execution_profile'] = profile_metadata(execution_mode, {'executable_sha256': hashlib.sha256(source).hexdigest(), 'tool_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()})
+    (out / artifact('analysis.json', execution_mode)).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n',
                                        encoding='utf-8')
     print(f"{report['sfo'].get('TITLE')} | entry={header[4]:#x} | image={size:,} bytes")
     print(f"{len(names)} imported symbols; {sum(counts.values()):,} relocations; {len(report['needed'])} required modules")
@@ -251,8 +255,9 @@ if __name__ == '__main__':
     parser.add_argument('game', type=Path)
     parser.add_argument('--out', type=Path, default=Path(__file__).resolve().parent.parent / 'out')
     parser.add_argument('--exe', default='eboot.bin', help='executable in the game folder')
+    parser.add_argument('--execution-mode', choices=MODES, default='native-x86')
     args = parser.parse_args()
     try:
-        prepare(args.game, args.out, args.exe)
+        prepare(args.game, args.out, args.exe, args.execution_mode)
     except (ValueError, OSError, StopIteration, KeyError, IndexError) as error:
         parser.exit(1, f'prepare failed: {error}\n')
