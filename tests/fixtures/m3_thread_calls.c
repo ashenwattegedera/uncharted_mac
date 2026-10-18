@@ -4,6 +4,7 @@ U thread_worker(ThreadJob *job) {
     ThreadShared *s=job->shared; ThreadImports *f=&s->imports;
     U *tls=(U *)(tcb()-16); volatile U index[2]; index[0]=2; index[1]=0; U *module=f->tls((U *)index);
     if(tls[0]!=13 || tls[1] || module[0]!=17 || module[1]) return 1;
+    __asm__ volatile("movq %%rsp,%0":"=r"(job->stack_pointer));
     job->tcb=tcb(); tls[0]=job->number; module[0]=job->number+100;
     *f->error()=(int)job->number;
     if(f->setspecific(s->key,job) || f->mutex_lock(&s->mutex)) return 2;

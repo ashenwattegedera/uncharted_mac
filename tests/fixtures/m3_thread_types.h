@@ -22,7 +22,7 @@ typedef struct {
     int (*posix_join)(U,U *);
 } ThreadImports;
 struct ThreadShared;
-typedef struct { struct ThreadShared *shared; U number,tcb,dtor_calls,ok; } ThreadJob;
+typedef struct { struct ThreadShared *shared; U number,tcb,dtor_calls,ok,stack_pointer; } ThreadJob;
 typedef struct ThreadShared {
     ThreadImports imports;
     U worker,destructor,mutex,cond,started,go,counter,atomic_counter;

@@ -42,6 +42,12 @@ int main(int argc,char **argv) {
     assert(bb_vm_read(vm,base+G,&data,sizeof(data))==BB_VM_OK);
     assert(data.counter==36 && data.atomic_counter==36 && data.tsc_before==1000 && data.tsc_after==2000);
     for(unsigned i=0;i<3;++i) assert(data.jobs[i].ok && data.jobs[i].dtor_calls==(i ? 1 : 2));
+    for(unsigned i=0;i<3;++i) {
+        U guard=(data.jobs[i].stack_pointer+G-1)&~(U)(G-1); uint32_t permissions=99;
+        uintptr_t query=runtime_memory_resolve_symbol("sceKernelQueryMemoryProtection");
+        assert(!((int32_t (*)(void *,void **,void **,uint32_t *))query)((void *)(uintptr_t)guard,NULL,NULL,&permissions) && !permissions);
+        BbVmView view; assert(bb_vm_query(vm,guard,&view)==BB_VM_OK && !view.guest_permissions);
+    }
     for(U id=2;id<=4;++id) assert(bb_tasks_worker_mask(tasks,id)==7);
     assert(data.jobs[0].tcb!=data.jobs[1].tcb && data.jobs[1].tcb!=data.jobs[2].tcb);
     OK(bb_tasks_finalize(tasks)); OK(bb_translated_close(r));

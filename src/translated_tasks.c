@@ -145,9 +145,11 @@ static BbTranslatedStatus spawn(BbTasks *t,uint64_t entry,const uint64_t args[3]
     Thread next={.id=t->thread_count+1,.detached=detached};
     next.stack_size=align_up(stack,BB_VM_GUEST_PAGE)+2*BB_VM_GUEST_PAGE;
     if(!alloc(t,next.stack_size,&next.stack) || !make_tls(t,&next)) goto failed;
-    BbGuestMemory *vm=bb_translated_memory(t->runtime);
-    if(bb_vm_protect(vm,next.stack,BB_VM_GUEST_PAGE,0)!=BB_VM_OK ||
-       bb_vm_protect(vm,next.stack+next.stack_size-BB_VM_GUEST_PAGE,BB_VM_GUEST_PAGE,0)!=BB_VM_OK || !seed(t,&next,entry,args)) goto failed;
+    /* Keep service queries and translator protection in agreement. */
+    uintptr_t protect_address=runtime_memory_resolve_symbol("sceKernelMprotect");
+    int32_t (*protect)(const void *,uint64_t,int)=(int32_t (*)(const void *,uint64_t,int))protect_address;
+    if(protect((const void *)(uintptr_t)next.stack,BB_VM_GUEST_PAGE,0) ||
+       protect((const void *)(uintptr_t)(next.stack+next.stack_size-BB_VM_GUEST_PAGE),BB_VM_GUEST_PAGE,0) || !seed(t,&next,entry,args)) goto failed;
     t->threads[t->thread_count++]=next; *id=next.id; return BB_TRANSLATED_OK;
 failed:
     bb_probe_context_free(next.cpu); unmap(next.stack,next.stack_size); unmap(next.tls,next.tls_size); return BB_TRANSLATED_MEMORY;
