@@ -80,3 +80,11 @@ borrowed CPU/VM/router accessors must not be used to replace its observer, destr
 its resources or mutate raw backing. Keep all operations on its creating thread.
 Its GPU callback is an explicit synchronization contract exercised by fixtures,
 not a renderer or async-signal handler integration.
+
+## M3 integration
+
+The root `BB_BUILD_TRANSLATED_M2=ON` compatibility profile now adds resumable CPU
+contexts, leased worker execution, virtual fibers and translated linked-module
+boot. The standalone spike remains independently buildable. See
+[the M3 verification record](../../docs/M3_VERIFICATION.md) for synthetic coverage,
+ordering guarantees, source/profile versions and explicit production gaps.

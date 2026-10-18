@@ -73,6 +73,16 @@ UBSan and explicit ASan-subset commands, inventory checks and remaining gates.
 The protocol tests use synthetic renderer callbacks. They do not build the full
 GPU library, load game modules or establish runtime/gameplay compatibility.
 
+## M3 game-free reference runtime
+
+The same opt-in CMake profile now includes translated threads, TLS, virtual
+fibers, linked synthetic module boot and `bb-reference-boot`. Work uses the
+planned dependent stack `codex/mac-port-guest-threads` →
+`codex/mac-port-guest-fibers` → `codex/mac-port-module-boot`, with one final PR
+into `mac-port`. See [M3 verification](M3_VERIFICATION.md) for commands, evidence
+and explicit implementation limits. The scheduler is serialized; this profile
+does not enable the full ARM application or renderer.
+
 ## Dependencies for the existing graphics build
 
 ```bash

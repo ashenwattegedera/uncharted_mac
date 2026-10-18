@@ -1,5 +1,7 @@
 # M2 game-free integration closeout
 
+**Historical M2 record.** [M3 reference integration](M3_VERIFICATION.md) extends the current runtime with exclusive owner handoff, low image mappings and additional imports. The inventory now labels both milestones; counts and checks below describe the original M2 delivery.
+
 Date: 2026-10-17. Base: `mac-port` at `e17d818` (merged M2 foundations, PR #4).
 This record supersedes the implementation gaps in the historical
 [M2 foundation record](M2_VERIFICATION.md). No proprietary files were used.

@@ -80,3 +80,24 @@ before normal-context synchronization; no ARM signal context is synthesized.
 Executable-alias writes stop before the next instruction and invalidate cached
 translations before resuming. See [M2 closeout](M2_CLOSEOUT.md) for precise support,
 reproduction, sanitizer scope and remaining module/renderer/game gates.
+
+## M3 leased execution and virtual contexts
+
+`translated_tasks.h` adds explicit scheduler entry points to the opt-in reference
+library. Guest threads and fibers retain complete virtual CPU contexts, guest
+stacks and per-thread TLS. Native workers serialize execution and hand off the
+VM lease only while the CPU is stopped. `bb_translated_acquire` cannot steal an
+active lease. A MEMORY result grants a poisoned lease for release/teardown only;
+it must never be used to execute guest code. Other threads cannot close a live
+owner's runtime. There is no parallel guest execution claim.
+
+`translated_modules.h` reads the translated-profile-v1 BBPROBE5 subset, binds
+only declared host contracts or validated guest exports, initializes modules
+through a persistent main guest thread and retires contexts before unmapping.
+`bb-reference-boot` exposes this path as a diagnostic CLI. Preparation preserves
+FS and uses separate backend/versioned artifacts; native images retain GS
+rewriting. Guest patches verify expected bytes and invalidate translated code.
+M3 does not make the default ARM loader available or permit native MS-ABI hooks.
+
+See [M3 verification](M3_VERIFICATION.md) for precise supported APIs, ownership,
+ordering, limits, reproduction and outstanding implementation/game-file gates.
